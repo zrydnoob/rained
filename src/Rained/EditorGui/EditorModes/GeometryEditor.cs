@@ -7,7 +7,7 @@ namespace RainEd;
 
 class GeometryEditor : IEditorMode
 {
-    public string Name { get => "Geometry"; }
+    public string Name { get => "几何编辑器"; }
 
     private readonly LevelView window;
     
@@ -42,29 +42,29 @@ class GeometryEditor : IEditorMode
 
     private static readonly Dictionary<Tool, string> ToolNames = new()
     {
-        { Tool.Wall,            "Wall"              },
-        { Tool.Air,             "Air"               },
-        { Tool.Inverse,         "Toggle Wall/Air"   },
-        { Tool.Slope,           "Slope"             },
-        { Tool.Platform,        "Platform"          },
-        { Tool.Rock,            "Rock"              },
-        { Tool.Spear,           "Spear"             },
-        { Tool.Crack,           "Fissure"           },
-        { Tool.HorizontalBeam,  "Horizontal Beam"   },
-        { Tool.VerticalBeam,    "Vertical Beam"     },
-        { Tool.Glass,           "Invisible Wall"    },
-        { Tool.ShortcutEntrance,"Shortcut Entrance" },
-        { Tool.Shortcut,        "Shortcut Dot"      },
-        { Tool.CreatureDen,     "Creature Den"      },
-        { Tool.Entrance,        "Room Entrance"     },
-        { Tool.Hive,            "Batfly Hive"       },
-        { Tool.ForbidFlyChain,  "Forbid Fly Chain"  },
-        { Tool.Waterfall,       "Waterfall"         },
+        { Tool.Wall,            "墙"              },
+        { Tool.Air,             "空气"               },
+        { Tool.Inverse,         "切换墙壁/空气"   },
+        { Tool.Slope,           "斜坡"             },
+        { Tool.Platform,        "平台"          },
+        { Tool.Rock,            "石头"              },
+        { Tool.Spear,           "矛"             },
+        { Tool.Crack,           "裂缝"           },
+        { Tool.HorizontalBeam,  "水平杆子"   },
+        { Tool.VerticalBeam,    "垂直杆子"     },
+        { Tool.Glass,           "隐形墙"    },
+        { Tool.ShortcutEntrance,"管道入口" },
+        { Tool.Shortcut,        "管道路径圆点"      },
+        { Tool.CreatureDen,     "生物巢穴"      },
+        { Tool.Entrance,        "房间入口"     },
+        { Tool.Hive,            "蝠蝇"       },
+        { Tool.ForbidFlyChain,  "蝠蝇阻碍"  },
+        { Tool.Waterfall,       "瀑布"         },
         { Tool.WhackAMoleHole,  "Whack-a-mole Hole" },
-        { Tool.ScavengerHole,   "Scavenger Hole"    },
-        { Tool.GarbageWorm,     "Garbage Worm"      },
-        { Tool.WormGrass,       "Worm Grass"        },
-        { Tool.CopyBackwards,   "Copy Backwards"    },
+        { Tool.ScavengerHole,   "拾荒者管道"    },
+        { Tool.GarbageWorm,     "垃圾虫"      },
+        { Tool.WormGrass,       "舌草"        },
+        { Tool.CopyBackwards,   "向后复制"    },
     };
 
     private static readonly Dictionary<Tool, Vector2> ToolTextureOffsets = new()
@@ -158,7 +158,7 @@ class GeometryEditor : IEditorMode
     }
 
     public LayerViewMode layerViewMode = LayerViewMode.Overlay;
-    private readonly string[] viewModeNames = [ "Overlay", "Stack" ];
+    private readonly string[] viewModeNames = ["叠加", "单层" ];
 
     public void Load()
     {
@@ -288,11 +288,11 @@ class GeometryEditor : IEditorMode
         Vector4 textColor = ImGui.GetStyle().Colors[(int) ImGuiCol.Text];
         var level = RainEd.Instance.Level;
 
-        if (ImGui.Begin("Build", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("建造", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // view mode
             {
-                ImGui.Text("View Mode");
+                ImGui.Text("视图模式");
                 ImGui.SetNextItemWidth(-0.0001f);
                 if (ImGui.BeginCombo("##ViewMode", viewModeNames[(int)layerViewMode]))
                 {
@@ -361,7 +361,7 @@ class GeometryEditor : IEditorMode
             // show work layers
             for (int i = 0; i < 3; i++)
             {
-                ImGui.Checkbox("Layer " + (i+1), ref layerMask[i]);
+                ImGui.Checkbox("层级 " + (i+1), ref layerMask[i]);
             }
 
             ImGui.Separator();
@@ -371,8 +371,8 @@ class GeometryEditor : IEditorMode
                 bool mirrorX = mirrorFlags.HasFlag(MirrorFlags.MirrorX);
                 bool mirrorY = mirrorFlags.HasFlag(MirrorFlags.MirrorY);
 
-                ImGui.Checkbox("Mirror X", ref mirrorX);
-                ImGui.Checkbox("Mirror Y", ref mirrorY);
+                ImGui.Checkbox("镜像 X", ref mirrorX);
+                ImGui.Checkbox("镜像 Y", ref mirrorY);
 
                 mirrorFlags = 0;
                 if (mirrorX) mirrorFlags |= MirrorFlags.MirrorX;
@@ -390,10 +390,10 @@ class GeometryEditor : IEditorMode
             else
             {
                 if (ToolCanRectPlace(selectedTool))
-                    window.WriteStatus("Shift+Drag to fill rect");
+                    window.WriteStatus("Shift+拖拽以填充选区");
                 
                 if (ToolCanFloodFill(selectedTool))
-                    window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+Click to flood fill");
+                    window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+点击以洪水填充");
             }
         } ImGui.End();
 

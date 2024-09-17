@@ -5,7 +5,7 @@ namespace RainEd;
 
 class EnvironmentEditor : IEditorMode
 {
-    public string Name { get => "Environment"; }
+    public string Name { get => "环境"; }
     private readonly LevelView window;
 
     private ChangeHistory.EnvironmentChangeRecorder changeRecorder;
@@ -46,24 +46,24 @@ class EnvironmentEditor : IEditorMode
     {
         var level = RainEd.Instance.Level;
 
-        if (ImGui.Begin("Environment", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("环境", ImGuiWindowFlags.NoFocusOnAppearing))
         {
-            ImGui.Text("Tile Random Seed");
+            ImGui.Text("瓦片随机种子");
             ImGui.SetNextItemWidth(-0.001f);
 
             ImGui.SliderInt("##seed", ref level.TileSeed, 0, 400, "%i", ImGuiSliderFlags.AlwaysClamp);
             RecordItemChanges();
 
-            ImGui.Checkbox("Enclosed Room", ref level.DefaultMedium);
+            ImGui.Checkbox("封闭房间", ref level.DefaultMedium);
             RecordItemChanges();
 
-            ImGui.Checkbox("Sunlight", ref level.HasSunlight);
+            ImGui.Checkbox("日光", ref level.HasSunlight);
             RecordItemChanges();
 
-            ImGui.Checkbox("Water", ref level.HasWater);
+            ImGui.Checkbox("水", ref level.HasWater);
             RecordItemChanges();
 
-            ImGui.Checkbox("Is Water In Front", ref level.IsWaterInFront);
+            ImGui.Checkbox("水渲染在最前面", ref level.IsWaterInFront);
             RecordItemChanges();
         } ImGui.End();
     }
