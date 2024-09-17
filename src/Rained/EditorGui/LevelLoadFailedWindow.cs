@@ -5,7 +5,7 @@ namespace RainEd;
 
 static class LevelLoadFailedWindow
 {
-    public const string WindowName = "Load Failure";
+    public const string WindowName = "加载失败";
     public static bool IsWindowOpen = false;
 
     public static LevelLoadResult? LoadResult = null;
@@ -22,12 +22,12 @@ static class LevelLoadFailedWindow
 
         if (ImGui.BeginPopupModal(WindowName, ref IsWindowOpen, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
-            ImGui.Text("The level failed to load due to unrecognized assets.");
+            ImGui.Text("由于无法识别的资产，无法加载该关卡。");
 
             // show unknown props
             if (LoadResult!.UnrecognizedProps.Length > 0)
             {
-                ImGui.SeparatorText("Unrecognized Props");
+                ImGui.SeparatorText("无法识别的道具");
                 foreach (var name in LoadResult.UnrecognizedProps)
                 {
                     ImGui.BulletText(name);
@@ -37,7 +37,7 @@ static class LevelLoadFailedWindow
             // show unknown tiles
             if (LoadResult!.UnrecognizedTiles.Length > 0)
             {
-                ImGui.SeparatorText("Unrecognized Tiles");
+                ImGui.SeparatorText("无法识别的贴图");
                 foreach (var name in LoadResult.UnrecognizedTiles)
                 {
                     ImGui.BulletText(name);
@@ -47,7 +47,7 @@ static class LevelLoadFailedWindow
             // show unknown materials
             if (LoadResult!.UnrecognizedMaterials.Length > 0)
             {
-                ImGui.SeparatorText("Unrecognized Materials");
+                ImGui.SeparatorText("无法识别的材料");
                 foreach (var name in LoadResult.UnrecognizedMaterials)
                 {
                     ImGui.BulletText(name);
@@ -57,7 +57,7 @@ static class LevelLoadFailedWindow
             // show unknown effects
             if (LoadResult!.UnrecognizedEffects.Length > 0)
             {
-                ImGui.SeparatorText("Unrecognized Effects");
+                ImGui.SeparatorText("无法识别的特效");
                 foreach (var name in LoadResult.UnrecognizedEffects)
                 {
                     ImGui.BulletText(name);

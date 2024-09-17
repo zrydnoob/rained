@@ -62,7 +62,7 @@ static class AboutWindow
             ImGui.SetCursorPos(initCursor);
             ImGuiExt.Image(rainedLogo1.GlibTexture!, new Glib.Color(themeColor.X, themeColor.Y, themeColor.Z, themeColor.W));
             
-            ImGui.Text("A Rain World level editor - " + RainEd.Version);
+            ImGui.Text("一个雨世界关卡编辑器 - " + RainEd.Version);
             ImGui.NewLine();
             ImGui.Text("(c) 2024 pkhead - MIT License");
             ImGui.Text("Rain World - Videocult/Adult Swim Games/Akapura Games");
@@ -77,12 +77,12 @@ static class AboutWindow
             if (RainEd.Instance.LatestVersionInfo is not null && RainEd.Instance.LatestVersionInfo.VersionName != RainEd.Version)
             {
                 ImGui.NewLine();
-                ImGui.Text("New version available!");
+                ImGui.Text("发现新版本！");
                 ImGui.SameLine();
                 ImGuiExt.LinkText(RainEd.Instance.LatestVersionInfo.VersionName, RainEd.Instance.LatestVersionInfo.GitHubReleaseUrl);
             }
 
-            ImGui.SeparatorText("System Information");
+            ImGui.SeparatorText("系统信息:");
             {
                 var sysInfo = systemInfo ?? GetSystemInfo();
                 ImGui.BulletText(".NET: " + sysInfo.FrameworkName);

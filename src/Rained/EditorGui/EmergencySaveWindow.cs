@@ -5,7 +5,7 @@ namespace RainEd;
 
 static class EmergencySaveWindow
 {
-    public const string WindowName = "Emergency save file detected!";
+    public const string WindowName = "检测到紧急保存文件！";
     public static bool IsWindowOpen = false;
 
     private static string[] savList = [];
@@ -30,7 +30,7 @@ static class EmergencySaveWindow
 
             savList[i] = emSavList[i];
             savDisplays[i] = levelName[0..levelName.LastIndexOf('-')];
-            dateList[i] = writeTime.ToString(culture.DateTimeFormat.ShortDatePattern, culture) + " at " + writeTime.ToString(culture.DateTimeFormat.ShortTimePattern, culture);
+            dateList[i] = writeTime.ToString(culture.DateTimeFormat.ShortDatePattern, culture) + " 在 " + writeTime.ToString(culture.DateTimeFormat.ShortTimePattern, culture);
         }
 
         if (emSavList.Length == 1) radio = 0;
@@ -49,15 +49,15 @@ static class EmergencySaveWindow
         if (ImGuiExt.BeginPopupModal(WindowName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             ImGui.PushTextWrapPos(ImGui.GetTextLineHeight() * 32.0f);
-            ImGui.TextWrapped("Rained has detected one or more emergency saves. You may choose what to do with them.");
-            ImGui.TextWrapped("If you choose to open a file, it is recommended that you review the level and, if desired, use Save As to replace the original level file with the emergency save.");
+            ImGui.TextWrapped("Rained检测到一个或多个紧急保存。你可以选择如何处理它们。");
+            ImGui.TextWrapped("如果选择打开文件，建议您查看关卡，如果需要，使用“另存为”将原始关卡文件替换为紧急保存。");
             ImGui.PopTextWrapPos();
             
             var tableFlags = ImGuiTableFlags.RowBg;
-            if (ImGui.BeginTable("Emergency Save List", 2, tableFlags))
+            if (ImGui.BeginTable("紧急保存列表", 2, tableFlags))
             {
-                ImGui.TableSetupColumn("File Name");
-                ImGui.TableSetupColumn("Date");
+                ImGui.TableSetupColumn("文件名");
+                ImGui.TableSetupColumn("日期");
                 ImGui.TableHeadersRow();
 
                 for (int i = 0; i < savList.Length; i++)
@@ -74,7 +74,7 @@ static class EmergencySaveWindow
 
             ImGui.Separator();
 
-            if (ImGui.Button("Open", StandardPopupButtons.ButtonSize) && radio >= 0)
+            if (ImGui.Button("打开", StandardPopupButtons.ButtonSize) && radio >= 0)
             {
                 RainEd.Instance.LoadLevel(savList[radio]);
                 ImGui.CloseCurrentPopup();
@@ -82,14 +82,14 @@ static class EmergencySaveWindow
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Ignore", StandardPopupButtons.ButtonSize))
+            if (ImGui.Button("忽略", StandardPopupButtons.ButtonSize))
             {
                 ImGui.CloseCurrentPopup();
                 IsWindowOpen = false;
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Discard", StandardPopupButtons.ButtonSize))
+            if (ImGui.Button("放弃", StandardPopupButtons.ButtonSize))
             {
                 RainEd.DiscardEmergencySaves();
                 ImGui.CloseCurrentPopup();

@@ -105,7 +105,7 @@ class DrizzleRenderWindow : IDisposable
         
         // render preview lags a lot, so make it so the user doesn't have to let go of
         // mouse button in order to activate the cancel button
-        ImGui.Button("Cancel");
+        ImGui.Button("取消");
         if (ImGui.IsItemClicked())
             drizzleRenderer?.Cancel();
         
@@ -117,7 +117,7 @@ class DrizzleRenderWindow : IDisposable
             ImGui.BeginDisabled();
         
         ImGui.SameLine();
-        if (ImGui.Button("Close"))
+        if (ImGui.Button("关闭"))
         {
             doClose = true;
             ImGui.CloseCurrentPopup();
@@ -131,7 +131,7 @@ class DrizzleRenderWindow : IDisposable
             ImGui.BeginDisabled();
         
         ImGui.SameLine();
-        if (ImGui.Button("Show In File Browser"))
+        if (ImGui.Button("打开成品文件夹"))
             RainEd.Instance.ShowPathInSystemBrowser(Path.Combine(
                 RainEd.Instance.AssetDataPath,
                 "Levels",
@@ -149,44 +149,44 @@ class DrizzleRenderWindow : IDisposable
         // status sidebar
         if (drizzleRenderer is null || drizzleRenderer.State == RenderState.Errored)
         {
-            ImGui.Text("An error occured!\nCheck the logs for more info.");
+            ImGui.Text("有错误发生。\n请查看日志来获得更多信息");
             if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
         }
         else if (drizzleRenderer.State == RenderState.Cancelling)
         {
-            ImGui.Text("Cancelling...");
+            ImGui.Text("正在取消...");
             if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
         }
         else if (drizzleRenderer.State == RenderState.Canceled)
         {
-            ImGui.Text("Canceled");
+            ImGui.Text("已取消");
             if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
         }
         else
         {
             if (drizzleRenderer.State == RenderState.Finished)
             {
-                ImGui.Text("Done!");
+                ImGui.Text("完成!");
                 if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
             }
             else if (drizzleRenderer.State == RenderState.Initializing)
             {
-                ImGui.Text("Initializing Drizzle...");
+                ImGui.Text("初始化 Drizzle...");
                 showTime = false;
             }
             else if (drizzleRenderer.State == RenderState.Loading)
             {
-                ImGui.Text("Loading level...");
+                ImGui.Text("加载关卡...");
                 showTime = false;
             }
             else if (drizzleRenderer.State == RenderState.GeometryExport)
             {
-                ImGui.Text($"Exporting geometry...");
+                ImGui.Text($"导出中...");
                 showTime = false;
             }
             else
             {
-                ImGui.Text($"Rendering {drizzleRenderer.CamerasDone+1} of {drizzleRenderer.CameraCount} cameras...");
+                ImGui.Text($"渲染状态 已完成数:{drizzleRenderer.CamerasDone+1} 总摄像机数:{drizzleRenderer.CameraCount}");
                 
                 if (!elapsedStopwatch.IsRunning)
                 {

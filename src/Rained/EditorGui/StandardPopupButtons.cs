@@ -22,7 +22,7 @@ static class StandardPopupButtons
         switch (list)
         {
             case PopupButtonList.OK:
-                if (ImGui.Button("OK", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
+                if (ImGui.Button("确定", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
                 {
                     pressed = true;
                     buttonPressed = 0;
@@ -30,14 +30,14 @@ static class StandardPopupButtons
                 break;
             
             case PopupButtonList.OKCancel:
-                if (ImGui.Button("OK", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
+                if (ImGui.Button("确定", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
                 {
                     pressed = true;
                     buttonPressed = 0;
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Cancel", size) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
+                if (ImGui.Button("取消", size) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
                 {
                     pressed = true;
                     buttonPressed = 1;
@@ -46,14 +46,14 @@ static class StandardPopupButtons
                 break;
             
             case PopupButtonList.YesNo:
-                if (ImGui.Button("Yes", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
+                if (ImGui.Button("是", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
                 {
                     pressed = true;
                     buttonPressed = 0;
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("No", size) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
+                if (ImGui.Button("否", size) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
                 {
                     pressed = true;
                     buttonPressed = 1;

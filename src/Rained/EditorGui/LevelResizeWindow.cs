@@ -45,20 +45,20 @@ class LevelResizeWindow
 
         var winFlags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoDocking;
         ImGuiExt.CenterNextWindow(ImGuiCond.Once);
-        if (ImGui.Begin("Resize Level", ref IsWindowOpen, winFlags))
+        if (ImGui.Begin("设置关卡大小", ref IsWindowOpen, winFlags))
         {
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 8.0f);
 
-            ImGui.SeparatorText("Level Size");
+            ImGui.SeparatorText("关卡大小");
             {
                 // tile size
                 ImGui.BeginGroup();
-                if (ImGui.InputInt("Width", ref newWidth))
+                if (ImGui.InputInt("宽度", ref newWidth))
                     screenW = (newWidth - 20) / 52f;
                 
                 newWidth = Math.Max(newWidth, 1); // minimum value is 1
 
-                if (ImGui.InputInt("Height", ref newHeight))
+                if (ImGui.InputInt("高度", ref newHeight))
                     screenH = (newHeight - 3) / 40f;
                 
                 newHeight = Math.Max(newHeight, 1); // minimum value is 1
@@ -69,13 +69,13 @@ class LevelResizeWindow
                 {
                     ImGui.SameLine();
                     ImGui.BeginGroup();
-                    if (ImGui.InputFloat("Screen Width", ref screenW, 0.5f, 0.125f))
+                    if (ImGui.InputFloat("屏幕宽度", ref screenW, 0.5f, 0.125f))
                     {
                         newWidth = (int)(screenW * 52f + 20f);
                     }
                     screenW = Math.Max(screenW, 0);
 
-                    if (ImGui.InputFloat("Screen Height", ref screenH, 0.5f, 0.125f))
+                    if (ImGui.InputFloat("屏幕高度", ref screenH, 0.5f, 0.125f))
                     {
                         newHeight = (int)(screenH * 40f + 3f);
                     }
@@ -84,7 +84,7 @@ class LevelResizeWindow
                 }
             }
 
-            ImGui.SeparatorText("Anchors");
+            ImGui.SeparatorText("锚点");
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(2f, 2f));
                 var textColor = ImGui.GetStyle().Colors[(int) ImGuiCol.Text];
@@ -160,12 +160,12 @@ class LevelResizeWindow
                 ImGui.PopStyleVar();
             }
 
-            ImGui.SeparatorText("Border Tiles");
+            ImGui.SeparatorText("边框瓦片");
             {
-                ImGui.InputInt("Border Tiles Left", ref newBufL);
-                ImGui.InputInt("Border Tiles Top", ref newBufT);
-                ImGui.InputInt("Border Tiles Right", ref newBufR);
-                ImGui.InputInt("Border Tiles Bottom", ref newBufB);
+                ImGui.InputInt("左方", ref newBufL);
+                ImGui.InputInt("上方", ref newBufT);
+                ImGui.InputInt("右方", ref newBufR);
+                ImGui.InputInt("底部", ref newBufB);
 
                 newBufL = Math.Max(newBufL, 0);
                 newBufR = Math.Max(newBufR, 0);
@@ -176,25 +176,25 @@ class LevelResizeWindow
 
                 ImGui.Separator();
 
-                if (ImGui.Button("OK"))
+                if (ImGui.Button("确定"))
                 {
                     Apply();
                     IsWindowOpen = false;
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Apply"))
+                if (ImGui.Button("应用"))
                 {
                     Apply();
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Cancel"))
+                if (ImGui.Button("取消"))
                 {
                     IsWindowOpen = false;
                 }
 
-                ImGui.Text("Note: This cannot be undone");
+                ImGui.Text("注意:此操作无法撤消");
             }
         } ImGui.End();
     }
