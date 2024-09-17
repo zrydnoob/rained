@@ -1,6 +1,14 @@
+
 Note: This fork is a Chinese translation. If you need the English version, please go to the upstream repository.
 # 有关此fork:Rained (Chinese translation | 中文翻译版)
-此fork在rained的基础上进行二次开发，实现了一些更加方便的功能和中文翻译。
+此fork在rained的基础上进行二次开发，实现了一些更加方便的功能和部分中文翻译。
+
+- 添加了部分特效effect的预览效果(预览图来源于[rew+](https://github.com/timofey260/RWE-Plus))
+- 添加了部分中文翻译
+
+![show](1.png)
+![show](2.png)
+
 ## 在第一次进入时如中文显示乱码或? 请在 编辑>偏好 中将字体设为 AlibabaPuHuiTi.ttf
 
 以下为README文件
