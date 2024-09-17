@@ -241,13 +241,13 @@ class LevelView
         
         if (IsWindowOpen)
         {
-            if (ImGui.Begin("Level"))
+            if (ImGui.Begin("关卡"))
             {
                 var newEditMode = selectedMode;
 
                 // edit mode
                 ImGui.AlignTextToFramePadding();
-                ImGui.Text("Edit Mode");
+                ImGui.Text("编辑模式");
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 8f);
                 if (ImGui.BeginCombo("##EditMode", editorModes[selectedMode].Name))
@@ -272,8 +272,8 @@ class LevelView
                 StatusText = string.Empty;
 
                 {
-                    var zoomText = $"Zoom: {Math.Floor(viewZoom * 100f)}%";
-                    var mouseText = $"Mouse: ({MouseCx}, {MouseCy})";
+                    var zoomText = $"缩放: {Math.Floor(viewZoom * 100f)}%";
+                    var mouseText = $"鼠标: ({MouseCx}, {MouseCy})";
                     WriteStatus(zoomText.PadRight(12, ' ') + mouseText);
                 }
                 //ImGui.TextUnformatted($"Zoom: {Math.Floor(viewZoom * 100f)}%      {StatusText}");
