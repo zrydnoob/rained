@@ -8,121 +8,121 @@ static partial class ShortcutsWindow
 {
     public static bool IsWindowOpen = false;
     
-    private readonly static string[] NavTabs = new string[] { "General", "Environment Edit", "Geometry Edit", "Tile Edit", "Camera Edit", "Light Edit", "Effects Edit", "Prop Edit" };
+    private readonly static string[] NavTabs = new string[] { "常规", "环境编辑", "几何编辑", "瓦片贴图编辑", "相机编辑", "灯光编辑", "特效编辑", "道具编辑" };
 
     private readonly static (string, string)[][] TabData = new (string, string)[][]
     {
         // General
         [
-            ("Scroll Wheel", "Zoom"),
-            ("[ViewZoomIn]/[ViewZoomOut]", "Zoom In/Out"),
-            ("Middle Mouse", "Pan"),
-            ("Alt+Left Mouse", "Pan"),
-            ("[Undo]", "Undo"),
-            ("[Redo]", "Redo"),
-            ("[Render]", "Render"),
-            ("[ExportGeometry]", "Export geometry"),
-            ("1", "Edit environment"),
-            ("2", "Edit geometry"),
-            ("3", "Edit tiles"),
-            ("4", "Edit cameras"),
-            ("5", "Edit light"),
-            ("6", "Edit effects"),
-            ("7", "Edit props"),
+            ("鼠标滚轮", "缩放"),
+            ("[ViewZoomIn]/[ViewZoomOut]", "放大/缩小"),
+            ("鼠标中键", "移动"),
+            ("Alt+鼠标左键", "移动"),
+            ("[Undo]", "撤销"),
+            ("[Redo]", "重做"),
+            ("[Render]", "渲染"),
+            ("[ExportGeometry]", "渲染为关卡.txt"),
+            ("1", "编辑环境"),
+            ("2", "编辑几何"),
+            ("3", "编辑瓦片贴图"),
+            ("4", "编辑相机"),
+            ("5", "编辑灯光"),
+            ("6", "编辑特效"),
+            ("7", "编辑道具"),
         ],
 
         // Environment
         [
-            ("Left Mouse", "Set water level")
+            ("鼠标左键", "设置水面高度")
         ],
 
         // Geometry
         [
-            ("[NavUp][NavLeft][NavDown][NavRight]", "Browse tool selector"),
-            ("Left Mouse", "Place/remove"),
-            ("Right Mouse", "Remove object"),
-            ("Shift+Left Mouse", "Rect fill"),
-            ("[FloodFill]+Left Mouse", "Flood fill"),
-            ("[SwitchLayer]", "Cycle layers"),
-            ("[ToggleLayer1]", "Toggle layer 1"),
-            ("[ToggleLayer2]", "Toggle layer 2"),
-            ("[ToggleLayer3]", "Toggle layer 3"),
-            ("[ToggleMirrorX]", "Toggle Mirror X"),
-            ("[ToggleMirrorY]", "Toggle Mirror Y")
+            ("[NavUp][NavLeft][NavDown][NavRight]", "选择瓦片"),
+            ("鼠标左键", "放置/删除"),
+            ("鼠标右键", "删除对象"),
+            ("Shift+鼠标左键", "填充选区"),
+            ("[FloodFill]+鼠标左键", "洪水填充"),
+            ("[SwitchLayer]", "循环层级"),
+            ("[ToggleLayer1]", "切换层1"),
+            ("[ToggleLayer2]", "切换层2"),
+            ("[ToggleLayer3]", "切换层3"),
+            ("[ToggleMirrorX]", "切换镜像X"),
+            ("[ToggleMirrorY]", "切换镜像Y")
         ],
 
         // Tile
         [
-            ("[SwitchLayer]", "Switch layer"),
-            ("[SwitchTab]", "Switch selector tab"),
-            ("[NavUp]/[NavDown]", "Browse selected category"),
-            ("[NavLeft]/[NavRight]", "Browse tile categories"),
-            ("Shift+Mouse Wheel", "Change material brush size"),
-            ("[DecreaseBrushSize]/[IncreaseBrushSize]", "Change material brush size"),
-            ("[Eyedropper]", "Sample tile from level"),
-            ("[SetMaterial]", "Set selected to default material"),
-            ("Left Mouse", "Place tile/material"),
-            ("Right Mouse", "Remove tile/material"),
-            ("Shift+Left Mouse", "Rect fill tile/material"),
-            ("Shift+Right Mouse", "Rect remove tile/material"),
-            ("[TileIgnoreDifferent]+Left Mouse", "Ignore differing materials"),
-            ("[TileIgnoreDifferent]+Left Mouse", "Ignore materials or tiles"),
-            ("[TileForcePlacement]+Left Mouse", "Force tile placement"),
-            ("[TileForceGeometry]+Left Mouse", "Force tile geometry"),
-            ("[TileForceGeometry]+Right Mouse", "Remove tile and geometry"),
+            ("[SwitchLayer]", "切换层级"),
+            ("[SwitchTab]", "切换选择器选项卡"),
+            ("[NavUp]/[NavDown]", "浏览所选类别"),
+            ("[NavLeft]/[NavRight]", "浏览瓦片类别"),
+            ("Shift+鼠标滚轮", "更改材质笔刷大小"),
+            ("[DecreaseBrushSize]/[IncreaseBrushSize]", "更改材质笔刷大小"),
+            ("[Eyedropper]", "从层级中选取材质"),
+            ("[SetMaterial]", "将选定内容设置为默认材质"),
+            ("鼠标左键", "放置贴图/材料"),
+            ("鼠标右键", "删除贴图/材料"),
+            ("Shift+鼠标左键", "矩形填充贴图/材料"),
+            ("Shift+鼠标右键", "矩形删除贴图/材料"),
+            ("[TileIgnoreDifferent]+鼠标左键", "忽略不同的材料"),
+            ("[TileIgnoreDifferent]+鼠标左键", "忽略材质或瓦片"),
+            ("[TileForcePlacement]+鼠标左键", "强制平铺放置"),
+            ("[TileForceGeometry]+鼠标左键", "强制平铺瓦片"),
+            ("[TileForceGeometry]+鼠标右键", "删除贴图及瓦片"),
         ],
 
         // Camera
         [
-            ("Double-click", "Create camera"),
-            ("[NewObject]", "Create camera"),
-            ("Left Mouse", "Select camera"),
-            ("Right Mouse", "Reset camera corner"),
-            ("[RemoveObject]", "Delete selected camera"),
-            ("[Duplicate]", "Duplicate selected camera"),
-            ("[CameraSnapX]/[NavUp]/[NavDown]", "Snap X to other cameras"),
-            ("[CameraSnapY]/[NavLeft]/[NavRight]", "Snap Y to other cameras"),
+            ("双击", "创建相机"),
+            ("[NewObject]", "创建相机"),
+            ("鼠标左键", "选择相机"),
+            ("鼠标右键", "重置摄像机角"),
+            ("[RemoveObject]", "删除所选相机"),
+            ("[Duplicate]", "复制选定的摄像机"),
+            ("[CameraSnapX]/[NavUp]/[NavDown]", "将X轴捕捉到其他相机"),
+            ("[CameraSnapY]/[NavLeft]/[NavRight]", "将Y轴捕捉到其他相机"),
         ],
 
         // Light
         [
-            ("[NavUp][NavLeft][NavDown][NavRight]", "Browse brush catalog"),
-            ("[ZoomLightIn]", "Move light inward"),
-            ("[ZoomLightOut]", "Move light outward"),
-            ("[RotateLightCW]", "Rotate light clockwise"),
-            ("[RotateLightCCW]", "Rotate light counter-clockwise"),
-            ("[ScaleLightBrush]+Mouse Move", "Scale brush"),
-            ("[RotateLightBrush]+Mouse Move", "Rotate brush"),
-            ("[ResetBrushTransform]", "Reset brush transform"),
-            ("Left Mouse", "Paint shadow"),
-            ("Right Mouse", "Paint light"),
+            ("[NavUp][NavLeft][NavDown][NavRight]", "浏览画笔目录"),
+            ("[ZoomLightIn]", "向内移动光线"),
+            ("[ZoomLightOut]", "向外移动光线"),
+            ("[RotateLightCW]", "顺时针旋转光线"),
+            ("[RotateLightCCW]", "顺时针旋转光线"),
+            ("[ScaleLightBrush]+鼠标移动", "缩放笔刷"),
+            ("[RotateLightBrush]+鼠标移动", "旋转笔刷"),
+            ("[ResetBrushTransform]", "重置笔刷变换"),
+            ("鼠标左键", "绘制阴影"),
+            ("鼠标右键", "绘制光线"),
         ],
 
         // Effects
         [
-            ("Left Mouse", "Paint effect"),
-            ("Shift+Left Mouse", "Paint effect stronger"),
-            ("Right Mouse", "Erase effect"),
-            ("Shift+Mouse Wheel", "Change brush size"),
-            ("[DecreaseBrushSize]/[IncreaseBrushSize]", "Change brush size"),
+            ("鼠标左键", "绘制特效"),
+            ("Shift+鼠标左键", "强力绘制特效"),
+            ("鼠标右键", "擦除特效"),
+            ("Shift+鼠标滚轮", "更改笔刷大小"),
+            ("[DecreaseBrushSize]/[IncreaseBrushSize]", "更改笔刷大小"),
         ],
 
         // Props
         [
-            ("[SwitchLayer]", "Switch layer"),
-            ("[SwitchTab]", "Switch selector tab"),
-            ("[NavUp]/[NavDown]", "Browse selected category"),
-            ("[NavLeft]/[NavRight]", "Browse prop categories"),
-            ("[Eyedropper]", "Sample prop under mouse"),
-            ("Right-click", "Create prop"),
-            ("[NewObject]", "Create prop"),
-            ("Left Mouse", "Select prop"),
-            ("Shift+Left Mouse", "Add prop to selection"),
-            ("Double-click", "Find prop(s) under the mouse"),
-            ("[RemoveObject]", "Delete selected prop(s)"),
-            ("[ToggleVertexMode]", "Toggle vertex mode"),
-            ("[Duplicate]", "Duplicate selected prop(s)"),
-            ("[RopeSimulation]", "Simulate selected rope prop(s)")
+            ("[SwitchLayer]", "切换层级"),
+            ("[SwitchTab]", "切换选择器选项卡"),
+            ("[NavUp]/[NavDown]", "浏览所选类别"),
+            ("[NavLeft]/[NavRight]", "浏览道具类别"),
+            ("[Eyedropper]", "吸取鼠标下的道具"),
+            ("右键点击", "创建道具"),
+            ("[NewObject]", "创建道具"),
+            ("鼠标左键", "选择道具"),
+            ("Shift+鼠标左键", "将道具添加到选择列表"),
+            ("双击", "查早鼠标下的道具"),
+            ("[RemoveObject]", "删除所选道具"),
+            ("[ToggleVertexMode]", "切换顶点模式"),
+            ("[Duplicate]", "复制选定的道具"),
+            ("[RopeSimulation]", "模拟选定的绳索道具")
         ]
     };
 
@@ -131,17 +131,17 @@ static partial class ShortcutsWindow
         if (!IsWindowOpen) return;
 
         var editMode = RainEd.Instance.LevelView.EditMode;
-        if (ImGui.Begin("Shortcuts", ref IsWindowOpen))
+        if (ImGui.Begin("快捷键", ref IsWindowOpen))
         {
-            if (ImGui.BeginTabBar("ShortcutTabs"))
+            if (ImGui.BeginTabBar("快捷键"))
             {
-                if (ImGui.BeginTabItem("General"))
+                if (ImGui.BeginTabItem("常规"))
                 {
                     ShowTab(0);
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("Current Edit Mode"))
+                if (ImGui.BeginTabItem("当前编辑模式"))
                 {
                     ShowTab(editMode + 1);
                     ImGui.EndTabItem();
@@ -184,8 +184,8 @@ static partial class ShortcutsWindow
         var tableFlags = ImGuiTableFlags.RowBg;
         if (ImGui.BeginTable("ControlTable", 2, tableFlags))
         {
-            ImGui.TableSetupColumn("Shortcut", ImGuiTableColumnFlags.WidthFixed, ImGui.GetTextLineHeight() * 10.0f);
-            ImGui.TableSetupColumn("Action");
+            ImGui.TableSetupColumn("快捷键", ImGuiTableColumnFlags.WidthFixed, ImGui.GetTextLineHeight() * 10.0f);
+            ImGui.TableSetupColumn("功能");
             ImGui.TableHeadersRow();
 
             var tabData = TabData[navTab];
