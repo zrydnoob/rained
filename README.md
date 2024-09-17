@@ -1,3 +1,9 @@
+Note: This fork is a Chinese translation. If you need the English version, please go to the upstream repository.
+# 有关此fork:Rained (Chinese translation | 中文翻译版)
+此fork在rained的基础上进行二次开发，实现了一些更加方便的功能和中文翻译。
+
+
+以下为README文件
 # Rained
 <p align="center">
     <img src="rained-logo.png" />

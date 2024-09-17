@@ -42,10 +42,10 @@ static class Fonts
         foreach (var file in availableFontPaths)
         {
             var fullFilePath = Path.Combine(FontDirectory, file + ".ttf");
-            var font = io.Fonts.AddFontFromFileTTF(fullFilePath, 13f * Boot.WindowScale);
+            var font = io.Fonts.AddFontFromFileTTF(fullFilePath, 13f * Boot.WindowScale, null,io.Fonts.GetGlyphRangesChineseFull());
             loadedFontList.Add(font);
 
-            var bigFont = io.Fonts.AddFontFromFileTTF(fullFilePath, 26f * Boot.WindowScale);
+            var bigFont = io.Fonts.AddFontFromFileTTF(fullFilePath, 26f * Boot.WindowScale, null, io.Fonts.GetGlyphRangesChineseFull());
             loadedBigFontsList.Add(bigFont);
         }
 

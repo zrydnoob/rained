@@ -122,7 +122,7 @@ static class EditorWindow
         }
 
         fileBrowser = new FileBrowser(openMode, callback, RainEd.Instance.IsTemporaryFile ? null : Path.GetDirectoryName(RainEd.Instance.CurrentFilePath));
-        fileBrowser.AddFilterWithCallback("Level file", levelCheck, ".txt");
+        fileBrowser.AddFilterWithCallback("关卡文件", levelCheck, ".txt");
         fileBrowser.PreviewCallback = (string path, bool isRw) =>
         {
             if (isRw) return new BrowserLevelPreview(path);
@@ -134,17 +134,17 @@ static class EditorWindow
     {
         if (ImGui.BeginMainMenuBar())
         {
-            if (ImGui.BeginMenu("File"))
+            if (ImGui.BeginMenu("文件"))
             {
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.New, "New");
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Open, "Open");
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.New, "新建");
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Open, "打开");
 
                 var recentFiles = RainEd.Instance.Preferences.RecentFiles;
-                if (ImGui.BeginMenu("Open Recent"))
+                if (ImGui.BeginMenu("最近打开"))
                 {
                     if (recentFiles.Count == 0)
                     {
-                        ImGui.MenuItem("(no recent files)", false);
+                        ImGui.MenuItem("(无最近的文件)", false);
                     }
                     else
                     {
@@ -164,7 +164,7 @@ static class EditorWindow
                                 }
                                 else
                                 {
-                                    ShowNotification("File could not be accessed");
+                                    ShowNotification("无法访问文件");
                                     recentFiles.RemoveAt(i);
                                 }
                             }
@@ -175,23 +175,23 @@ static class EditorWindow
                     ImGui.EndMenu();
                 }
 
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Save, "Save");
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.SaveAs, "Save As...");
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Save, "保存");
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.SaveAs, "另存为...");
 
                 ImGui.Separator();
 
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Render, "Render...");
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ExportGeometry, "Export Geometry...");
-                ImGui.MenuItem("Mass Render", false);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Render, "渲染...");
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ExportGeometry, "渲染为关卡.txt...");
+                ImGui.MenuItem("批量渲染", false);
 
                 ImGui.Separator();
-                if (ImGui.MenuItem("Preferences"))
+                if (ImGui.MenuItem("偏好"))
                 {
                     PreferencesWindow.OpenWindow();
                 }
 
                 ImGui.Separator();
-                if (ImGui.MenuItem("Quit", "Alt+F4"))
+                if (ImGui.MenuItem("退出", "Alt+F4"))
                 {
                     PromptUnsavedChanges(() => RainEd.Instance.Running = false);
                 }
@@ -199,17 +199,17 @@ static class EditorWindow
                 ImGui.EndMenu();
             }
 
-            if (ImGui.BeginMenu("Edit"))
+            if (ImGui.BeginMenu("编辑"))
             {
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Undo, "Undo");
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Redo, "Redo");
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Undo, "撤销");
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Redo, "重做");
                 //ImGui.Separator();
                 //ImGuiMenuItemShortcut(ShortcutID.Cut, "Cut");
                 //ImGuiMenuItemShortcut(ShortcutID.Copy, "Copy");
                 //ImGuiMenuItemShortcut(ShortcutID.Paste, "Paste");
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("Resize Level..."))
+                if (ImGui.MenuItem("设置关卡大小..."))
                 {
                     levelResizeWin = new LevelResizeWindow();
                 }
@@ -219,7 +219,7 @@ static class EditorWindow
                 {
                     ImGui.Separator();
 
-                    if (ImGui.BeginMenu("Commands"))
+                    if (ImGui.BeginMenu("命令"))
                     {
                         foreach (RainEd.Command cmd in customCommands)
                         {
@@ -239,13 +239,13 @@ static class EditorWindow
                 ImGui.EndMenu();
             }
 
-            if (ImGui.BeginMenu("View"))
+            if (ImGui.BeginMenu("视图"))
             {
                 var prefs = RainEd.Instance.Preferences;
 
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ViewZoomIn, "Zoom In");
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ViewZoomOut, "Zoom Out");
-                if (ImGui.MenuItem("Reset View"))
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ViewZoomIn, "放大");
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ViewZoomOut, "缩小");
+                if (ImGui.MenuItem("重置视图"))
                 {
                     RainEd.Instance.LevelView.ResetView();
                 }
@@ -254,13 +254,13 @@ static class EditorWindow
 
                 var renderer = RainEd.Instance.LevelView.Renderer;
 
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGrid, "Grid", renderer.ViewGrid);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewTiles, "Tiles", prefs.ViewTiles);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewProps, "Props", prefs.ViewProps);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewCameras, "Camera Borders", renderer.ViewCameras);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGraphics, "Tile Graphics", prefs.ViewPreviews);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGrid, "显示网格", renderer.ViewGrid);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewTiles, "显示贴图", prefs.ViewTiles);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewProps, "显示道具", prefs.ViewProps);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewCameras, "显示相机边框", renderer.ViewCameras);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGraphics, "显示贴图预览", prefs.ViewPreviews);
 
-                if (ImGui.MenuItem("Obscured Beams", null, renderer.ViewObscuredBeams))
+                if (ImGui.MenuItem("显示被遮挡的杆子", null, renderer.ViewObscuredBeams))
                 {
                     renderer.ViewObscuredBeams = !renderer.ViewObscuredBeams;
                     renderer.InvalidateGeo(0);
@@ -268,47 +268,47 @@ static class EditorWindow
                     renderer.InvalidateGeo(2);
                 }
 
-                if (ImGui.MenuItem("Tile Heads", null, renderer.ViewTileHeads))
+                if (ImGui.MenuItem("显示瓦片主要格", null, renderer.ViewTileHeads))
                 {
                     renderer.ViewTileHeads = !renderer.ViewTileHeads;
                 }
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("Keyboard Shortcuts", null, ShortcutsWindow.IsWindowOpen))
+                if (ImGui.MenuItem("快捷键", null, ShortcutsWindow.IsWindowOpen))
                 {
                     ShortcutsWindow.IsWindowOpen = !ShortcutsWindow.IsWindowOpen;
                 }
 
-                if (ImGui.MenuItem("Plugin Logs", null, LuaInterface.IsLogWindowOpen))
+                if (ImGui.MenuItem("插件日志", null, LuaInterface.IsLogWindowOpen))
                 {
                     LuaInterface.IsLogWindowOpen = !LuaInterface.IsLogWindowOpen;
                 }
 
-                if (ImGui.MenuItem("Palettes", null, PaletteWindow.IsWindowOpen))
+                if (ImGui.MenuItem("调色板", null, PaletteWindow.IsWindowOpen))
                 {
                     PaletteWindow.IsWindowOpen = !PaletteWindow.IsWindowOpen;
                 }
 
                 ImGui.Separator();
                 
-                if (ImGui.MenuItem("Show Data Folder..."))
+                if (ImGui.MenuItem("打开数据文件夹..."))
                     RainEd.Instance.ShowPathInSystemBrowser(RainEd.Instance.AssetDataPath, false);
                 
-                if (ImGui.MenuItem("Show Render Folder..."))
+                if (ImGui.MenuItem("打开渲染文件夹..."))
                     RainEd.Instance.ShowPathInSystemBrowser(Path.Combine(RainEd.Instance.AssetDataPath, "Levels"), false);
                 
                 ImGui.EndMenu();
             }
 
-            if (ImGui.BeginMenu("Help"))
+            if (ImGui.BeginMenu("帮助"))
             {
-                if (ImGui.MenuItem("Guide..."))
+                if (ImGui.MenuItem("向导..."))
                 {
                     GuideViewerWindow.IsWindowOpen = true;
                 }
 
-                if (ImGui.MenuItem("About..."))
+                if (ImGui.MenuItem("关于..."))
                 {
                     AboutWindow.IsWindowOpen = true;
                 }
@@ -330,9 +330,9 @@ static class EditorWindow
         {
             PromptUnsavedChanges(() =>
             {
-                Log.Information("Load default level...");
+                Log.Information("加载默认关卡...");
                 RainEd.Instance.LoadDefaultLevel();
-                Log.Information("Done!");
+                Log.Information("完成!");
             });
         }
 
@@ -551,27 +551,27 @@ static class EditorWindow
         if (promptUnsavedChanges)
         {
             promptUnsavedChanges = false;
-            ImGui.OpenPopup("Unsaved Changes");
+            ImGui.OpenPopup("未保存的更改");
 
             // center popup 
             ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
         }
 
         bool unused = true;
-        if (ImGui.BeginPopupModal("Unsaved Changes", ref unused, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
+        if (ImGui.BeginPopupModal("未保存的更改", ref unused, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             if (promptUnsavedChangesCancelable)
             {
-                ImGui.Text("Do you want to save your changes before proceeding?");
+                ImGui.Text("继续之前是否要保存您的更改？");
             }
             else
             {
-                ImGui.Text("You must save before proceeding.\nDo you want to save now?");
+                ImGui.Text("您必须先保存，然后才能继续。\n您想现在保存吗？");
             }
 
             ImGui.Separator();
 
-            if (ImGui.Button("Yes", StandardPopupButtons.ButtonSize) || ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.Space))
+            if (ImGui.Button("保存", StandardPopupButtons.ButtonSize) || ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.Space))
             {
                 ImGui.CloseCurrentPopup();
 
@@ -583,7 +583,7 @@ static class EditorWindow
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("No", StandardPopupButtons.ButtonSize) || (!promptUnsavedChangesCancelable && ImGui.IsKeyPressed(ImGuiKey.Escape)))
+            if (ImGui.Button("不了", StandardPopupButtons.ButtonSize) || (!promptUnsavedChangesCancelable && ImGui.IsKeyPressed(ImGuiKey.Escape)))
             {
                 ImGui.CloseCurrentPopup();
 
@@ -601,7 +601,7 @@ static class EditorWindow
             if (promptUnsavedChangesCancelable)
             {
                 ImGui.SameLine();
-                if (ImGui.Button("Cancel", StandardPopupButtons.ButtonSize) || ImGui.IsKeyPressed(ImGuiKey.Escape))
+                if (ImGui.Button("取消", StandardPopupButtons.ButtonSize) || ImGui.IsKeyPressed(ImGuiKey.Escape))
                 {
                     ImGui.CloseCurrentPopup();
                     promptCallback = null;
