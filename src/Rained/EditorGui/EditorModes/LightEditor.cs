@@ -8,7 +8,7 @@ namespace RainEd;
 
 class LightEditor : IEditorMode
 {
-    public string Name { get => "Light"; }
+    public string Name { get => "灯光"; }
     private readonly LevelView window;
 
     private Vector2 brushSize = new(50f, 70f);
@@ -71,7 +71,7 @@ class LightEditor : IEditorMode
 
     public void ShowEditMenu()
     {
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ResetBrushTransform, "Reset Brush Transform");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ResetBrushTransform, "重置笔刷变换");
     }
 
     public void DrawToolbar()
@@ -82,17 +82,17 @@ class LightEditor : IEditorMode
         var level = RainEd.Instance.Level;
         var brushDb = RainEd.Instance.LightBrushDatabase;
 
-        if (ImGui.Begin("Light###Light Catalog", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("灯光###Light Catalog", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             if (changeRecorder is null) ImGui.BeginDisabled();
 
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 8.0f);
 
-            ImGui.SliderAngle("Light Angle", ref level.LightAngle, 0f, 360f, "%.1f deg");
+            ImGui.SliderAngle("光线角度", ref level.LightAngle, 0f, 360f, "%.1f deg");
             if (ImGui.IsItemDeactivatedAfterEdit())
                 changeRecorder?.PushParameterChanges();
             
-            ImGui.SliderFloat("Light Distance", ref level.LightDistance, 1f, Level.MaxLightDistance, "%.3f", ImGuiSliderFlags.AlwaysClamp);
+            ImGui.SliderFloat("光线距离", ref level.LightDistance, 1f, Level.MaxLightDistance, "%.3f", ImGuiSliderFlags.AlwaysClamp);
             if (ImGui.IsItemDeactivatedAfterEdit())
                 changeRecorder?.PushParameterChanges();
             
@@ -127,7 +127,7 @@ class LightEditor : IEditorMode
                     color
                 );
 
-                ImGui.InvisibleButton("LightRing", new Vector2(avail.X, maxRadius * 2f));
+                ImGui.InvisibleButton("闪电", new Vector2(avail.X, maxRadius * 2f));
                 if (ImGui.IsItemActive())
                 {
                     isChangingParameters = true;
@@ -149,9 +149,9 @@ class LightEditor : IEditorMode
             if (changeRecorder is null) ImGui.EndDisabled();
         } ImGui.End();
 
-        if (ImGui.Begin("Brush", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("笔刷", ImGuiWindowFlags.NoFocusOnAppearing))
         {
-            if (ImGui.Button("Reset Brush") || KeyShortcuts.Activated(KeyShortcut.ResetBrushTransform))
+            if (ImGui.Button("重设笔刷") || KeyShortcuts.Activated(KeyShortcut.ResetBrushTransform))
             {
                 brushSize = new(50f, 70f);
                 brushRotation = 0f;
