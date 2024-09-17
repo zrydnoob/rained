@@ -82,7 +82,7 @@ partial class TileEditor : IEditorMode
     {
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.IncreaseBrushSize, "Increase Brush Size");
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.DecreaseBrushSize, "Decrease Brush Size");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.SetMaterial, "Set Selected Material as Default");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.SetMaterial, "设置所选材料为默认值");
     }
 
     public void DrawToolbar()
@@ -91,24 +91,24 @@ partial class TileEditor : IEditorMode
         var matDb = RainEd.Instance.MaterialDatabase;
         var prefs = RainEd.Instance.Preferences;
 
-        if (ImGui.Begin("Tile Selector", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("贴图选择器", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // work layer
             {
                 int workLayerV = window.WorkLayer + 1;
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-                ImGui.InputInt("Work Layer", ref workLayerV);
+                ImGui.InputInt("工作层级", ref workLayerV);
                 window.WorkLayer = Math.Clamp(workLayerV, 1, 3) - 1;
             }
 
             // default material button (or press E)
             int defaultMat = RainEd.Instance.Level.DefaultMaterial;
-            ImGui.TextUnformatted($"Default Material: {matDb.GetMaterial(defaultMat).Name}");
+            ImGui.TextUnformatted($"默认材料: {matDb.GetMaterial(defaultMat).Name}");
 
             if (selectionMode != SelectionMode.Materials)
                 ImGui.BeginDisabled();
             
-            if ((ImGui.Button("Set Selected Material as Default") || KeyShortcuts.Activated(KeyShortcut.SetMaterial)) && selectionMode == SelectionMode.Materials)
+            if ((ImGui.Button("设置所选材料为默认值") || KeyShortcuts.Activated(KeyShortcut.SetMaterial)) && selectionMode == SelectionMode.Materials)
             {
                 var oldMat = RainEd.Instance.Level.DefaultMaterial;
                 var newMat = selectedMaterial;
@@ -123,7 +123,7 @@ partial class TileEditor : IEditorMode
 
             if (ImGui.IsItemHovered() && selectionMode != SelectionMode.Materials)
             {
-                ImGui.SetTooltip("A material is not selected");
+                ImGui.SetTooltip("没有材料被选择");
             }
 
             // search bar
@@ -146,7 +146,7 @@ partial class TileEditor : IEditorMode
                     autotilesFlags = ImGuiTabItemFlags.SetSelected;
 
                 // Materials tab
-                if (ImGuiExt.BeginTabItem("Materials", materialsFlags))
+                if (ImGuiExt.BeginTabItem("材料", materialsFlags))
                 {
                     if (selectionMode != SelectionMode.Materials)
                     {
@@ -155,7 +155,7 @@ partial class TileEditor : IEditorMode
                     }
 
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "Search...", ref searchQuery, 128, searchInputFlags))
+                    if (ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, searchInputFlags))
                     {
                         ProcessSearch();
                     }
@@ -219,7 +219,7 @@ partial class TileEditor : IEditorMode
                 }
 
                 // Tiles tab
-                if (ImGuiExt.BeginTabItem("Tiles", tilesFlags))
+                if (ImGuiExt.BeginTabItem("贴图", tilesFlags))
                 {
                     if (selectionMode != SelectionMode.Tiles)
                     {
@@ -228,7 +228,7 @@ partial class TileEditor : IEditorMode
                     }
 
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "Search...", ref searchQuery, 128, searchInputFlags))
+                    if (ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, searchInputFlags))
                     {
                         ProcessSearch();
                     }
@@ -297,7 +297,7 @@ partial class TileEditor : IEditorMode
                 }
 
                 // Autotiles tab
-                if (ImGuiExt.BeginTabItem("Autotiles", autotilesFlags))
+                if (ImGuiExt.BeginTabItem("自动图块", autotilesFlags))
                 {
                     if (selectionMode != SelectionMode.Autotiles)
                     {
@@ -318,10 +318,10 @@ partial class TileEditor : IEditorMode
 
                     // create autotile button
                     ImGui.BeginGroup();
-                    if (ImGui.Button("Create Autotile", new Vector2(boxWidth, 0f)))
+                    if (ImGui.Button("创建自动图块", new Vector2(boxWidth, 0f)))
                     {
                         RainEd.Instance.Autotiles.OpenCreatePopup();
-                        ImGui.OpenPopup("Create Autotile");
+                        ImGui.OpenPopup("创建自动图块");
                         ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
                     }
 
@@ -366,18 +366,18 @@ partial class TileEditor : IEditorMode
                             ImGui.SeparatorText(autotile.Name);
                             if (autotile.Type == Autotiles.AutotileType.Path)
                             {
-                                ImGui.Text("Path Autotile");
+                                ImGui.Text("路径自动图块");
                             }
                             else if (autotile.Type == Autotiles.AutotileType.Rect)
                             {
-                                ImGui.Text("Rectangle Autotile");
+                                ImGui.Text("矩形自动图块");
                             }
 
                             ImGui.Separator();
 
                             if (!autotile.IsReady)
                             {
-                                ImGui.TextWrapped("There was a problem loading this autotile.");
+                                ImGui.TextWrapped("加载此自动图块文件时出现问题。");
                             }
                             else
                             {
@@ -386,7 +386,7 @@ partial class TileEditor : IEditorMode
                         }
                         else
                         {
-                            ImGui.TextDisabled("(no autotile selected)");
+                            ImGui.TextDisabled("(未选择自动图块文件)");
                         }
                     ImGui.EndGroup();
 
