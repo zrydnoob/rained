@@ -7,7 +7,7 @@ namespace RainEd;
 
 partial class PropEditor : IEditorMode
 {
-    public string Name { get => "Props"; }
+    public string Name { get => "µÀ¾ß"; }
     private readonly LevelView window;
     
     private readonly List<Prop> selectedProps = new();

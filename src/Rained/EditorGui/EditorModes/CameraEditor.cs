@@ -7,7 +7,7 @@ namespace RainEd;
 
 class CameraEditor : IEditorMode
 {
-    public string Name { get => "相机编辑"; }
+    public string Name { get => "相机"; }
     private readonly LevelView window;
 
     private List<Camera> selectedCameras; // all selected cameras

@@ -8,7 +8,7 @@ namespace RainEd;
 
 partial class TileEditor : IEditorMode
 {
-    public string Name { get => "ÌùÍ¼±à¼­"; }
+    public string Name { get => "ÌùÍ¼"; }
 
     private readonly LevelView window;
     private Tile selectedTile;

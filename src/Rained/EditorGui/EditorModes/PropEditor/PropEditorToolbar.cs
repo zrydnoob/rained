@@ -8,7 +8,7 @@ namespace RainEd;
 
 partial class PropEditor : IEditorMode
 {
-    private readonly string[] PropRenderTimeNames = ["Pre Effects", "Post Effects"];
+    private readonly string[] PropRenderTimeNames = ["渲染特效前", "渲染特效后"];
     private readonly string[] RopeReleaseModeNames = ["None", "Left", "Right"];
 
     enum SelectionMode
@@ -361,24 +361,24 @@ partial class PropEditor : IEditorMode
     {
         var propDb = RainEd.Instance.PropDatabase;
 
-        if (ImGui.Begin("Props", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("道具", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // work layer
             {
                 int workLayerV = window.WorkLayer + 1;
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-                ImGui.InputInt("View Layer", ref workLayerV);
+                ImGui.InputInt("视图层级", ref workLayerV);
                 window.WorkLayer = Math.Clamp(workLayerV, 1, 3) - 1;
             }
 
             // snapping
             ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-            ImGui.Combo("Snap", ref snappingMode, "Off\00.5x\01x");
+            ImGui.Combo("对齐", ref snappingMode, "Off\00.5x\01x");
             
             // flags for search bar
             var searchInputFlags = ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EscapeClearsAll;
 
-            if (ImGui.BeginTabBar("PropSelector"))
+            if (ImGui.BeginTabBar("道具选择器"))
             {
                 var halfWidth = ImGui.GetContentRegionAvail().X / 2f - ImGui.GetStyle().ItemSpacing.X / 2f;
 
@@ -392,7 +392,7 @@ partial class PropEditor : IEditorMode
                     tilesFlags = ImGuiTabItemFlags.SetSelected;
 
                 // Props tab
-                if (ImGuiExt.BeginTabItem("Props", propsFlags))
+                if (ImGuiExt.BeginTabItem("道具", propsFlags))
                 {
                     if (selectionMode != SelectionMode.Props)
                     {
@@ -402,7 +402,7 @@ partial class PropEditor : IEditorMode
 
                     // search bar
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "Search...", ref searchQuery, 128, searchInputFlags))
+                    if (ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, searchInputFlags))
                     {
                         ProcessSearch();
                     }
@@ -463,7 +463,7 @@ partial class PropEditor : IEditorMode
                 }
 
                 // Tiles as props tab
-                if (ImGuiExt.BeginTabItem("Tiles", tilesFlags))
+                if (ImGuiExt.BeginTabItem("贴图", tilesFlags))
                 {
                     // if tab changed, reset selected group back to 0
                     if (selectionMode != SelectionMode.Tiles)
@@ -474,7 +474,7 @@ partial class PropEditor : IEditorMode
 
                     // search bar
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "Search...", ref searchQuery, 128, searchInputFlags))
+                    if (ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, searchInputFlags))
                     {
                         ProcessSearch();
                     }
@@ -638,7 +638,7 @@ partial class PropEditor : IEditorMode
     {
         var propDb = RainEd.Instance.PropDatabase;
 
-        if (ImGui.Begin("Prop Options", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("道具选项", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // prop transformation mode
             if (selectedProps.Count > 0)
@@ -647,15 +647,15 @@ partial class PropEditor : IEditorMode
                 {
                     var prop = selectedProps[0];
 
-                    ImGui.TextUnformatted($"Selected {prop.PropInit.Name}");
-                    ImGui.TextUnformatted($"Depth: {prop.DepthOffset} - {prop.DepthOffset + prop.PropInit.Depth}");
+                    ImGui.TextUnformatted($"选择: {prop.PropInit.Name}");
+                    ImGui.TextUnformatted($"纵深: {prop.DepthOffset} - {prop.DepthOffset + prop.PropInit.Depth}");
                 }
                 else
                 {
-                    ImGui.Text("Selected multiple props");
+                    ImGui.Text("选定多个道具");
                 }
                 
-                if (ImGui.Button("Reset Transform"))
+                if (ImGui.Button("重置变换"))
                 {
                     changeRecorder.BeginTransform();
                         foreach (var prop in selectedProps)
@@ -664,7 +664,7 @@ partial class PropEditor : IEditorMode
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Flip X"))
+                if (ImGui.Button("翻转 X"))
                 {
                     changeRecorder.BeginTransform();
                         foreach (var prop in selectedProps)
@@ -673,7 +673,7 @@ partial class PropEditor : IEditorMode
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Flip Y"))
+                if (ImGui.Button("翻转 Y"))
                 {
                     changeRecorder.BeginTransform();
                         foreach (var prop in selectedProps)
@@ -682,10 +682,10 @@ partial class PropEditor : IEditorMode
                 }
 
                 ImGui.PushItemWidth(ImGui.GetTextLineHeightWithSpacing() * 10f);
-                MultiselectDragInt("Render Order", "RenderOrder", 0.02f);
-                MultiselectSliderInt("Depth Offset", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
-                MultiselectSliderInt("Seed", "Seed", 0, 999);
-                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "Render Time", "RenderTime", PropRenderTimeNames);
+                MultiselectDragInt("渲染顺序", "RenderOrder", 0.02f);
+                MultiselectSliderInt("纵深偏移", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
+                MultiselectSliderInt("种子", "Seed", 0, 999);
+                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "渲染时机", "RenderTime", PropRenderTimeNames);
 
                 // custom depth, if available
                 {
@@ -700,7 +700,7 @@ partial class PropEditor : IEditorMode
                     }
 
                     if (hasCustomDepth)
-                        MultiselectSliderInt("Custom Depth", "CustomDepth", 1, 30, "%i", ImGuiSliderFlags.AlwaysClamp);
+                        MultiselectSliderInt("自定义纵深", "CustomDepth", 1, 30, "%i", ImGuiSliderFlags.AlwaysClamp);
                 }
 
                 // custom color, if available
@@ -716,7 +716,7 @@ partial class PropEditor : IEditorMode
                     }
 
                     if (hasCustomColor)
-                        MultiselectListInput("Custom Color", "CustomColor", propColorNames);
+                        MultiselectListInput("自定义颜色", "CustomColor", propColorNames);
                 }
 
                 // rope properties, if all selected props are ropes
@@ -827,7 +827,7 @@ partial class PropEditor : IEditorMode
                             // color Zero-G Tube white
                             if (prop.PropInit.PropFlags.HasFlag(PropFlags.Colorize))
                             {
-                                if (ImGui.Checkbox("Apply Color", ref prop.ApplyColor))
+                                if (ImGui.Checkbox("应用颜色", ref prop.ApplyColor))
                                     changeRecorder.PushSettingsChanges();
                             }
                         }
@@ -835,7 +835,7 @@ partial class PropEditor : IEditorMode
                         // rope simulation controls
                         if (affineProps)
                         {
-                            if (ImGui.Button("Reset Simulation") || KeyShortcuts.Activated(KeyShortcut.ResetSimulation))
+                            if (ImGui.Button("重置模拟") || KeyShortcuts.Activated(KeyShortcut.ResetSimulation))
                             {
                                 changeRecorder.BeginTransform();
 
@@ -846,7 +846,7 @@ partial class PropEditor : IEditorMode
                             }
 
                             ImGui.SameLine();
-                            ImGui.Button("Simulate");
+                            ImGui.Button("模拟");
 
                             if (ImGui.IsItemActive() || KeyShortcuts.Active(KeyShortcut.RopeSimulation))
                             {
@@ -881,7 +881,7 @@ partial class PropEditor : IEditorMode
                                 v: ref varV,
                                 v_min: 1,
                                 v_max: prop.PropInit.VariationCount,
-                                format: varV == 0 ? "Random" : "%i",
+                                format: varV == 0 ? "随机" : "%i",
                                 flags: ImGuiSliderFlags.AlwaysClamp
                             );
                             prop.Variation = Math.Clamp(varV, 0, prop.PropInit.VariationCount) - 1;
@@ -893,7 +893,7 @@ partial class PropEditor : IEditorMode
                         // apply color
                         if (prop.PropInit.PropFlags.HasFlag(PropFlags.Colorize))
                         {
-                            if (ImGui.Checkbox("Apply Color", ref prop.ApplyColor))
+                            if (ImGui.Checkbox("应用颜色", ref prop.ApplyColor))
                                 changeRecorder.PushSettingsChanges();
                         }
 
@@ -906,12 +906,12 @@ partial class PropEditor : IEditorMode
                     // notes
                 }
 
-                ImGui.SeparatorText("Notes");
+                ImGui.SeparatorText("注意");
 
                 if (longProps && !affineProps)
                 {
                     ImGui.Bullet(); ImGui.SameLine();
-                    ImGui.TextWrapped("One or more selected rope or long props did not load as a rectangle, so editing is limited. Reset its transformation to edit it again.");
+                    ImGui.TextWrapped("一个或多个选定的绳子或长道具没有作为矩形加载，因此编辑受到限制。重置其变换以再次编辑它。");
                 }
 
                 if (selectedProps.Count == 1)
@@ -922,11 +922,11 @@ partial class PropEditor : IEditorMode
                     if (!isDecal && prop.DepthOffset <= 5 && prop.DepthOffset + prop.CustomDepth >= 6)
                     {
                         ImGui.Bullet(); ImGui.SameLine();
-                        ImGui.TextWrapped("Warning: This prop will intersect with the play layer (depth 5-6)!");
+                        ImGui.TextWrapped("警告:此道具将与游戏层相交(深度5-6)！");
                     }
 
                     if (prop.PropInit.PropFlags.HasFlag(PropFlags.Tile))
-                        ImGui.BulletText("Tile as Prop");
+                        ImGui.BulletText("作为道具的贴图");
 
                     if (prop.PropInit.PropFlags.HasFlag(PropFlags.Colorize))
                     {
@@ -934,18 +934,18 @@ partial class PropEditor : IEditorMode
 
                         if (prop.Rope is not null)
                         {
-                            ImGui.TextWrapped("The tube can be colored white through settings.");
+                            ImGui.TextWrapped("可以通过设置将管染成白色。");
                         }
                         else
                         {
-                            ImGui.TextWrapped("It's recommended to render this prop after the effects if the color is activated, as the effects won't affect the color layers.");
+                            ImGui.TextWrapped("如果颜色被激活，建议在效果之后渲染这个道具，因为效果不会影响颜色层。");
                         }
                     }
 
                     if (!prop.PropInit.PropFlags.HasFlag(PropFlags.ProcedurallyShaded))
                     {
                         ImGui.Bullet(); ImGui.SameLine();
-                        ImGui.TextWrapped("Be aware that shadows and highlights will not rotate with the prop, so extreme rotations may cause incorrect shading.");
+                        ImGui.TextWrapped("请注意，阴影和高光不会随道具旋转，因此过度旋转可能会导致不正确的着色。");
                     }
                     
                     // user notes
@@ -960,7 +960,7 @@ partial class PropEditor : IEditorMode
             }
             else
             {
-                ImGui.Text("No props selected");
+                ImGui.Text("没有选择道具");
             }
 
         } ImGui.End();
@@ -968,9 +968,9 @@ partial class PropEditor : IEditorMode
 
     public void ShowEditMenu()
     {
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "Duplicate Selected Prop(s)");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "Delete Selected Prop(s)");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleVertexMode, "Toggle Vertex Edit");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "复制选定的道具");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "删除选定的道具");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleVertexMode, "切换顶点编辑");
     }
 
     private static int Mod(int a, int b)

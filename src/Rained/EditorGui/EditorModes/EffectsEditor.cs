@@ -6,7 +6,7 @@ namespace RainEd;
 
 class EffectsEditor : IEditorMode
 {
-    public string Name { get => "Effects"; }
+    public string Name { get => "特效"; }
     private readonly LevelView window;
 
     private int selectedGroup = 0;
@@ -68,12 +68,12 @@ class EffectsEditor : IEditorMode
 
     private static readonly string[] layerModeNames =
     [
-        "All", "1", "2", "3", "1+2", "2+3"
+        "全部", "1", "2", "3", "1+2", "2+3"
     ];
 
     private static readonly string[] plantColorNames =
     [
-        "Color1", "Color2", "Dead"
+        "颜色1", "颜色2", "死亡"
     ];
 
     private bool doDeleteCurrent = false;
@@ -85,13 +85,13 @@ class EffectsEditor : IEditorMode
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.IncreaseBrushSize, "Increase Brush Size");
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.DecreaseBrushSize, "Decrease Brush Size");
 
-        if (ImGui.MenuItem("Delete Effect", selectedEffect >= 0))
+        if (ImGui.MenuItem("删除特效", selectedEffect >= 0))
             doDeleteCurrent = true;
 
-        if (ImGui.MenuItem("Move Effect Up", selectedEffect >= 0))
+        if (ImGui.MenuItem("上移效果", selectedEffect >= 0))
             doMoveCurrentUp = true;
 
-        if (ImGui.MenuItem("Move Effect Down", selectedEffect >= 0))
+        if (ImGui.MenuItem("下移效果", selectedEffect >= 0))
             doMoveCurrentDown = true;
 
         // TODO: clear effect menu item
@@ -102,19 +102,19 @@ class EffectsEditor : IEditorMode
         var level = RainEd.Instance.Level;
         var fxDatabase = RainEd.Instance.EffectsDatabase;
 
-        if (ImGui.Begin("Add Effect", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("添加特效", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // work layer
             {
                 int workLayerV = window.WorkLayer + 1;
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-                ImGui.InputInt("View Layer", ref workLayerV);
+                ImGui.InputInt("视图层级", ref workLayerV);
                 window.WorkLayer = Math.Clamp(workLayerV, 1, 3) - 1;
             }
 
             // search bar
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-            ImGui.InputTextWithHint("##Search", "Search...", ref searchQuery, 128, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EscapeClearsAll);
+            ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EscapeClearsAll);
 
             var groupsPassingSearch = new List<int>();
 
@@ -181,13 +181,13 @@ class EffectsEditor : IEditorMode
 
         int deleteRequest = -1;
 
-        if (ImGui.Begin("Active Effects", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("已添加特效", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             if (ImGui.BeginListBox("##EffectStack", ImGui.GetContentRegionAvail()))
             {
                 if (level.Effects.Count == 0)
                 {
-                    ImGui.TextDisabled("(no effects)");
+                    ImGui.TextDisabled("(无特效)");
                 }
                 else
                 {
@@ -248,7 +248,7 @@ class EffectsEditor : IEditorMode
             changeRecorder.PushListChange();
         }
 
-        if (ImGui.Begin("Effect Options", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("特效选项", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // effect properties
             if (selectedEffect >= 0)
@@ -257,11 +257,11 @@ class EffectsEditor : IEditorMode
 
                 // on delete action, only delete effect after UI has been processed
                 bool doDelete = false;
-                if (ImGui.Button("Delete"))
+                if (ImGui.Button("删除"))
                     doDelete = true;
                 
                 ImGui.SameLine();
-                if ((ImGui.Button("Move Up") || doMoveCurrentUp) && selectedEffect > 0)
+                if ((ImGui.Button("上移") || doMoveCurrentUp) && selectedEffect > 0)
                 {
                     doMoveCurrentUp = false;
 
@@ -274,7 +274,7 @@ class EffectsEditor : IEditorMode
                 }
 
                 ImGui.SameLine();
-                if ((ImGui.Button("Move Down") || doMoveCurrentDown) && selectedEffect < level.Effects.Count - 1)
+                if ((ImGui.Button("下移") || doMoveCurrentDown) && selectedEffect < level.Effects.Count - 1)
                 {
                     doMoveCurrentDown = false;
 
@@ -287,7 +287,7 @@ class EffectsEditor : IEditorMode
                 }
 
                 if (effect.Data.deprecated)
-                    ImGui.TextDisabled("This effect is deprecated!");
+                    ImGui.TextDisabled("此效果已弃用！");
 
                 ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 8.0f);
 
@@ -297,7 +297,7 @@ class EffectsEditor : IEditorMode
                 // layers property
                 if (effect.Data.useLayers)
                 {
-                    if (ImGui.BeginCombo("Layers", layerModeNames[(int) effect.Layer]))
+                    if (ImGui.BeginCombo("层级", layerModeNames[(int) effect.Layer]))
                     {
                         for (int i = 0; i < layerModeNames.Length; i++)
                         {
@@ -331,7 +331,7 @@ class EffectsEditor : IEditorMode
                 // plant color property
                 if (effect.Data.usePlantColors)
                 {
-                    if (ImGui.BeginCombo("Color", plantColorNames[effect.PlantColor]))
+                    if (ImGui.BeginCombo("颜色", plantColorNames[effect.PlantColor]))
                     {
                         for (int i = 0; i < plantColorNames.Length; i++)
                         {
@@ -356,7 +356,7 @@ class EffectsEditor : IEditorMode
                 // affect colors and gradients
                 if (effect.Data.useDecalAffect)
                 {
-                    if (ImGui.Checkbox("Affect Gradients and Decals", ref effect.AffectGradientsAndDecals))
+                    if (ImGui.Checkbox("影响渐变和贴花", ref effect.AffectGradientsAndDecals))
                         hadChanged = true;
                 }
 
@@ -398,7 +398,7 @@ class EffectsEditor : IEditorMode
                 }
 
                 // seed
-                ImGui.SliderInt("Seed", ref effect.Seed, 0, 500);
+                ImGui.SliderInt("种子", ref effect.Seed, 0, 500);
                 if (ImGui.IsItemDeactivatedAfterEdit())
                         hadChanged = true;
 
@@ -420,7 +420,7 @@ class EffectsEditor : IEditorMode
             }
             else
             {
-                ImGui.TextDisabled("No effect selected");
+                ImGui.TextDisabled("未选择特效");
             }
         } ImGui.End();
 
