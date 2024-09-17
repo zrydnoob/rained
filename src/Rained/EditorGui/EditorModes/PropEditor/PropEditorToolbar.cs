@@ -922,7 +922,7 @@ partial class PropEditor : IEditorMode
                     if (!isDecal && prop.DepthOffset <= 5 && prop.DepthOffset + prop.CustomDepth >= 6)
                     {
                         ImGui.Bullet(); ImGui.SameLine();
-                        ImGui.TextWrapped("警告:此道具将与游戏层相交(深度5-6)！");
+                        ImGui.TextWrapped("警告:此道具将与游戏层相交(纵深5-6)！");
                     }
 
                     if (prop.PropInit.PropFlags.HasFlag(PropFlags.Tile))

@@ -21,7 +21,7 @@ partial class FileBrowser
 
     private readonly Stack<string> backStack = new();
     private readonly Stack<string> forwardStack = new();
-    private string folderName = "New Folder";
+    private string folderName = "新建文件夹";
 
     // path display mode - breadcrumb trail or string input
     private bool enterPath;
@@ -134,26 +134,26 @@ partial class FileBrowser
 
         if (RainEd.Instance is not null && doesProjectsFolderExist)
         {
-            AddBookmark("Projects", projectsFolderPath);
+            AddBookmark("项目", projectsFolderPath);
         }
 
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {
-            AddBookmark("User", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            AddBookmark("用户", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         }
 
-        AddBookmark("Desktop", Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
-        AddBookmark("Documents", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-        AddBookmark("Music", Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
-        AddBookmark("Pictures", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
-        AddBookmark("Videos", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
+        AddBookmark("桌面", Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+        AddBookmark("文档", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+        AddBookmark("音乐", Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
+        AddBookmark("图片", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+        AddBookmark("视频", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
 
         // idk why Environment.SpecialFolder doesn't have a MyDownloads enum;
         // xdg_user_dirs standardizes a download location, and mac has one as well.
         var downloadsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
         if (Directory.Exists(downloadsFolder))
         {
-            AddBookmark("Downloads", downloadsFolder);
+            AddBookmark("下载", downloadsFolder);
         }
 
         // list drives
