@@ -69,6 +69,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       id: create_release
       with:
+        tag_name: latest
         files: |
           ./artifacts/rained_linux-x64.tar.gz
           ./artifacts/rained_win-x64.zip
