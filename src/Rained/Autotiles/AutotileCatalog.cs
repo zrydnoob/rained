@@ -282,7 +282,7 @@ class AutotileCatalog
     /// </summary>
     public void OpenCreatePopup()
     {
-        ImGui.OpenPopup("Create Autotile");
+        ImGui.OpenPopup("创建自动图块");
         createName = "My Autotile";
         createCategory = "Misc";
     }
@@ -293,7 +293,7 @@ class AutotileCatalog
     /// <param name="autotile">The autotile to rename</param>
     public void OpenRenamePopup(Autotile autotile)
     {
-        ImGui.OpenPopup("Rename Autotile");
+        ImGui.OpenPopup("重命名自动图块");
         createName = autotile.Name;
         createCategory = GetCategoryNameOf(autotile);
         renameTarget = autotile;
@@ -306,11 +306,11 @@ class AutotileCatalog
     {
         bool p_open = true;
         ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
-        if (ImGui.BeginPopupModal("Create Autotile", ref p_open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
+        if (ImGui.BeginPopupModal("创建自动图块", ref p_open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 12.0f);
-            ImGui.InputText("Name", ref createName, 128);
-            ImGui.InputText("Category", ref createCategory, 128);
+            ImGui.InputText("名称", ref createName, 128);
+            ImGui.InputText("分类", ref createCategory, 128);
             ImGui.PopItemWidth();
 
             ImGui.Separator();
@@ -353,11 +353,11 @@ class AutotileCatalog
     {
         bool p_open = true;
         ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
-        if (ImGui.BeginPopupModal("Rename Autotile", ref p_open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
+        if (ImGui.BeginPopupModal("重命名自动图块", ref p_open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 12.0f);
-            ImGui.InputText("Name", ref createName, 128);
-            ImGui.InputText("Category", ref createCategory, 128);
+            ImGui.InputText("名称", ref createName, 128);
+            ImGui.InputText("分类", ref createCategory, 128);
             ImGui.PopItemWidth();
 
             ImGui.Separator();

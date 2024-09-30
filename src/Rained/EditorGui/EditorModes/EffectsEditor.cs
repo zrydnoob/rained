@@ -24,6 +24,9 @@ class EffectsEditor : IEditorMode
 
     private ChangeHistory.EffectsChangeRecorder changeRecorder;
 
+    private string _activeEffPreview = "";
+    private RlManaged.Texture2D? _loadedEffPreview = null;
+
     public EffectsEditor(LevelWindow window)
     {
         this.window = window;
