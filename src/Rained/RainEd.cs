@@ -24,11 +24,8 @@ sealed class RainEd
     public static Glib.Window Window => Boot.Window;
     public static Glib.RenderContext RenderContext => Glib.RenderContext.Instance!;
 
-    private Level level;
     public readonly RlManaged.Texture2D LevelGraphicsTexture;
-    private readonly LevelView levelView;
-    private readonly ChangeHistory.ChangeHistory changeHistory;
-    private bool ShowDemoWindow = false;
+    private readonly LevelWindow levelView;
 
     private readonly string prefFilePath;
     public UserPreferences Preferences;
@@ -42,9 +39,7 @@ sealed class RainEd
     public readonly Props.PropDatabase PropDatabase;
     public readonly AutotileCatalog Autotiles;
 
-    private string currentFilePath = string.Empty;
-
-    public string CurrentFilePath { get => currentFilePath; }
+    public string CurrentFilePath { get => CurrentTab!.FilePath; }
     
     /// <summary>
     /// The path of the emergency save file. Is created when the application
@@ -52,15 +47,14 @@ sealed class RainEd
     /// </summary> 
     public static readonly string EmergencySaveFolder = Path.Combine(Boot.AppDataPath, "emsavs");
 
-    /// <summary>
-    /// True if the file for the current level is non-existent or is an emergency save.
-    /// </summary>
-    public bool IsTemporaryFile => string.IsNullOrEmpty(CurrentFilePath) || Path.GetDirectoryName(CurrentFilePath) == EmergencySaveFolder;
+    private readonly List<LevelTab> _tabs = [];
+    public IEnumerable<LevelTab> Tabs => _tabs;
+    private LevelTab? _currentTab = null;
+    public LevelTab? CurrentTab { get => _currentTab; set => SwitchTab(value); }
 
-    public Level Level { get => level; }
-    public LevelView LevelView { get => levelView; }
-    
-    public ChangeHistory.ChangeHistory ChangeHistory { get => changeHistory; }
+    public Level Level { get => CurrentTab!.Level; }
+    public LevelWindow LevelView { get => levelView; }
+    public ChangeHistory.ChangeHistory ChangeHistory { get => CurrentTab!.ChangeHistory; }
 
     // this is used to set window IsEventDriven to true
     // when the user hasn't interacted with the window in a while
@@ -119,7 +113,7 @@ sealed class RainEd
             }
             catch (Exception e)
             {
-                Log.Error("Failed to load user preferences!\n{ErrorMessage}", e);
+                Log.UserLogger.Error("Failed to load user preferences!\n{ErrorMessage}", e);
                 Preferences = new UserPreferences();
                 EditorWindow.ShowNotification("Failed to load preferences");
             }
@@ -178,11 +172,11 @@ sealed class RainEd
             AssetGraphics = new AssetGraphicsProvider();
             
             initPhase = "materials";
-            Log.Information("Initializing materials database...");
+            Log.UserLogger.Information("Reading Materials/Init.txt");
             MaterialDatabase = new Tiles.MaterialDatabase();
 
             initPhase = "tiles";
-            Log.Information("Initializing tile database...");
+            Log.UserLogger.Information("Reading Graphics/Init.txt...");
             TileDatabase = new Tiles.TileDatabase();
 
             // init autotile catalog
@@ -215,14 +209,15 @@ sealed class RainEd
             EffectsDatabase = new EffectsDatabase();
 
             initPhase = "light brushes";
-            Log.Information("Initializing light brush database...");
+            Log.UserLogger.Information("Reading light brushes...");
             LightBrushDatabase = new Light.LightBrushDatabase();
 
             initPhase = "props";
-            Log.Information("Initializing prop database...");
+            Log.UserLogger.Information("Reading Props/Init.txt");
             PropDatabase = new Props.PropDatabase(TileDatabase);
 
             DrizzleCast.Initialize();
+            Log.UserLogger.Information("Asset initialization done!");
             Log.Information("----- ASSET INIT DONE! -----");
         }
         #if !DEBUG
@@ -237,16 +232,14 @@ sealed class RainEd
             throw new RainEdStartupException();
         }
         #endif
-        
-        level = Level.NewDefaultLevel();
+
+        _tabs.Add(new LevelTab());
+        _currentTab = _tabs[0];      
 
         LevelGraphicsTexture = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath,"assets","level-graphics.png"));
 
-        Log.Information("Initializing change history...");
-        changeHistory = new ChangeHistory.ChangeHistory();
-
         Log.Information("Creating level view...");
-        levelView = new LevelView();
+        levelView = new LevelWindow();
 
         if (Preferences.StaticDrizzleLingoRuntime)
         {
@@ -381,15 +374,9 @@ sealed class RainEd
 
     public void LoadDefaultLevel()
     {
-        levelView.UnloadView();
-        level.LightMap.Dispose();
-        level = Level.NewDefaultLevel();
-        ReloadLevel();
-        levelView.LoadView();
-
-        currentFilePath = string.Empty;
-        UpdateTitle();
-
+        var tab = new LevelTab();
+        _tabs.Add(tab);
+        CurrentTab = tab;
         //AssetGraphics.ClearTextureCache();
     }
 
@@ -399,20 +386,15 @@ sealed class RainEd
         {
             Log.Information("Loading level {Path}...", path);
 
-            levelView.UnloadView();
-
             try
             {
                 var loadRes = LevelSerialization.Load(path);
 
                 if (loadRes.Level is not null)
                 {
-                    level = loadRes.Level;
-
-                    ReloadLevel();
-                    currentFilePath = path;
-                    UpdateTitle();
-
+                    var tab = new LevelTab(loadRes.Level, path);
+                    _tabs.Add(tab);
+                    CurrentTab = tab;
                     Log.Information("Done!");
                 }
                 else
@@ -430,7 +412,7 @@ sealed class RainEd
             }
             catch (Exception e)
             {
-                Log.Error("Error loading level {Path}:\n{ErrorMessage}", path, e);
+                Log.UserLogger.Error("Error loading level {Path}:\n{ErrorMessage}", path, e);
                 EditorWindow.ShowNotification("Error while loading level");
             }
 
@@ -454,23 +436,26 @@ sealed class RainEd
 
         try
         {
-            string oldFilePath = currentFilePath;
+            string oldFilePath = CurrentTab!.FilePath;
 
-            LevelSerialization.SaveLevelTextFile(path);
-            LevelSerialization.SaveLevelLightMap(path);
+            LevelSerialization.SaveLevelTextFile(Level, path);
+            LevelSerialization.SaveLevelLightMap(Level, path);
 
-            currentFilePath = path;
+            CurrentTab.FilePath = path;
+            CurrentTab.Name = Path.GetFileNameWithoutExtension(path);
+
             UpdateTitle();
-            changeHistory.MarkUpToDate();
+
             Log.Information("Done!");
+            CurrentTab.ChangeHistory.MarkUpToDate();
             EditorWindow.ShowNotification("Saved!");
-            AddToRecentFiles(currentFilePath);
+            AddToRecentFiles(CurrentTab.FilePath);
 
             // if the old level was an emergency save and the user
             // saved it to a non-emergency save file, delete the
             // old file as it is no longer necessary.
             var oldParentFolder = Path.GetDirectoryName(oldFilePath);
-            var newParentFolder = Path.GetDirectoryName(currentFilePath);
+            var newParentFolder = Path.GetDirectoryName(CurrentTab.FilePath);
 
             if (oldParentFolder == EmergencySaveFolder && newParentFolder != EmergencySaveFolder)
             {
@@ -495,24 +480,33 @@ sealed class RainEd
     /// </summary>
     public void EmergencySave()
     {
-        Directory.CreateDirectory(EmergencySaveFolder);
 
+        Directory.CreateDirectory(EmergencySaveFolder);
         var secs = (int)Math.Floor((DateTime.UtcNow - DateTime.UnixEpoch).TotalSeconds);
         var id = secs.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        var fileName = CurrentFilePath;
-        if (string.IsNullOrEmpty(fileName))
+        foreach (var tab in Tabs)
         {
-            fileName = "unnamed";
-        }
-        else
-        {
-            fileName = Path.GetFileNameWithoutExtension(fileName);
-        }
+            var fileName = tab.FilePath;
+            bool doSave = tab.ChangeHistory.HasChanges;
 
-        var emSavFileName = Path.Combine(EmergencySaveFolder, $"{fileName}-{id}.txt");
-        LevelSerialization.SaveLevelTextFile(emSavFileName);
-        LevelSerialization.SaveLevelLightMap(emSavFileName);
+            if (string.IsNullOrEmpty(fileName))
+            {
+                fileName = "unnamed";
+                doSave = true;
+            }
+            else
+            {
+                fileName = Path.GetFileNameWithoutExtension(fileName);
+            }
+
+            if (doSave)
+            {
+                var emSavFileName = Path.Combine(EmergencySaveFolder, $"{fileName}-{id}.txt");
+                LevelSerialization.SaveLevelTextFile(tab.Level, emSavFileName);
+                LevelSerialization.SaveLevelLightMap(tab.Level, emSavFileName);
+            }
+        }
     }
 
     public static string[] DetectEmergencySaves()
@@ -543,7 +537,7 @@ sealed class RainEd
             {
                 if (!Platform.TrashFile(file))
                 {
-                    Log.Warning("TrashFile is not supported, resorted to permanent deletion.");
+                    Log.UserLogger.Warning("File trashing is not supported on this platform, resorted to permanent deletion.");
                     File.Delete(file);
                 }
             }
@@ -566,6 +560,8 @@ sealed class RainEd
 
     public void ResizeLevel(int newWidth, int newHeight, int anchorX, int anchorY)
     {
+        var level = Level;
+
         if (newWidth == level.Width && newHeight == level.Height) return;
         Log.Information("Resizing level...");
         IsLevelLocked = true;
@@ -574,7 +570,8 @@ sealed class RainEd
         var dstOrigin = level.Resize(newWidth, newHeight, anchorX, anchorY);
 
         levelView.ReloadLevel();
-        changeHistory.Clear();
+        CurrentTab!.ChangeHistory.ForceMarkDirty();
+        ChangeHistory.Clear();
         levelView.Renderer.ReloadLevel();
         levelView.ViewOffset += dstOrigin * Level.TileSize;
 
@@ -582,33 +579,29 @@ sealed class RainEd
         IsLevelLocked = false;
     }
 
-    private void ReloadLevel()
+    private void SwitchTab(LevelTab? tab)
     {
-        levelView.ReloadLevel();
-        changeHistory.Clear();
-        changeHistory.MarkUpToDate();
-        levelView.Renderer.ReloadLevel();
+        if (tab == _currentTab) return;
+        if (tab is not null && !_tabs.Contains(tab))
+            throw new ArgumentException("Given LevelTab is not in Tabs list", nameof(tab));
+        
+        _currentTab = tab;
+        if (_currentTab is not null)
+        {
+            levelView.ReloadLevel();
+            levelView.Renderer.ReloadLevel();
+            UpdateTitle();
+        }
+    }
+
+    public bool CloseTab(LevelTab tab)
+    {
+        return _tabs.Remove(tab);
     }
 
     private void UpdateTitle()
     {
-        string levelName =
-            string.IsNullOrEmpty(currentFilePath) ? "Untitled" :
-            Path.GetFileNameWithoutExtension(currentFilePath);
-        
-        if (currentFilePath is not null && Path.GetDirectoryName(currentFilePath) == EmergencySaveFolder)
-        {
-            int hyphenIndex = levelName.LastIndexOf('-');
-            if (hyphenIndex >= 0)
-            {
-                levelName = levelName[0..hyphenIndex] + " [EMERGENCY SAVE]";
-            }
-            else
-            {
-                levelName += " [EMERGENCY SAVE]";
-            }
-        }
-        
+        string levelName = CurrentTab!.Name;
         Raylib.SetWindowTitle($"Rained - {levelName}");
     }
 
@@ -667,11 +660,19 @@ sealed class RainEd
 
         return tcs.Task;
     }
+
+    private async void AsyncCloseWindowRequest()
+    {
+        if (await EditorWindow.CloseAllTabs())
+        {
+            Running = false; 
+        }
+    }
     
     public void Draw(float dt)
     {
         if (Raylib.WindowShouldClose())
-            EditorWindow.PromptUnsavedChanges(() => Running = false);
+            AsyncCloseWindowRequest();
         
         AssetGraphics.Maintenance();
         
@@ -691,9 +692,11 @@ sealed class RainEd
         
         Raylib.ClearBackground(Color.DarkGray);
         KeyShortcuts.Update();
-        ImGui.DockSpaceOverViewport();
+        //ImGui.DockSpaceOverViewport();
 
-        UpdateRopeSimulation();
+        if (CurrentTab != null)
+            UpdateRopeSimulation();
+        
         EditorWindow.Render();
 
         if (ImGui.IsKeyPressed(ImGuiKey.F1))
@@ -724,6 +727,7 @@ sealed class RainEd
 
     public void UpdateRopeSimulation()
     {
+        var level = CurrentTab!.Level;
         double nowTime = Raylib.GetTime();
         double stepTime = 1.0 / 30.0;
 

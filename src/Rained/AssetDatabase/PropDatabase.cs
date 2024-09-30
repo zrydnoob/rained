@@ -530,11 +530,18 @@ class PropDatabase
         return allProps.TryGetValue(name, out value);
     }
     
-    private void AddPropToIndex(PropInit prop)
+    private void AddPropToIndex(int lineNo, PropInit prop)
     {
         if (allProps.ContainsKey(prop.Name))
         {
-            Log.Warning("Already added prop {PropName}", prop.Name);
+            if (lineNo == -2) // dumb idk
+            {
+                Log.UserLogger.Warning("Tiles: Already added prop {PropName}", prop.Name);
+            }
+            else
+            {
+                Log.UserLogger.Warning(ErrorString(lineNo, "Already added prop " + prop.Name));
+            }
         }
 
         allProps[prop.Name] = prop;
@@ -576,7 +583,7 @@ class PropDatabase
             {
                 if (lingoParser.Read(line[1..]) is not Lingo.List header)
                 {
-                    Log.Warning(ErrorString(lineNo, "Malformed category header, ignoring."));
+                    Log.UserLogger.Warning(ErrorString(lineNo, "Malformed category header, ignoring."));
                     continue;
                 }
 
@@ -595,12 +602,12 @@ class PropDatabase
                     propData = (Lingo.List) (lingoParser.Read(line) ?? throw new Exception(ErrorString(lineNo, "Malformed prop init")));
                     var propInit = new PropInit(currentCategory, propData);
                     currentCategory.Props.Add(propInit);
-                    AddPropToIndex(propInit);
+                    AddPropToIndex(lineNo, propInit);
                 }
                 catch (Exception e)
                 {
                     var name = propData is null ? "Unknown Prop" : (string) propData.fields["nm"];
-                    Log.Warning(ErrorString(lineNo, "Could not add prop '{PropName}': {ErrorMessage}"), name, e.Message);
+                    Log.UserLogger.Warning(ErrorString(lineNo, "Could not add prop '{PropName}': {ErrorMessage}"), name, e.Message);
                 }
             }
         }
@@ -628,7 +635,7 @@ class PropDatabase
                 var propInit = new PropInit(currentCategory, tile);
                 currentCategory.Props.Add(propInit);
                 tilePropCategory.Props.Add(propInit);
-                AddPropToIndex(propInit);
+                AddPropToIndex(-2, propInit);
                 tileIndex++;
 
                 // 21 tiles per page
@@ -675,7 +682,7 @@ class PropDatabase
                 var ropeData = (Lingo.List)lingoParser.Read(line)!;
                 var propInit = new PropInit(curGroup!, ropeData);
                 curGroup!.Props.Add(propInit);
-                AddPropToIndex(propInit);
+                AddPropToIndex(-1, propInit);
             }
         }
 
