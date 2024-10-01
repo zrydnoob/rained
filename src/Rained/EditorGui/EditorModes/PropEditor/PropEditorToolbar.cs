@@ -938,14 +938,14 @@ partial class PropEditor : IEditorMode
                         }
                         else
                         {
-                            ImGui.TextWrapped("如果颜色被激活，建议在效果之后渲染这个道具，因为效果不会影响颜色层。");
+                            ImGui.TextWrapped("如果颜色被激活，建议在特效之后渲染这个道具，因为特效不会影响颜色层。");
                         }
                     }
 
                     if (!prop.PropInit.PropFlags.HasFlag(PropFlags.ProcedurallyShaded))
                     {
                         ImGui.Bullet(); ImGui.SameLine();
-                        ImGui.TextWrapped("请注意，阴影和高光不会随道具旋转，因此过度旋转可能会导致不正确的着色。");
+                        ImGui.TextWrapped("请注意，阴影和高光不会随道具旋转，因此过度旋转可能会导致错误的着色。");
                     }
                     
                     // user notes
