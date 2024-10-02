@@ -15,7 +15,7 @@ public class RainEdStartupException : Exception
 
 sealed class RainEd
 {
-    public const string Version = "v2.1.4";
+    public const string Version = "wfd-v2.1.6";
 
     public static RainEd Instance = null!;
 
@@ -40,7 +40,7 @@ sealed class RainEd
     public readonly AutotileCatalog Autotiles;
 
     public string CurrentFilePath { get => CurrentTab!.FilePath; }
-    
+
     /// <summary>
     /// The path of the emergency save file. Is created when the application
     /// encounters a fatal error.
@@ -59,7 +59,7 @@ sealed class RainEd
     // this is used to set window IsEventDriven to true
     // when the user hasn't interacted with the window in a while
     private float remainingActiveTime = 2f;
-    
+
     private double lastRopeUpdateTime = 0f;
     private float simTimeLeftOver = 0f;
     public float SimulationTimeRemainder { get => simTimeLeftOver; }
@@ -89,11 +89,12 @@ sealed class RainEd
 
     private readonly List<Command> customCommands = [];
     public List<Command> CustomCommands { get => customCommands; }
-    
-    public RainEd(string? assetData, string levelPath = "") {
+
+    public RainEd(string? assetData, string levelPath = "")
+    {
         if (Instance != null)
             throw new Exception("Attempt to create more than one RainEd instance");
-        
+
         Instance = this;
 
         Log.Information("========================");
@@ -126,7 +127,7 @@ sealed class RainEd
             {
                 Preferences.DataPath = assetData;
             }
-            
+
             UserPreferences.SaveToFile(Preferences, prefFilePath);
         }
 
@@ -165,12 +166,12 @@ sealed class RainEd
 
         string initPhase = null!;
 
-        #if !DEBUG
+#if !DEBUG
         try
-        #endif
+#endif
         {
             AssetGraphics = new AssetGraphicsProvider();
-            
+
             initPhase = "materials";
             Log.UserLogger.Information("Reading Materials/Init.txt");
             MaterialDatabase = new Tiles.MaterialDatabase();
@@ -181,7 +182,7 @@ sealed class RainEd
 
             // init autotile catalog
             Autotiles = new AutotileCatalog();
-            
+
             // run lua scripts after initializing the tiles
             // (trying to get lua error messages to show as soon as possible)
             try
@@ -203,7 +204,7 @@ sealed class RainEd
                 Boot.DisplayError("Could not start", displayMsg);
                 throw new RainEdStartupException();
             }
-            
+
             initPhase = "effects";
             Log.Information("Initializing effects database...");
             EffectsDatabase = new EffectsDatabase();
@@ -220,23 +221,23 @@ sealed class RainEd
             Log.UserLogger.Information("Asset initialization done!");
             Log.Information("----- ASSET INIT DONE! -----");
         }
-        #if !DEBUG
+#if !DEBUG
         catch (Exception e)
         {
             Log.Error(e.ToString());
 
             if (e is RainEdStartupException)
                 throw;
-            
+
             Boot.DisplayError("Could not start", $"There was an error while loading the {initPhase} Init.txt file:\n\n{e}\n\nThe application will now quit.");
             throw new RainEdStartupException();
         }
-        #endif
+#endif
 
         _tabs.Add(new LevelTab());
-        _currentTab = _tabs[0];      
+        _currentTab = _tabs[0];
 
-        LevelGraphicsTexture = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath,"assets","level-graphics.png"));
+        LevelGraphicsTexture = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "level-graphics.png"));
 
         Log.Information("Creating level view...");
         levelView = new LevelWindow();
@@ -278,7 +279,7 @@ sealed class RainEd
         // check on the update checker
         if (!versionCheckTask.IsCompleted)
             versionCheckTask.Wait();
-        
+
         if (versionCheckTask.IsCompletedSuccessfully)
         {
             LatestVersionInfo = versionCheckTask.Result;
@@ -347,7 +348,7 @@ sealed class RainEd
         Preferences.WindowHeight = Raylib.GetScreenHeight();
         Preferences.WindowMaximized = Raylib.IsWindowMaximized();
         Preferences.DataPath = AssetDataPath;
-        
+
         UserPreferences.SaveToFile(Preferences, prefFilePath);
         levelView.Renderer.Dispose();
     }
@@ -513,7 +514,7 @@ sealed class RainEd
     {
         if (!Directory.Exists(EmergencySaveFolder)) return [];
         List<string> output = [];
-        
+
         foreach (var file in Directory.EnumerateFiles(EmergencySaveFolder))
         {
             // if this is a .txt file and there is also a .png file of the same name,
@@ -524,7 +525,7 @@ sealed class RainEd
             }
         }
 
-        return [..output];
+        return [.. output];
     }
 
     public static void DiscardEmergencySaves()
@@ -584,7 +585,7 @@ sealed class RainEd
         if (tab == _currentTab) return;
         if (tab is not null && !_tabs.Contains(tab))
             throw new ArgumentException("Given LevelTab is not in Tabs list", nameof(tab));
-        
+
         _currentTab = tab;
         if (_currentTab is not null)
         {
@@ -665,23 +666,23 @@ sealed class RainEd
     {
         if (await EditorWindow.CloseAllTabs())
         {
-            Running = false; 
+            Running = false;
         }
     }
-    
+
     public void Draw(float dt)
     {
         if (Raylib.WindowShouldClose())
             AsyncCloseWindowRequest();
-        
+
         AssetGraphics.Maintenance();
-        
+
         foreach (var f in deferredActions) f();
         deferredActions.Clear();
 
         {
             _tcsMutex.WaitOne();
-            List<TaskCompletionSource> tasks = [.._tasksToRunOnNextFrame];
+            List<TaskCompletionSource> tasks = [.. _tasksToRunOnNextFrame];
             _tasksToRunOnNextFrame.Clear();
             _tcsMutex.ReleaseMutex();
 
@@ -689,26 +690,26 @@ sealed class RainEd
         }
 
         EditorWindow.UpdateMouseState();
-        
+
         Raylib.ClearBackground(Color.DarkGray);
         KeyShortcuts.Update();
         //ImGui.DockSpaceOverViewport();
 
         if (CurrentTab != null)
             UpdateRopeSimulation();
-        
+
         EditorWindow.Render();
 
         if (ImGui.IsKeyPressed(ImGuiKey.F1))
             DebugWindow.IsWindowOpen = !DebugWindow.IsWindowOpen;
-        
+
         // don't sleep rained if mouse is held down
         // for example, the user may be holding down a +/- imgui input, and i'm not quite sure how to detect that.
         if (ImGui.IsMouseDown(ImGuiMouseButton.Left) || ImGui.IsMouseDown(ImGuiMouseButton.Right) || ImGui.IsMouseDown(ImGuiMouseButton.Middle))
         {
             NeedScreenRefresh();
         }
-        
+
 #if DEBUG
         if (ImGui.IsKeyPressed(ImGuiKey.F2))
             throw new Exception("Test Exception");
@@ -734,7 +735,7 @@ sealed class RainEd
         for (int i = 0; nowTime >= lastRopeUpdateTime + stepTime; i++)
         {
             lastRopeUpdateTime += stepTime;
-            
+
             // tick rope simulation
             foreach (var prop in level.Props)
             {
