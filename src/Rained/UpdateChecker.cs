@@ -27,7 +27,7 @@ static class UpdateChecker
 
         [JsonPropertyName("name")]
         public string Name { get; set; } = "";
- 
+
         [JsonPropertyName("created_at")]
         public string CreatedAt { get; set; } = "";
 
@@ -43,7 +43,7 @@ static class UpdateChecker
     public static async Task<RainedVersionInfo?> FetchLatestVersion()
     {
         if (!RainEd.Instance.Preferences.CheckForUpdates) return null;
-        
+
         var client = new HttpClient()
         {
             BaseAddress = new Uri("https://api.github.com/"),
@@ -54,7 +54,7 @@ static class UpdateChecker
 
         client.DefaultRequestHeaders.Add("user-agent", $"Mozilla/4.0 (compatible; MSIE 6.0; {os}; .NET CLR {clr};)");
 
-        using var response = await client.GetAsync("repos/pkhead/rained/releases/latest");
+        using var response = await client.GetAsync("repos/zrydnoob/rained/releases/latest");
         response.EnsureSuccessStatusCode();
 
         var jsonResponse = await response.Content.ReadAsStringAsync();

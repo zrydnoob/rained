@@ -26,13 +26,13 @@ class AppSetup
     private Task? downloadTask = null;
 
     private const string StartupText = """
-    Welcome to the Rained setup screen! Please configure the location of the Rain World level editor data folder.
+    欢迎来到 Rained 设置屏幕！请配置 Rain World 关卡编辑器数据文件夹的位置。
 
-    If you have installed a Rain World level editor before, you may click the "Choose Data folder" button to point Rained's data folder to your previous installation.
+    如果您之前安装了 Rain World 关卡编辑器，您可以单击“选择数据文件夹”按钮。
 
-    If you have installed the official editor, or a mod of it like the Community Editor, you would thus select the folder where the executable is contained. Otherwise, you should find and select the Drizzle data folder for your previous editor. 
+    如果您之前安装了官方编辑器或者像社区编辑器一样的编辑器, 那么您将选择包含可执行文件的文件夹。否则，您应该找到并选择上编辑器的 Drizzle 数据文件夹。
 
-    If you are unsure what to do, select "Download Data".
+    如果不知道如何做，请点击“下载数据文件”按钮。 注意，数据文件存放在Github上，因网络原因可能会下载失败，可自行前往镜像网站下载。本fork在接下来的版本会提供国内加速镜像。
     """;
 
     private enum SetupState
@@ -53,18 +53,18 @@ class AppSetup
     }
 
     private SetupState setupState = SetupState.SetupChoice;
-    
+
     public bool Start(out string? assetDataPath)
     {
         assetDataPath = null;
 
         if (Boot.WindowScale == 1.0f)
         {
-            Fonts.SetFont("ProggyClean");
+            Fonts.SetFont("AlibabaPuHuiTi");
         }
         else
         {
-            Fonts.SetFont("ProggyVector-Regular");
+            Fonts.SetFont("AlibabaPuHuiTi");
         }
 
         while (true)
@@ -82,7 +82,7 @@ class AppSetup
             ImGuiExt.CenterNextWindow(ImGuiCond.Always);
 
             bool exitAppSetup = false;
-            
+
             if (ImGuiExt.BeginPopupModal("Configure Data", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoMove))
             {
                 switch (setupState)
@@ -90,19 +90,19 @@ class AppSetup
                     case SetupState.SetupChoice:
                         ShowSetupChoice();
                         break;
-                    
+
                     case SetupState.DownloadConfiguration:
                         ShowDownloadConfiguration();
                         break;
-                    
+
                     case SetupState.Downloading:
                         ShowDownload();
                         break;
-                    
+
                     case SetupState.Finished:
                         exitAppSetup = ShowFinished(out assetDataPath);
                         break;
-                    
+
                     default:
                         throw new UnreachableException("Invalid setup state mode");
                 }
@@ -129,13 +129,13 @@ class AppSetup
 
         FileBrowser.Render(ref fileBrowser);
 
-        if (ImGui.Button("Choose Data Folder"))
+        if (ImGui.Button("选择数据文件夹"))
         {
             fileBrowser = new FileBrowser(FileBrowser.OpenMode.Directory, FileBrowserCallback, Boot.AppDataPath);
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Download Data"))
+        if (ImGui.Button("下载数据文件"))
         {
             setupState = SetupState.Downloading;
             downloadTask = DownloadData();
@@ -175,15 +175,15 @@ class AppSetup
     {
         if (downloadStage == 1)
         {
-            ImGui.Text("Downloading from\nhttps://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip...");
+            ImGui.Text("正在下载\nhttps://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip...");
         }
         else if (downloadStage == 2)
         {
-            ImGui.Text("Extracting...");
+            ImGui.Text("提取中...");
         }
         else
         {
-            ImGui.Text("Starting...");
+            ImGui.Text("开启中...");
         }
 
         ImGui.ProgressBar(downloadProgress, new Vector2(ImGui.GetTextLineHeight() * 50.0f, 0.0f));
@@ -200,7 +200,7 @@ class AppSetup
     private bool ShowFinished(out string? assetDataPath)
     {
         Debug.Assert(callbackRes is not null);
-        ImGui.Text("Launching Rained...");
+        ImGui.Text("启动 Rained...");
 
         // wait a bit so that the Launching Rained... message can appear
         callbackWait -= Raylib.GetFrameTime();
@@ -255,7 +255,7 @@ class AppSetup
 
                 var response = await client.GetAsync("https://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip");
                 response.EnsureSuccessStatusCode();
-                
+
                 var contentLength = response.Content.Headers.ContentLength;
                 using var download = await response.Content.ReadAsStreamAsync();
 
@@ -273,17 +273,17 @@ class AppSetup
                         downloadProgress = (float)totalBytesRead / contentLength.Value;
                 }
             }
-            
+
             // begin extracting the zip file
             downloadStage = 2;
             downloadProgress = 0f;
-            
+
             // ensure last character of dest path ends with a directory separator char
             // (for security reasons)
             var extractPath = Boot.AppDataPath;
             if (!extractPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
                 extractPath += Path.DirectorySeparatorChar;
-            
+
             using (var zip = ZipFile.OpenRead(tempZipFile))
             {
                 // get the number of entries that aren't in the Cast folder
@@ -318,7 +318,7 @@ class AppSetup
                     }
 
                     processedEntries++;
-                    downloadProgress = (float)processedEntries / entryCount; 
+                    downloadProgress = (float)processedEntries / entryCount;
                 }
             }
         }

@@ -1,3 +1,11 @@
+此汉化版本：
+- 完善汉化
+- 添加数据文件国内下载加速镜像
+
+额外功能：
+- 特效预览缺失补全
+
+
 Bugs:
 - chain holder undo/redo is broken
 - reported issue of lag building up over time... speeds up when opened a room with a lot of props
