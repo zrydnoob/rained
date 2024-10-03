@@ -15,7 +15,7 @@ struct HexColor(byte r = 0, byte g = 0, byte b = 0)
     {
         if (hexString[0] != '#')
             throw new Exception("Hex string does not begin with a #");
-        
+
         int color = int.Parse(hexString[1..], System.Globalization.NumberStyles.HexNumber);
 
         R = (byte)((color >> 16) & 0xFF);
@@ -69,7 +69,8 @@ class UserPreferences
     public CameraBorderModeOption CameraBorderMode;
 
     [JsonPropertyName("cameraBorderMode")]
-    public string CameraBorderModeString {
+    public string CameraBorderModeString
+    {
         get => CameraBorderMode switch
         {
             CameraBorderModeOption.Standard => "standardBorder",
@@ -80,7 +81,7 @@ class UserPreferences
 
         set
         {
-            switch(value)
+            switch (value)
             {
                 case "standardBorder":
                     CameraBorderMode = CameraBorderModeOption.Standard;
@@ -96,7 +97,7 @@ class UserPreferences
 
                 default:
                     Log.Error("Invalid CameraBorderMode '{Value}'", value);
-                    
+
                     CameraBorderMode = CameraBorderModeOption.Both;
                     break;
             }
@@ -120,13 +121,14 @@ class UserPreferences
     public AutotileMouseModeOptions AutotileMouseMode;
 
     [JsonPropertyName("autotileMouseMode")]
-    public string AutotileMouseModeString {
+    public string AutotileMouseModeString
+    {
         get => AutotileMouseMode switch
-            {
-                AutotileMouseModeOptions.Click => "click",
-                AutotileMouseModeOptions.Hold => "hold",
-                _ => throw new Exception("Invalid AutotileMouseMode option")
-            };
+        {
+            AutotileMouseModeOptions.Click => "click",
+            AutotileMouseModeOptions.Hold => "hold",
+            _ => throw new Exception("Invalid AutotileMouseMode option")
+        };
         set
         {
             switch (value)
@@ -134,14 +136,14 @@ class UserPreferences
                 case "click":
                     AutotileMouseMode = AutotileMouseModeOptions.Click;
                     break;
-                
+
                 case "hold":
                     AutotileMouseMode = AutotileMouseModeOptions.Hold;
                     break;
-                
+
                 default:
                     Log.Error("Invalid CameraBorderMode '{value}'", value);
-                    
+
                     AutotileMouseMode = AutotileMouseModeOptions.Hold;
                     break;
             }
@@ -156,7 +158,8 @@ class UserPreferences
     public PropSelectionLayerFilterOption PropSelectionLayerFilter = PropSelectionLayerFilterOption.Current;
 
     [JsonPropertyName("propSelectionLayerFilter")]
-    public string PropSelectionLayerFilterString {
+    public string PropSelectionLayerFilterString
+    {
         get => PropSelectionLayerFilter switch
         {
             PropSelectionLayerFilterOption.All => "all",
@@ -171,7 +174,7 @@ class UserPreferences
                 case "all":
                     PropSelectionLayerFilter = PropSelectionLayerFilterOption.All;
                     break;
-                
+
                 case "current":
                     PropSelectionLayerFilter = PropSelectionLayerFilterOption.Current;
                     break;
@@ -179,7 +182,7 @@ class UserPreferences
                 case "inFront":
                     PropSelectionLayerFilter = PropSelectionLayerFilterOption.InFront;
                     break;
-                
+
                 default:
                     Log.Error("Invalid 'propSelecitonLayerFilter' option");
                     break;
@@ -201,7 +204,7 @@ class UserPreferences
     public HexColor BackgroundColor;
     public HexColor TileSpec1;
     public HexColor TileSpec2;
-    
+
     [JsonPropertyName("layerColor1")]
     public string LayerColor1String { get => LayerColor1.ToString(); set => LayerColor1 = new HexColor(value); }
     [JsonPropertyName("layerColor2")]
@@ -229,7 +232,7 @@ class UserPreferences
     public UserPreferences()
     {
         DataPath = Path.Combine(Boot.AppDataPath, "Data");
-        
+
         ViewGrid = true;
         ViewObscuredBeams = false;
         ViewKeyboardShortcuts = true;
@@ -255,7 +258,7 @@ class UserPreferences
         OptimizedTilePreviews = true;
 
         ContentScale = Boot.Window is null ? 1.0f : Boot.WindowScale;
-        Font = (ContentScale == 1.0f) ? "ProggyClean" : "ProggyVector-Regular";
+        Font = (ContentScale == 1.0f) ? "AlibabaPuHuiTi" : "AlibabaPuHuiTi";
         Theme = "Dark";
         if (Boot.Window is not null)
         {
@@ -329,7 +332,7 @@ class UserPreferences
     public void SaveKeyboardShortcuts()
     {
         Shortcuts = [];
-        for (int i = 0; i < (int) KeyShortcut.COUNT; i++)
+        for (int i = 0; i < (int)KeyShortcut.COUNT; i++)
         {
             var shortcut = (KeyShortcut)i;
 
