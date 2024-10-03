@@ -1,7 +1,10 @@
 using System.Numerics;
 using Raylib_cs;
 using ImGuiNET;
-namespace RainEd;
+using Rained.EditorGui.Editors;
+using Rained.Rendering;
+using Rained.LevelData;
+namespace Rained.EditorGui;
 
 class LevelWindow
 {
@@ -11,9 +14,9 @@ class LevelWindow
     private const int MaxZoomSteps = 7;
     private const int MinZoomSteps = -5;
 
-    public float ViewZoom { get => RainEd.Instance.CurrentTab.ViewZoom; private set => RainEd.Instance.CurrentTab.ViewZoom = value; }
-    public ref int WorkLayer => ref RainEd.Instance.CurrentTab.WorkLayer;
-    public ref Vector2 ViewOffset => ref RainEd.Instance.CurrentTab.ViewOffset;
+    public float ViewZoom { get => RainEd.Instance.CurrentTab!.ViewZoom; private set => RainEd.Instance.CurrentTab!.ViewZoom = value; }
+    public ref int WorkLayer => ref RainEd.Instance.CurrentTab!.WorkLayer;
+    public ref Vector2 ViewOffset => ref RainEd.Instance.CurrentTab!.ViewOffset;
 
     private int mouseCx = 0;
     private int mouseCy = 0;
@@ -196,8 +199,8 @@ class LevelWindow
     public void ResetView()
     {
         ViewOffset = Vector2.Zero;
-        RainEd.Instance.CurrentTab.ViewZoom = 1f;
-        RainEd.Instance.CurrentTab.ZoomSteps = 0;
+        RainEd.Instance.CurrentTab!.ViewZoom = 1f;
+        RainEd.Instance.CurrentTab!.ZoomSteps = 0;
     }
 
     public void ShowEditMenu()
@@ -237,10 +240,23 @@ class LevelWindow
 
         if (IsWindowOpen)
         {
+            var newEditMode = selectedMode;
+
+            // edit mode switch radial menu
+            {
+                if (EditorWindow.IsKeyPressed(ImGuiKey.GraveAccent))
+                    RadialMenu.OpenPopupRadialMenu("模式切换");
+
+                Span<string> options = ["环境", "几何", "贴图", "相机", "灯光", "效果", "道具"];
+                var sel = RadialMenu.PopupRadialMenu("模式切换", options, selectedMode);
+                if (sel != -1)
+                {
+                    newEditMode = sel;
+                }
+            }
+
             if (ImGui.Begin("关卡"))
             {
-                var newEditMode = selectedMode;
-
                 // edit mode
                 ImGui.AlignTextToFramePadding();
                 ImGui.Text("编辑模式");
@@ -363,7 +379,7 @@ class LevelWindow
 
     private void DrawCanvas()
     {
-        var doc = RainEd.Instance.CurrentTab;
+        var doc = RainEd.Instance.CurrentTab!;
 
         OverrideMouseWheel = false;
         Raylib.ClearBackground(new Color(0, 0, 0, 0));

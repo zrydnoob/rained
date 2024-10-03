@@ -1,11 +1,12 @@
-namespace RainEd;
-
 using System.Numerics;
 using System.Text;
 using ImGuiNET;
 using NLua;
 using NLua.Exceptions;
-using Autotiles;
+using Rained.Autotiles;
+using Rained.EditorGui;
+using Rained.LevelData;
+namespace Rained;
 
 static class LuaInterface
 {
@@ -615,7 +616,7 @@ static class LuaInterface
                 if (!RainEd.Instance.Level.IsInBounds(x, y)) return 0;
                 if (layer < 0 || layer > 2) return 0;
 
-                Tiles.Tile? tile = null;
+                Assets.Tile? tile = null;
 
                 if (tileName is not null)
                 {

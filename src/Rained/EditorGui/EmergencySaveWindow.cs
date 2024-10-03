@@ -1,7 +1,6 @@
 using System.Globalization;
 using ImGuiNET;
-
-namespace RainEd;
+namespace Rained.EditorGui;
 
 static class EmergencySaveWindow
 {
