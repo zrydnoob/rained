@@ -25,7 +25,7 @@ class AutotileCatalog
     /// <param name="autotile">The autotile to add.</param>
     /// <param name="category">The category to add it in.</param>
     public void AddAutotile(Autotile autotile, string category = "Misc")
-    {   
+    {
         var catIndex = AutotileCategories.IndexOf(category);
         if (catIndex == -1)
         {
@@ -43,7 +43,7 @@ class AutotileCatalog
 
     public List<Autotile> GetAutotilesInCategory(int index)
         => Autotiles[index];
-    
+
     public bool HasAutotile(Autotile autotile)
         => autotileCategoryMap.ContainsKey(autotile);
 
@@ -84,7 +84,7 @@ class AutotileCatalog
         void SubmitAutotile()
         {
             if (autotileName == "") return;
-            
+
             if (
                 //thickness is null ||
                 //length is null ||
@@ -115,7 +115,8 @@ class AutotileCatalog
                     1, 1,
                     ld, lu, rd, ru,
                     vertical, horizontal
-                ) {
+                )
+                {
                     Name = autotileName
                 };
 
@@ -132,7 +133,7 @@ class AutotileCatalog
                     autotile.TileTable.PlaceCaps = false;
                 else
                     throw new AutotileParseException($"Line {lineNo}: Expected true or false for the value of the key 'placeCaps', got '{placeCaps}'");
-                
+
                 autotile.TileTable.TRight = tr;
                 autotile.TileTable.TUp = tu;
                 autotile.TileTable.TLeft = tl;
@@ -142,7 +143,7 @@ class AutotileCatalog
                 autotile.TileTable.CapUp = capUp;
                 autotile.TileTable.CapLeft = capLeft;
                 autotile.TileTable.CapDown = capDown;
-                                
+
                 AddAutotile(autotile, groupName);
             }
 
@@ -170,9 +171,9 @@ class AutotileCatalog
                 // header lines always end with a closing bracket
                 if (line[^1] != ']')
                     throw new AutotileParseException($"Line {lineNo}: Expected ']', got newline.");
-                
+
                 SubmitAutotile();
-                
+
                 var sepIndex = line.IndexOf(':');
                 autotileName = "(unknown)";
                 groupName = "Misc";
@@ -186,7 +187,7 @@ class AutotileCatalog
                 else
                 {
                     autotileName = line[1..sepIndex];
-                    groupName = line[(sepIndex+1)..^1];
+                    groupName = line[(sepIndex + 1)..^1];
                 }
             }
 
@@ -197,7 +198,7 @@ class AutotileCatalog
                 if (sepIndex == -1) throw new AutotileParseException($"Line {lineNo}: Expected '=', got newline.");
 
                 var key = line[0..sepIndex];
-                var value = line[(sepIndex+1)..];
+                var value = line[(sepIndex + 1)..];
 
                 switch (key)
                 {
@@ -208,7 +209,7 @@ class AutotileCatalog
                     case "length":
                         length = int.Parse(value, CultureInfo.InvariantCulture);
                         break;
-                    
+
                     // other key/value pair
                     default:
                         tileDict.Add(key, value);
@@ -282,7 +283,7 @@ class AutotileCatalog
     /// </summary>
     public void OpenCreatePopup()
     {
-        ImGui.OpenPopup("´´½¨×Ô¶¯Í¼¿é");
+        ImGui.OpenPopup("åˆ›å»ºè‡ªåŠ¨å›¾å—");
         createName = "My Autotile";
         createCategory = "Misc";
     }
@@ -293,7 +294,7 @@ class AutotileCatalog
     /// <param name="autotile">The autotile to rename</param>
     public void OpenRenamePopup(Autotile autotile)
     {
-        ImGui.OpenPopup("ÖØÃüÃû×Ô¶¯Í¼¿é");
+        ImGui.OpenPopup("é‡å‘½åè‡ªåŠ¨å›¾å—");
         createName = autotile.Name;
         createCategory = GetCategoryNameOf(autotile);
         renameTarget = autotile;
@@ -306,11 +307,11 @@ class AutotileCatalog
     {
         bool p_open = true;
         ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
-        if (ImGui.BeginPopupModal("´´½¨×Ô¶¯Í¼¿é", ref p_open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
+        if (ImGui.BeginPopupModal("åˆ›å»ºè‡ªåŠ¨å›¾å—", ref p_open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 12.0f);
-            ImGui.InputText("Ãû³Æ", ref createName, 128);
-            ImGui.InputText("·ÖÀà", ref createCategory, 128);
+            ImGui.InputText("åç§°", ref createName, 128);
+            ImGui.InputText("åˆ†ç±»", ref createCategory, 128);
             ImGui.PopItemWidth();
 
             ImGui.Separator();
@@ -353,11 +354,11 @@ class AutotileCatalog
     {
         bool p_open = true;
         ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
-        if (ImGui.BeginPopupModal("ÖØÃüÃû×Ô¶¯Í¼¿é", ref p_open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
+        if (ImGui.BeginPopupModal("é‡å‘½åè‡ªåŠ¨å›¾å—", ref p_open, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 12.0f);
-            ImGui.InputText("Ãû³Æ", ref createName, 128);
-            ImGui.InputText("·ÖÀà", ref createCategory, 128);
+            ImGui.InputText("åç§°", ref createName, 128);
+            ImGui.InputText("åˆ†ç±»", ref createCategory, 128);
             ImGui.PopItemWidth();
 
             ImGui.Separator();

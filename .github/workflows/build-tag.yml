@@ -4,43 +4,46 @@
 name: build-tag
 
 on:
-  push:
-    branches: [ "main" ]
-    tags: "v*"
+    push:
+        branches: ['main']
+        tags: 'v*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-    
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: |
-        cd src/Drizzle
-        dotnet run --project Drizzle.Transpiler
-        cd ../..
-        dotnet restore
-    - name: Restore Cake Tool
-      run: dotnet tool restore
-    - name: Build windows
-      run: dotnet cake --os=win-x64 --target=Package
-    - name: Print file
-      run: ls
-    - name: Create release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: workflow-build
-        name: "Push Build"
-        make_latest: false
-        body: Latest in-development push build.
-        files: ./rained_win-x64.zip
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        # if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: 8.0.x
+            - name: Restore dependencies
+              run: |
+                  cd src/Drizzle
+                  dotnet run --project Drizzle.Transpiler
+                  cd ../..
+                  dotnet restore
+            - name: Restore Cake Tool
+              run: dotnet tool restore
+            - name: Build windows
+              run: dotnet cake --os=win-x64 --target=Package
+            - name: Update Tag
+              run: |
+                  git tag -f workflow-build HEAD
+                  git push -f origin workflow-build
+            - name: Create release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: workflow-build
+                  name: 'Rained 中文翻译 push build'
+                  make_latest: false
+
+                  body: 自动构建并发布的最新commit版本
+                  files: ./rained_win-x64.zip
