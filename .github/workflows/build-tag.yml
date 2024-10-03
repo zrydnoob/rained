@@ -19,6 +19,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
               with:
+                  fetch-depth: 0
                   submodules: recursive
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
@@ -37,13 +38,29 @@ jobs:
             - name: Update Tag
               run: |
                   git tag -f workflow-build HEAD
-                  git push -f origin workflow-build
+                  git push -f origin workflow-
+            - name: Get the latest commit details  
+                id: latest_commit  
+                run: |  
+                    SHA=$(git rev-parse HEAD)  
+                    AUTHOR_NAME=$(git log -1 --pretty=%an)  
+                    AUTHOR_EMAIL=$(git log -1 --pretty=%ae)  
+                    MESSAGE=$(git log -1 --pretty=%B)  
+                    echo "::set-output name=sha::$SHA"  
+                    echo "::set-output name=author_name::$AUTHOR_NAME"  
+                    echo "::set-output name=author_email::$AUTHOR_EMAIL"  
+                    echo "::set-output name=message::$MESSAGE"
             - name: Create release
               uses: softprops/action-gh-release@v2
               with:
                   tag_name: workflow-build
                   name: 'Rained 中文翻译 push build'
                   make_latest: false
-
-                  body: 自动构建并发布的最新commit版本
+                  prerelease: true
+                  body: |
+                      当前版本为最新commit自动构建版本  
+                      commit哈希: ${{ steps.latest_commit.outputs.sha }}  
+                      by ${{ steps.latest_commit.outputs.author_name }} <${{ steps.latest_commit.outputs.author_email }}>  
+                      ${{ steps.latest_commit.outputs.message }}
                   files: ./rained_win-x64.zip
+                  allowUpdates: true
