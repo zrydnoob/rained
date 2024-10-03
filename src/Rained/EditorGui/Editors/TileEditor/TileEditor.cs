@@ -2,10 +2,6 @@ using Rained.Assets;
 using Raylib_cs;
 using System.Numerics;
 using ImGuiNET;
-using RainEd.Autotiles;
-using System.Reflection.Emit;
-
-namespace RainEd;
 using Rained.Autotiles;
 using Rained.LevelData;
 namespace Rained.EditorGui.Editors;

@@ -6,7 +6,7 @@ namespace Rained.EditorGui.Editors;
 
 class GeometryEditor : IEditorMode
 {
-    public string Name { get => "几何编辑器"; }
+    public string Name { get => "几何"; }
 
     private readonly LevelWindow window;
 
