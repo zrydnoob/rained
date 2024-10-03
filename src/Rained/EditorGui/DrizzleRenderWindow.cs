@@ -21,7 +21,7 @@ class DrizzleRenderWindow : IDisposable
 
     private readonly RlManaged.Shader layerPreviewShader;
     private readonly RlManaged.Shader layerPreviewLightShader;
-    private int _updateProgress = -1; 
+    private int _updateProgress = -1;
 
     private Stopwatch elapsedStopwatch = new();
 
@@ -29,7 +29,7 @@ class DrizzleRenderWindow : IDisposable
     {
         try
         {
-            var level = RainEd.Instance.Level;            
+            var level = RainEd.Instance.Level;
             var prioCam = level.PrioritizedCamera is null ? -1 : level.Cameras.IndexOf(level.PrioritizedCamera);
 
             drizzleRenderer = new DrizzleRender(onlyGeo, prioCam);
@@ -94,7 +94,7 @@ class DrizzleRenderWindow : IDisposable
             cancelDisabled =
                 drizzleRenderer.State == RenderState.Cancelling ||
                 drizzleRenderer.State == RenderState.Errored || drizzleRenderer.IsDone;
-            
+
             closeDisabled = !drizzleRenderer.IsDone && drizzleRenderer.State != RenderState.Errored;
             revealDisabled = !drizzleRenderer.IsDone || drizzleRenderer.State == RenderState.Canceled;
         }
@@ -102,22 +102,22 @@ class DrizzleRenderWindow : IDisposable
         // cancel button (disabled if cancelling/canceled)
         if (cancelDisabled)
             ImGui.BeginDisabled();
-        
+
         // render preview lags a lot, so make it so the user doesn't have to let go of
         // mouse button in order to activate the cancel button
-        ImGui.Button("È¡Ïû");
+        ImGui.Button("å–æ¶ˆ");
         if (ImGui.IsItemClicked())
             drizzleRenderer?.Cancel();
-        
+
         if (cancelDisabled)
             ImGui.EndDisabled();
 
         // close button (disabled if render process is not done)
         if (closeDisabled)
             ImGui.BeginDisabled();
-        
+
         ImGui.SameLine();
-        if (ImGui.Button("¹Ø±Õ"))
+        if (ImGui.Button("å…³é—­"))
         {
             doClose = true;
             ImGui.CloseCurrentPopup();
@@ -129,15 +129,15 @@ class DrizzleRenderWindow : IDisposable
         // show in file browser button
         if (revealDisabled)
             ImGui.BeginDisabled();
-        
+
         ImGui.SameLine();
-        if (ImGui.Button("´ò¿ª³ÉÆ·ÎÄ¼ş¼Ğ"))
+        if (ImGui.Button("æ‰“å¼€æˆå“æ–‡ä»¶å¤¹"))
             RainEd.Instance.ShowPathInSystemBrowser(Path.Combine(
                 RainEd.Instance.AssetDataPath,
                 "Levels",
                 Path.GetFileNameWithoutExtension(RainEd.Instance.CurrentFilePath) + ".txt"
             ), true);
-        
+
         if (revealDisabled)
             ImGui.EndDisabled();
     }
@@ -149,45 +149,45 @@ class DrizzleRenderWindow : IDisposable
         // status sidebar
         if (drizzleRenderer is null || drizzleRenderer.State == RenderState.Errored)
         {
-            ImGui.Text("ÓĞ´íÎó·¢Éú¡£\nÇë²é¿´ÈÕÖ¾À´»ñµÃ¸ü¶àĞÅÏ¢");
+            ImGui.Text("æœ‰é”™è¯¯å‘ç”Ÿã€‚\nè¯·æŸ¥çœ‹æ—¥å¿—æ¥è·å¾—æ›´å¤šä¿¡æ¯");
             if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
         }
         else if (drizzleRenderer.State == RenderState.Cancelling)
         {
-            ImGui.Text("ÕıÔÚÈ¡Ïû...");
+            ImGui.Text("æ­£åœ¨å–æ¶ˆ...");
             if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
         }
         else if (drizzleRenderer.State == RenderState.Canceled)
         {
-            ImGui.Text("ÒÑÈ¡Ïû");
+            ImGui.Text("å·²å–æ¶ˆ");
             if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
         }
         else
         {
             if (drizzleRenderer.State == RenderState.Finished)
             {
-                ImGui.Text("Íê³É!");
+                ImGui.Text("å®Œæˆ!");
                 if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
             }
             else if (drizzleRenderer.State == RenderState.Initializing)
             {
-                ImGui.Text("³õÊ¼»¯ Drizzle...");
+                ImGui.Text("åˆå§‹åŒ– Drizzle...");
                 showTime = false;
             }
             else if (drizzleRenderer.State == RenderState.Loading)
             {
-                ImGui.Text("¼ÓÔØ¹Ø¿¨...");
+                ImGui.Text("åŠ è½½å…³å¡...");
                 showTime = false;
             }
             else if (drizzleRenderer.State == RenderState.GeometryExport)
             {
-                ImGui.Text($"µ¼³öÖĞ...");
+                ImGui.Text($"å¯¼å‡ºä¸­...");
                 showTime = false;
             }
             else
             {
-                ImGui.Text($"äÖÈ¾×´Ì¬ ÒÑÍê³ÉÊı:{drizzleRenderer.CamerasDone+1} ×ÜÉãÏñ»úÊı:{drizzleRenderer.CameraCount}");
-                
+                ImGui.Text($"æ¸²æŸ“çŠ¶æ€ å·²å®Œæˆæ•°:{drizzleRenderer.CamerasDone + 1} æ€»æ‘„åƒæœºæ•°:{drizzleRenderer.CameraCount}");
+
                 if (!elapsedStopwatch.IsRunning)
                 {
                     elapsedStopwatch.Start();
@@ -196,7 +196,7 @@ class DrizzleRenderWindow : IDisposable
 
             if (showTime)
                 ImGui.TextUnformatted(elapsedStopwatch.Elapsed.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
-            
+
             ImGui.NewLine();
             ImGui.TextUnformatted(drizzleRenderer.DisplayString);
         }
@@ -236,7 +236,7 @@ class DrizzleRenderWindow : IDisposable
                 ImGui.SameLine();
                 ImGui.BeginGroup();
                 ImGui.ProgressBar(renderProgress, new Vector2(-0.000001f, 0.0f));
-                
+
                 // update the preview texture
                 var previewImages = drizzleRenderer!.PreviewImages;
 
@@ -269,7 +269,7 @@ class DrizzleRenderWindow : IDisposable
                             {
                                 if (previewImages.BlackOut1 is not null && previewBlackout1 is not null)
                                     UpdateTexture(previewImages.BlackOut1, previewBlackout1.GlibTexture);
-                                
+
                                 if (previewImages.BlackOut2 is not null && previewBlackout2 is not null)
                                     UpdateTexture(previewImages.BlackOut2, previewBlackout2.GlibTexture);
 
@@ -298,7 +298,7 @@ class DrizzleRenderWindow : IDisposable
                 ImGui.ProgressBar(renderProgress, new Vector2(ImGui.GetContentRegionAvail().X, 0.0f));
                 ShowStatusText();
             }
-            
+
             ImGui.EndPopup();
         }
 
@@ -357,7 +357,7 @@ class DrizzleRenderWindow : IDisposable
                 int grayscalePixSize = img.Width * img.Height + 32; // add 32 bytes of padding, just in case
                 if (convertedBitmap is null || convertedBitmap.Length != img.Width * img.Height + grayscalePixSize)
                     convertedBitmap = new byte[img.Width * img.Height + grayscalePixSize];
-                
+
                 ConvertBitmap(srcPixels, convertedBitmap);
                 gtex.UpdateFromImage(new ReadOnlySpan<byte>(convertedBitmap, 0, img.Width * img.Height));
             }
@@ -366,7 +366,7 @@ class DrizzleRenderWindow : IDisposable
                 // bgra -> rgba conversion is done in the shader                
                 //await Task.Run(() =>
                 //{
-                    gtex.UpdateFromImage(new ReadOnlySpan<byte>(img.Pixels, 0, img.Width * img.Height * 4));
+                gtex.UpdateFromImage(new ReadOnlySpan<byte>(img.Pixels, 0, img.Width * img.Height * 4));
                 //});
             }
         }

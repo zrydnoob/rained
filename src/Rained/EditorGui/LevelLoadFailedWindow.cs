@@ -5,7 +5,7 @@ namespace RainEd;
 
 static class LevelLoadFailedWindow
 {
-    public const string WindowName = "¼ÓÔØÊ§°Ü";
+    public const string WindowName = "åŠ è½½å¤±è´¥";
     public static bool IsWindowOpen = false;
 
     public static LevelLoadResult? LoadResult = null;
@@ -22,12 +22,12 @@ static class LevelLoadFailedWindow
 
         if (ImGui.BeginPopupModal(WindowName, ref IsWindowOpen, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
-            ImGui.Text("ÓÉÓÚÎÞ·¨Ê¶±ðµÄ×Ê²ú£¬ÎÞ·¨¼ÓÔØ¸Ã¹Ø¿¨¡£");
+            ImGui.Text("ç”±äºŽæ— æ³•è¯†åˆ«çš„èµ„äº§ï¼Œæ— æ³•åŠ è½½è¯¥å…³å¡ã€‚");
 
             // show unknown props
             if (LoadResult!.UnrecognizedProps.Length > 0)
             {
-                ImGui.SeparatorText("ÎÞ·¨Ê¶±ðµÄµÀ¾ß");
+                ImGui.SeparatorText("æ— æ³•è¯†åˆ«çš„é“å…·");
                 foreach (var name in LoadResult.UnrecognizedProps)
                 {
                     ImGui.BulletText(name);
@@ -37,7 +37,7 @@ static class LevelLoadFailedWindow
             // show unknown tiles
             if (LoadResult!.UnrecognizedTiles.Length > 0)
             {
-                ImGui.SeparatorText("ÎÞ·¨Ê¶±ðµÄÌùÍ¼");
+                ImGui.SeparatorText("æ— æ³•è¯†åˆ«çš„è´´å›¾");
                 foreach (var name in LoadResult.UnrecognizedTiles)
                 {
                     ImGui.BulletText(name);
@@ -47,7 +47,7 @@ static class LevelLoadFailedWindow
             // show unknown materials
             if (LoadResult!.UnrecognizedMaterials.Length > 0)
             {
-                ImGui.SeparatorText("ÎÞ·¨Ê¶±ðµÄ²ÄÁÏ");
+                ImGui.SeparatorText("æ— æ³•è¯†åˆ«çš„ææ–™");
                 foreach (var name in LoadResult.UnrecognizedMaterials)
                 {
                     ImGui.BulletText(name);
@@ -57,7 +57,7 @@ static class LevelLoadFailedWindow
             // show unknown effects
             if (LoadResult!.UnrecognizedEffects.Length > 0)
             {
-                ImGui.SeparatorText("ÎÞ·¨Ê¶±ðµÄÌØÐ§");
+                ImGui.SeparatorText("æ— æ³•è¯†åˆ«çš„ç‰¹æ•ˆ");
                 foreach (var name in LoadResult.UnrecognizedEffects)
                 {
                     ImGui.BulletText(name);

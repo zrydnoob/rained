@@ -22,38 +22,38 @@ static class StandardPopupButtons
         switch (list)
         {
             case PopupButtonList.OK:
-                if (ImGui.Button("»∑∂®", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
+                if (ImGui.Button("Á°ÆÂÆö", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
                 {
                     pressed = true;
                     buttonPressed = 0;
                 }
                 break;
-            
+
             case PopupButtonList.OKCancel:
-                if (ImGui.Button("»∑∂®", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
+                if (ImGui.Button("Á°ÆÂÆö", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
                 {
                     pressed = true;
                     buttonPressed = 0;
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("»°œ˚", size) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
+                if (ImGui.Button("ÂèñÊ∂à", size) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
                 {
                     pressed = true;
                     buttonPressed = 1;
                 }
 
                 break;
-            
+
             case PopupButtonList.YesNo:
-                if (ImGui.Button(" «", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
+                if (ImGui.Button("ÊòØ", size) || EditorWindow.IsKeyPressed(ImGuiKey.Space) || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
                 {
                     pressed = true;
                     buttonPressed = 0;
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("∑Ò", size) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
+                if (ImGui.Button("Âê¶", size) || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
                 {
                     pressed = true;
                     buttonPressed = 1;

@@ -7,7 +7,7 @@ namespace RainEd;
 
 class CameraEditor : IEditorMode
 {
-    public string Name { get => "Ïà»ú"; }
+    public string Name { get => "ç›¸æœº"; }
     private readonly LevelWindow window;
 
     private List<Camera> selectedCameras; // all selected cameras
@@ -22,7 +22,7 @@ class CameraEditor : IEditorMode
     private int selectedCorner = -1;
     private bool isDraggingCamera = false;
     private Vector2 dragTargetPos = new(); // unaffected by camera snapping
-    
+
     private Vector2 lastMousePos = new();
     private Vector2 dragBegin = new();
 
@@ -87,8 +87,8 @@ class CameraEditor : IEditorMode
             RainEd.Instance.Level.PrioritizedCamera = null;
         }
     }
-    
-    public void DrawToolbar() {}
+
+    public void DrawToolbar() { }
 
     private Camera? PickCameraAt(Vector2 mpos)
     {
@@ -130,11 +130,11 @@ class CameraEditor : IEditorMode
 
         // draw level background (solid white)
         Raylib.DrawRectangle(0, 0, level.Width * Level.TileSize, level.Height * Level.TileSize, LevelWindow.BackgroundColor);
-        
+
         // draw the layers
         var drawTiles = RainEd.Instance.Preferences.ViewTiles;
         var drawProps = RainEd.Instance.Preferences.ViewProps;
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             var alpha = l == 0 ? 255 : 50;
             var color = LevelWindow.GeoColor(30f / 255f, alpha);
@@ -146,10 +146,10 @@ class CameraEditor : IEditorMode
 
             if (drawTiles)
                 levelRender.RenderTiles(l, (int)(alpha * (100.0f / 255.0f)));
-            
+
             if (drawProps)
                 levelRender.RenderProps(l, (int)(alpha * (100.0f / 255.0f)));
-            
+
             Rlgl.PopMatrix();
         }
 
@@ -221,7 +221,7 @@ class CameraEditor : IEditorMode
                         {
                             selectedCameras = [pickedCam];
                         }
-                        
+
                         changeRecorder.BeginChange();
                         isDraggingCamera = true;
 
@@ -356,7 +356,7 @@ class CameraEditor : IEditorMode
                 level.Cameras.Add(cam);
                 selectedCameras = [cam];
                 activeCamera = cam;
-                selectedCorner =- 1;
+                selectedCorner = -1;
                 changeRecorder.PushChange();
             }
 
@@ -387,7 +387,7 @@ class CameraEditor : IEditorMode
                     selectedCameras = newList;
                     changeRecorder.PushChange();
                 }
-                
+
                 // Delete, or Backspace to delete the selected camera
                 if (KeyShortcuts.Activated(KeyShortcut.RemoveObject))
                 {
@@ -435,11 +435,11 @@ class CameraEditor : IEditorMode
         var rctx = RainEd.RenderContext;
         var font = Fonts.GetCurrentBigFont()!.Value;
         var fontTex = Boot.ImGuiController!.FontTexture;
-        
+
         for (int i = 0; i < text.Length; i++)
         {
             char c = text[i];
-            ImGuiGlyph* glyph = (ImGuiGlyph*) font.FindGlyph(c).NativePtr;
+            ImGuiGlyph* glyph = (ImGuiGlyph*)font.FindGlyph(c).NativePtr;
             var glyphW = (glyph->U1 - glyph->U0) * fontTex.Width;
             var glyphH = (glyph->V1 - glyph->V0) * fontTex.Height;
 
@@ -473,7 +473,7 @@ class CameraEditor : IEditorMode
 
         Raylib.DrawTriangle(p0, p3, p1, quadColor);
         Raylib.DrawTriangle(p3, p2, p1, quadColor);
-        
+
         // draw full rect ouline
         Raylib.DrawRectangleLinesEx(
             new Rectangle(
@@ -481,7 +481,7 @@ class CameraEditor : IEditorMode
                 Camera.WidescreenSize * Level.TileSize
             ),
             2f / window.ViewZoom,
-            new Color(0, 0, 0, 255)       
+            new Color(0, 0, 0, 255)
         );
 
         // draw inner outline

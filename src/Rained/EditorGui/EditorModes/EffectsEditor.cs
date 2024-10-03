@@ -6,7 +6,7 @@ namespace RainEd;
 
 class EffectsEditor : IEditorMode
 {
-    public string Name { get => "Ãÿ–ß"; }
+    public string Name { get => "ÁâπÊïà"; }
     private readonly LevelWindow window;
 
     private int selectedGroup = 0;
@@ -57,7 +57,7 @@ class EffectsEditor : IEditorMode
         var level = RainEd.Instance.Level;
         matrixImage.Dispose();
         matrixTexture.Dispose();
-        
+
         matrixImage = RlManaged.Image.GenColor(level.Width, level.Height, Color.Black);
         matrixTexture = RlManaged.Texture2D.LoadFromImage(matrixImage);
     }
@@ -71,30 +71,30 @@ class EffectsEditor : IEditorMode
 
     private static readonly string[] layerModeNames =
     [
-        "»´≤ø", "1", "2", "3", "1+2", "2+3"
+        "ÂÖ®ÈÉ®", "1", "2", "3", "1+2", "2+3"
     ];
 
     private static readonly string[] plantColorNames =
     [
-        "—’…´1", "—’…´2", "À¿Õˆ"
+        "È¢úËâ≤1", "È¢úËâ≤2", "Ê≠ª‰∫°"
     ];
 
     private bool doDeleteCurrent = false;
     private bool doMoveCurrentUp = false;
     private bool doMoveCurrentDown = false;
-    
+
     public void ShowEditMenu()
     {
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.IncreaseBrushSize, "Increase Brush Size");
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.DecreaseBrushSize, "Decrease Brush Size");
 
-        if (ImGui.MenuItem("…æ≥˝Ãÿ–ß", selectedEffect >= 0))
+        if (ImGui.MenuItem("Âà†Èô§ÁâπÊïà", selectedEffect >= 0))
             doDeleteCurrent = true;
 
-        if (ImGui.MenuItem("…œ“∆–ßπ˚", selectedEffect >= 0))
+        if (ImGui.MenuItem("‰∏äÁßªÊïàÊûú", selectedEffect >= 0))
             doMoveCurrentUp = true;
 
-        if (ImGui.MenuItem("œ¬“∆–ßπ˚", selectedEffect >= 0))
+        if (ImGui.MenuItem("‰∏ãÁßªÊïàÊûú", selectedEffect >= 0))
             doMoveCurrentDown = true;
 
         // TODO: clear effect menu item
@@ -105,19 +105,19 @@ class EffectsEditor : IEditorMode
         var level = RainEd.Instance.Level;
         var fxDatabase = RainEd.Instance.EffectsDatabase;
 
-        if (ImGui.Begin("ÃÌº”Ãÿ–ß", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("Ê∑ªÂä†ÁâπÊïà", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // work layer
             {
                 int workLayerV = window.WorkLayer + 1;
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-                ImGui.InputInt(" ”Õº≤„º∂", ref workLayerV);
+                ImGui.InputInt("ËßÜÂõæÂ±ÇÁ∫ß", ref workLayerV);
                 window.WorkLayer = Math.Clamp(workLayerV, 1, 3) - 1;
             }
 
             // search bar
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-            ImGui.InputTextWithHint("##Search", "À—À˜...", ref searchQuery, 128, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EscapeClearsAll);
+            ImGui.InputTextWithHint("##Search", "ÊêúÁ¥¢...", ref searchQuery, 128, ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EscapeClearsAll);
 
             var groupsPassingSearch = new List<int>();
 
@@ -155,10 +155,10 @@ class EffectsEditor : IEditorMode
                     if (ImGui.Selectable(fxDatabase.Groups[i].name, i == selectedGroup) || groupsPassingSearch.Count == 1)
                         selectedGroup = i;
                 }
-                
+
                 ImGui.EndListBox();
             }
-            
+
             // group listing (effects) list box
             ImGui.SameLine();
             if (ImGui.BeginListBox("##Effects", new Vector2(halfWidth, boxHeight)))
@@ -195,36 +195,37 @@ class EffectsEditor : IEditorMode
                         }
                     }
                 }
-                
+
                 ImGui.EndListBox();
             }
-        } ImGui.End();
+        }
+        ImGui.End();
 
         int deleteRequest = -1;
 
-        if (ImGui.Begin("“—ÃÌº”Ãÿ–ß", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("Â∑≤Ê∑ªÂä†ÁâπÊïà", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             if (ImGui.BeginListBox("##EffectStack", ImGui.GetContentRegionAvail()))
             {
                 if (level.Effects.Count == 0)
                 {
-                    ImGui.TextDisabled("(ŒﬁÃÿ–ß)");
+                    ImGui.TextDisabled("(Êó†ÁâπÊïà)");
                 }
                 else
                 {
                     for (int i = 0; i < level.Effects.Count; i++)
                     {
                         var effect = level.Effects[i];
-                        
+
                         ImGui.PushID(effect.GetHashCode());
-                        
+
                         if (ImGui.Selectable(effect.Data.name, selectedEffect == i))
                             selectedEffect = i;
 
                         // drag to reorder items
                         if (ImGui.IsItemActivated())
                             changeRecorder.BeginListChange();
-                        
+
                         if (ImGui.IsItemActive() && !ImGui.IsItemHovered())
                         {
                             var inext = i + (ImGui.GetMouseDragDelta(0).Y < 0f ? -1 : 1);
@@ -236,7 +237,7 @@ class EffectsEditor : IEditorMode
 
                                 if (selectedEffect == i) selectedEffect = inext;
                                 else if (selectedEffect == inext) selectedEffect = i;
-                            }   
+                            }
                         }
 
                         if (ImGui.IsItemDeactivated())
@@ -252,7 +253,8 @@ class EffectsEditor : IEditorMode
 
                 ImGui.EndListBox();
             }
-        } ImGui.End();
+        }
+        ImGui.End();
 
         // delete/backspace to delete selected effect
         if (KeyShortcuts.Activated(KeyShortcut.RemoveObject) || doDeleteCurrent)
@@ -269,7 +271,7 @@ class EffectsEditor : IEditorMode
             changeRecorder.PushListChange();
         }
 
-        if (ImGui.Begin("Ãÿ–ß—°œÓ", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("ÁâπÊïàÈÄâÈ°π", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // effect properties
             if (selectedEffect >= 0)
@@ -278,11 +280,11 @@ class EffectsEditor : IEditorMode
 
                 // on delete action, only delete effect after UI has been processed
                 bool doDelete = false;
-                if (ImGui.Button("…æ≥˝"))
+                if (ImGui.Button("Âà†Èô§"))
                     doDelete = true;
-                
+
                 ImGui.SameLine();
-                if ((ImGui.Button("…œ“∆") || doMoveCurrentUp) && selectedEffect > 0)
+                if ((ImGui.Button("‰∏äÁßª") || doMoveCurrentUp) && selectedEffect > 0)
                 {
                     doMoveCurrentUp = false;
 
@@ -295,7 +297,7 @@ class EffectsEditor : IEditorMode
                 }
 
                 ImGui.SameLine();
-                if ((ImGui.Button("œ¬“∆") || doMoveCurrentDown) && selectedEffect < level.Effects.Count - 1)
+                if ((ImGui.Button("‰∏ãÁßª") || doMoveCurrentDown) && selectedEffect < level.Effects.Count - 1)
                 {
                     doMoveCurrentDown = false;
 
@@ -308,7 +310,7 @@ class EffectsEditor : IEditorMode
                 }
 
                 if (effect.Data.deprecated)
-                    ImGui.TextDisabled("¥À–ßπ˚“—∆˙”√£°");
+                    ImGui.TextDisabled("Ê≠§ÊïàÊûúÂ∑≤ÂºÉÁî®ÔºÅ");
 
                 ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 8.0f);
 
@@ -318,14 +320,14 @@ class EffectsEditor : IEditorMode
                 // layers property
                 if (effect.Data.useLayers)
                 {
-                    if (ImGui.BeginCombo("≤„º∂", layerModeNames[(int) effect.Layer]))
+                    if (ImGui.BeginCombo("Â±ÇÁ∫ß", layerModeNames[(int)effect.Layer]))
                     {
                         for (int i = 0; i < layerModeNames.Length; i++)
                         {
-                            bool isSelected = i == (int) effect.Layer;
+                            bool isSelected = i == (int)effect.Layer;
                             if (ImGui.Selectable(layerModeNames[i], isSelected))
                             {
-                                effect.Layer = (Effect.LayerMode) i;
+                                effect.Layer = (Effect.LayerMode)i;
                                 hadChanged = true;
                             }
 
@@ -352,7 +354,7 @@ class EffectsEditor : IEditorMode
                 // plant color property
                 if (effect.Data.usePlantColors)
                 {
-                    if (ImGui.BeginCombo("—’…´", plantColorNames[effect.PlantColor]))
+                    if (ImGui.BeginCombo("È¢úËâ≤", plantColorNames[effect.PlantColor]))
                     {
                         for (int i = 0; i < plantColorNames.Length; i++)
                         {
@@ -362,7 +364,7 @@ class EffectsEditor : IEditorMode
                                 effect.PlantColor = i;
                                 hadChanged = true;
                             }
-                            
+
                             if (isSelected)
                                 ImGui.SetItemDefaultFocus();
                         }
@@ -377,7 +379,7 @@ class EffectsEditor : IEditorMode
                 // affect colors and gradients
                 if (effect.Data.useDecalAffect)
                 {
-                    if (ImGui.Checkbox("”∞œÏΩ•±‰∫ÕÃ˘ª®", ref effect.AffectGradientsAndDecals))
+                    if (ImGui.Checkbox("ÂΩ±ÂìçÊ∏êÂèòÂíåË¥¥Ëä±", ref effect.AffectGradientsAndDecals))
                         hadChanged = true;
                 }
 
@@ -419,9 +421,9 @@ class EffectsEditor : IEditorMode
                 }
 
                 // seed
-                ImGui.SliderInt("÷÷◊”", ref effect.Seed, 0, 500);
+                ImGui.SliderInt("ÁßçÂ≠ê", ref effect.Seed, 0, 500);
                 if (ImGui.IsItemDeactivatedAfterEdit())
-                        hadChanged = true;
+                    hadChanged = true;
 
                 ImGui.PopItemWidth();
 
@@ -441,9 +443,10 @@ class EffectsEditor : IEditorMode
             }
             else
             {
-                ImGui.TextDisabled("Œ¥—°‘ÒÃÿ–ß");
+                ImGui.TextDisabled("Êú™ÈÄâÊã©ÁâπÊïà");
             }
-        } ImGui.End();
+        }
+        ImGui.End();
 
         // tab to change work layer
         if (KeyShortcuts.Activated(KeyShortcut.SwitchLayer))
@@ -456,7 +459,7 @@ class EffectsEditor : IEditorMode
     {
         var dx = x - cx;
         var dy = y - cy;
-        return 1.0f - (MathF.Sqrt(dx*dx + dy*dy) / bsize);
+        return 1.0f - (MathF.Sqrt(dx * dx + dy * dy) / bsize);
     }
 
     public void DrawViewport(RlManaged.RenderTexture2D mainFrame, RlManaged.RenderTexture2D[] layerFrames)
@@ -468,14 +471,14 @@ class EffectsEditor : IEditorMode
 
         var level = RainEd.Instance.Level;
         var levelRender = window.Renderer;
-        
+
         // draw level background (solid white)
         Raylib.DrawRectangle(0, 0, level.Width * Level.TileSize, level.Height * Level.TileSize, LevelWindow.BackgroundColor);
 
         // draw layers, including tiles
         var drawTiles = RainEd.Instance.Preferences.ViewTiles;
         var drawProps = RainEd.Instance.Preferences.ViewProps;
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             // draw layer into framebuffer
             int offset = l * 2;
@@ -486,20 +489,20 @@ class EffectsEditor : IEditorMode
             window.BeginLevelScissorMode();
 
             Rlgl.PushMatrix();
-                Rlgl.Translatef(offset, offset, 0f);
-                levelRender.RenderGeometry(l, LevelWindow.GeoColor(30f / 255f, 255));
+            Rlgl.Translatef(offset, offset, 0f);
+            levelRender.RenderGeometry(l, LevelWindow.GeoColor(30f / 255f, 255));
 
-                if (drawTiles)
-                    levelRender.RenderTiles(l, 100);
+            if (drawTiles)
+                levelRender.RenderTiles(l, 100);
 
-                if (drawProps)
-                    levelRender.RenderProps(l, 100);
+            if (drawProps)
+                levelRender.RenderProps(l, 100);
             Rlgl.PopMatrix();
         }
 
         // draw alpha-blended result into main frame
         Raylib.BeginTextureMode(mainFrame);
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             Rlgl.PushMatrix();
             Rlgl.LoadIdentity();
@@ -542,20 +545,20 @@ class EffectsEditor : IEditorMode
                         brushSize += 1;
                     else if (Raylib.GetMouseWheelMove() < 0.0f || KeyShortcuts.Activated(KeyShortcut.DecreaseBrushSize))
                         brushSize -= 1;
-                    
+
                     brushSize = Math.Clamp(brushSize, 1, 10);
                 }
 
                 bool strokeStart = EditorWindow.IsMouseClicked(ImGuiMouseButton.Left) || EditorWindow.IsMouseClicked(ImGuiMouseButton.Right);
                 if (strokeStart)
                     lastBrushPos = new(bcx, bcy);
-                
+
                 // paint when user's mouse is down and moving
                 if (EditorWindow.IsMouseDown(ImGuiMouseButton.Left))
                     brushFac = 1.0f;
                 else if (EditorWindow.IsMouseDown(ImGuiMouseButton.Right))
                     brushFac = -1.0f;
-                
+
                 if (brushFac != 0.0f)
                 {
                     if (!wasToolActive) changeRecorder.BeginMatrixChange(effect);
@@ -575,7 +578,7 @@ class EffectsEditor : IEditorMode
 
                                 if (brushP > 0f)
                                 {
-                                    effect.Matrix[x,y] = Math.Clamp(effect.Matrix[x,y] + brushStrength * brushP * brushFac, 0f, 100f);                            
+                                    effect.Matrix[x, y] = Math.Clamp(effect.Matrix[x, y] + brushStrength * brushP * brushFac, 0f, 100f);
                                 }
                             }
                         }
@@ -592,7 +595,7 @@ class EffectsEditor : IEditorMode
             {
                 for (int y = 0; y < level.Height; y++)
                 {
-                    int v = (int)(effect.Matrix[x,y] / 100f * 255f);
+                    int v = (int)(effect.Matrix[x, y] / 100f * 255f);
                     Raylib.ImageDrawPixel(matrixImage, x, y, new Color(v, v, v, 255));
                 }
             }
@@ -619,12 +622,12 @@ class EffectsEditor : IEditorMode
                     {
                         if (!level.IsInBounds(x, y)) continue;
                         if (GetBrushPower(bcx, bcy, bsize, x, y) <= 0f) continue;
-                        
+
                         // left
                         if (GetBrushPower(bcx, bcy, bsize, x - 1, y) <= 0f)
                             Raylib.DrawLine(
                                 x * Level.TileSize, y * Level.TileSize,
-                                x * Level.TileSize, (y+1) * Level.TileSize,
+                                x * Level.TileSize, (y + 1) * Level.TileSize,
                                 Color.White
                             );
 
@@ -632,23 +635,23 @@ class EffectsEditor : IEditorMode
                         if (GetBrushPower(bcx, bcy, bsize, x, y - 1) <= 0f)
                             Raylib.DrawLine(
                                 x * Level.TileSize, y * Level.TileSize,
-                                (x+1) * Level.TileSize, y * Level.TileSize,
+                                (x + 1) * Level.TileSize, y * Level.TileSize,
                                 Color.White
                             );
-                        
+
                         // right
                         if (GetBrushPower(bcx, bcy, bsize, x + 1, y) <= 0f)
                             Raylib.DrawLine(
-                                (x+1) * Level.TileSize, y * Level.TileSize,
-                                (x+1) * Level.TileSize, (y+1) * Level.TileSize,
+                                (x + 1) * Level.TileSize, y * Level.TileSize,
+                                (x + 1) * Level.TileSize, (y + 1) * Level.TileSize,
                                 Color.White
                             );
 
                         // bottom
                         if (GetBrushPower(bcx, bcy, bsize, x, y + 1) <= 0f)
                             Raylib.DrawLine(
-                                x * Level.TileSize, (y+1) * Level.TileSize,
-                                (x+1) * Level.TileSize, (y+1) * Level.TileSize,
+                                x * Level.TileSize, (y + 1) * Level.TileSize,
+                                (x + 1) * Level.TileSize, (y + 1) * Level.TileSize,
                                 Color.White
                             );
                     }

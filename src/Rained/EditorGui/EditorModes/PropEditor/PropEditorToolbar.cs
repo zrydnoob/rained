@@ -8,7 +8,7 @@ namespace RainEd;
 
 partial class PropEditor : IEditorMode
 {
-    private readonly string[] PropRenderTimeNames = ["‰÷»æÃÿ–ß«∞", "‰÷»æÃÿ–ß∫Û"];
+    private readonly string[] PropRenderTimeNames = ["Ê∏≤ÊüìÁâπÊïàÂâç", "Ê∏≤ÊüìÁâπÊïàÂêé"];
     private readonly string[] RopeReleaseModeNames = ["None", "Left", "Right"];
 
     enum SelectionMode
@@ -39,7 +39,7 @@ partial class PropEditor : IEditorMode
     private bool isRopeSimulationActive = false;
     private bool wasRopeSimulationActive = false;
 
-#region Multiselect Inputs
+    #region Multiselect Inputs
     // what a reflective mess...
 
     private void MultiselectDragInt(string label, string fieldName, float v_speed = 1f, int v_min = int.MinValue, int v_max = int.MaxValue)
@@ -59,7 +59,7 @@ partial class PropEditor : IEditorMode
 
         if (isSame)
         {
-            int v = (int) field.GetValue(selectedProps[0])!;
+            int v = (int)field.GetValue(selectedProps[0])!;
             if (ImGui.DragInt(label, ref v, v_speed, v_min, v_max))
             {
                 foreach (var prop in selectedProps)
@@ -99,7 +99,7 @@ partial class PropEditor : IEditorMode
 
         if (isSame)
         {
-            int v = (int) field.GetValue(selectedProps[0])!;
+            int v = (int)field.GetValue(selectedProps[0])!;
             if (ImGui.SliderInt(label, ref v, v_min, v_max, format, flags))
             {
                 foreach (var prop in selectedProps)
@@ -139,19 +139,19 @@ partial class PropEditor : IEditorMode
             }
         }
 
-        var previewText = isSame ? enumNames[(int) Convert.ChangeType(targetV, targetV.GetTypeCode())] : "";
+        var previewText = isSame ? enumNames[(int)Convert.ChangeType(targetV, targetV.GetTypeCode())] : "";
 
         if (ImGui.BeginCombo(label, previewText))
         {
             for (int i = 0; i < enumNames.Length; i++)
             {
-                E e = (E) Convert.ChangeType(i, targetV.GetTypeCode());
+                E e = (E)Convert.ChangeType(i, targetV.GetTypeCode());
                 bool sel = isSame && e.Equals(targetV);
                 if (ImGui.Selectable(enumNames[i], sel))
                 {
                     foreach (var item in items)
                         field.SetValue(item, e);
-                    
+
                     changeRecorder.PushSettingsChanges();
                 }
 
@@ -166,7 +166,7 @@ partial class PropEditor : IEditorMode
     private void MultiselectListInput<T>(string label, string fieldName, List<T> list)
     {
         var field = typeof(Prop).GetField(fieldName)!;
-        int targetV = (int) field.GetValue(selectedProps[0])!;
+        int targetV = (int)field.GetValue(selectedProps[0])!;
 
         bool isSame = true;
         for (int i = 1; i < selectedProps.Count; i++)
@@ -190,7 +190,7 @@ partial class PropEditor : IEditorMode
                 {
                     foreach (var prop in selectedProps)
                         field.SetValue(prop, i);
-                    
+
                     changeRecorder.PushSettingsChanges();
                 }
 
@@ -201,7 +201,7 @@ partial class PropEditor : IEditorMode
             ImGui.EndCombo();
         }
     }
-#endregion
+    #endregion
 
     private void ProcessSearch()
     {
@@ -259,40 +259,40 @@ partial class PropEditor : IEditorMode
             curPropPreview = prop;
 
             previewTexture?.Dispose();
-            previewTexture = RlManaged.RenderTexture2D.Load(texWidth, texHeight);   
+            previewTexture = RlManaged.RenderTexture2D.Load(texWidth, texHeight);
         }
 
-            Raylib.BeginTextureMode(previewTexture);
-            Raylib.ClearBackground(Color.Blank);
-            Raylib.BeginShaderMode(Shaders.PropShader);
+        Raylib.BeginTextureMode(previewTexture);
+        Raylib.ClearBackground(Color.Blank);
+        Raylib.BeginShaderMode(Shaders.PropShader);
+        {
+            var propTexture = RainEd.Instance.AssetGraphics.GetPropTexture(prop);
+            for (int depth = prop.LayerCount - 1; depth >= 0; depth--)
             {
-                var propTexture = RainEd.Instance.AssetGraphics.GetPropTexture(prop);
-                for (int depth = prop.LayerCount - 1; depth >= 0; depth--)
+                float whiteFade = Math.Clamp(depth / 16f, 0f, 1f);
+                Rectangle srcRect, dstRec;
+
+                if (propTexture is not null)
                 {
-                    float whiteFade = Math.Clamp(depth / 16f, 0f, 1f);
-                    Rectangle srcRect, dstRec;
-
-                    if (propTexture is not null)
-                    {
-                        srcRect = prop.GetPreviewRectangle(0, depth);
-                        dstRec = new Rectangle(Vector2.Zero, srcRect.Size);
-                    }
-                    else
-                    {
-                        srcRect = new Rectangle(Vector2.Zero, 2.0f * Vector2.One);
-                        dstRec = new Rectangle(Vector2.Zero, prop.Width * 20f, prop.Height * 20f);
-                    }
-
-                    Raylib.DrawTexturePro(
-                        propTexture ?? RainEd.Instance.PlaceholderTexture,
-                        srcRect, dstRec,
-                        Vector2.Zero, 0f,
-                        new Color(255, (int)(whiteFade * 255f), 0, 0)
-                    );
+                    srcRect = prop.GetPreviewRectangle(0, depth);
+                    dstRec = new Rectangle(Vector2.Zero, srcRect.Size);
                 }
+                else
+                {
+                    srcRect = new Rectangle(Vector2.Zero, 2.0f * Vector2.One);
+                    dstRec = new Rectangle(Vector2.Zero, prop.Width * 20f, prop.Height * 20f);
+                }
+
+                Raylib.DrawTexturePro(
+                    propTexture ?? RainEd.Instance.PlaceholderTexture,
+                    srcRect, dstRec,
+                    Vector2.Zero, 0f,
+                    new Color(255, (int)(whiteFade * 255f), 0, 0)
+                );
             }
-            Raylib.EndShaderMode();
-            Raylib.EndTextureMode();
+        }
+        Raylib.EndShaderMode();
+        Raylib.EndTextureMode();
     }
 
     public void DrawToolbar()
@@ -329,7 +329,7 @@ partial class PropEditor : IEditorMode
 
         if (isWarpMode)
             RainEd.Instance.LevelView.WriteStatus("Vertex Mode");
-        
+
         // transform mode hints
         if (transformMode is ScaleTransformMode)
         {
@@ -361,24 +361,24 @@ partial class PropEditor : IEditorMode
     {
         var propDb = RainEd.Instance.PropDatabase;
 
-        if (ImGui.Begin("µ¿æﬂ", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("ÈÅìÂÖ∑", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // work layer
             {
                 int workLayerV = window.WorkLayer + 1;
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-                ImGui.InputInt(" ”Õº≤„º∂", ref workLayerV);
+                ImGui.InputInt("ËßÜÂõæÂ±ÇÁ∫ß", ref workLayerV);
                 window.WorkLayer = Math.Clamp(workLayerV, 1, 3) - 1;
             }
 
             // snapping
             ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-            ImGui.Combo("∂‘∆Î", ref snappingMode, "Off\00.5x\01x");
-            
+            ImGui.Combo("ÂØπÈΩê", ref snappingMode, "Off\00.5x\01x");
+
             // flags for search bar
             var searchInputFlags = ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EscapeClearsAll;
 
-            if (ImGui.BeginTabBar("µ¿æﬂ—°‘Ò∆˜"))
+            if (ImGui.BeginTabBar("ÈÅìÂÖ∑ÈÄâÊã©Âô®"))
             {
                 var halfWidth = ImGui.GetContentRegionAvail().X / 2f - ImGui.GetStyle().ItemSpacing.X / 2f;
 
@@ -392,7 +392,7 @@ partial class PropEditor : IEditorMode
                     tilesFlags = ImGuiTabItemFlags.SetSelected;
 
                 // Props tab
-                if (ImGuiExt.BeginTabItem("µ¿æﬂ", propsFlags))
+                if (ImGuiExt.BeginTabItem("ÈÅìÂÖ∑", propsFlags))
                 {
                     if (selectionMode != SelectionMode.Props)
                     {
@@ -402,7 +402,7 @@ partial class PropEditor : IEditorMode
 
                     // search bar
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "À—À˜...", ref searchQuery, 128, searchInputFlags))
+                    if (ImGui.InputTextWithHint("##Search", "ÊêúÁ¥¢...", ref searchQuery, 128, searchInputFlags))
                     {
                         ProcessSearch();
                     }
@@ -425,10 +425,10 @@ partial class PropEditor : IEditorMode
                                 }
                             }
                         }
-                        
+
                         ImGui.EndListBox();
                     }
-                    
+
                     // group listing (effects) list box
                     ImGui.SameLine();
                     if (ImGui.BeginListBox("##Props", new Vector2(halfWidth, boxHeight)))
@@ -442,7 +442,7 @@ partial class PropEditor : IEditorMode
                             // don't show this prop if it doesn't pass search test
                             if (!prop.Name.Contains(searchQuery, StringComparison.CurrentCultureIgnoreCase))
                                 continue;
-                            
+
                             if (ImGui.Selectable(prop.Name, i == selectedPropIdx))
                             {
                                 selectedPropIdx = i;
@@ -455,7 +455,7 @@ partial class PropEditor : IEditorMode
                                 ImGui.EndTooltip();
                             }
                         }
-                        
+
                         ImGui.EndListBox();
                     }
 
@@ -463,7 +463,7 @@ partial class PropEditor : IEditorMode
                 }
 
                 // Tiles as props tab
-                if (ImGuiExt.BeginTabItem("Ã˘Õº", tilesFlags))
+                if (ImGuiExt.BeginTabItem("Ë¥¥Âõæ", tilesFlags))
                 {
                     // if tab changed, reset selected group back to 0
                     if (selectionMode != SelectionMode.Tiles)
@@ -474,7 +474,7 @@ partial class PropEditor : IEditorMode
 
                     // search bar
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "À—À˜...", ref searchQuery, 128, searchInputFlags))
+                    if (ImGui.InputTextWithHint("##Search", "ÊêúÁ¥¢...", ref searchQuery, 128, searchInputFlags))
                     {
                         ProcessSearch();
                     }
@@ -505,10 +505,10 @@ partial class PropEditor : IEditorMode
                                 ImGui.ColorConvertFloat4ToU32(new Vector4(group.Color.R / 255f, group.Color.G / 255f, group.Color.B / 255f, 1f))
                             );
                         }
-                        
+
                         ImGui.EndListBox();
                     }
-                    
+
                     // group listing (effects) list box
                     ImGui.SameLine();
                     if (ImGui.BeginListBox("##Props", new Vector2(halfWidth, boxHeight)))
@@ -535,7 +535,7 @@ partial class PropEditor : IEditorMode
                                 ImGui.EndTooltip();
                             }
                         }
-                        
+
                         ImGui.EndListBox();
                     }
 
@@ -544,10 +544,11 @@ partial class PropEditor : IEditorMode
 
                 ImGui.EndTabBar();
             }
-            
+
             forceSelection = null;
 
-        } ImGui.End();
+        }
+        ImGui.End();
 
         // A/D to change selected group
         if (KeyShortcuts.Activated(KeyShortcut.NavLeft))
@@ -560,7 +561,7 @@ partial class PropEditor : IEditorMode
                     var group = propDb.Categories[selectedPropGroup];
                     if (!group.IsTileCategory && group.Props.Count > 0) break;
                 }
-                
+
                 selectedPropIdx = 0;
             }
             else if (selectionMode == SelectionMode.Tiles)
@@ -572,7 +573,7 @@ partial class PropEditor : IEditorMode
 
         if (KeyShortcuts.Activated(KeyShortcut.NavRight))
         {
-             if (selectionMode == SelectionMode.Props)
+            if (selectionMode == SelectionMode.Props)
             {
                 while (true) // must skip over the hidden Tiles as props categories (i now doubt the goodiness of this idea)
                 {
@@ -638,7 +639,7 @@ partial class PropEditor : IEditorMode
     {
         var propDb = RainEd.Instance.PropDatabase;
 
-        if (ImGui.Begin("µ¿æﬂ—°œÓ", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("ÈÅìÂÖ∑ÈÄâÈ°π", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // prop transformation mode
             if (selectedProps.Count > 0)
@@ -647,45 +648,45 @@ partial class PropEditor : IEditorMode
                 {
                     var prop = selectedProps[0];
 
-                    ImGui.TextUnformatted($"—°‘Ò: {prop.PropInit.Name}");
-                    ImGui.TextUnformatted($"◊›…Ó: {prop.DepthOffset} - {prop.DepthOffset + prop.PropInit.Depth}");
+                    ImGui.TextUnformatted($"ÈÄâÊã©: {prop.PropInit.Name}");
+                    ImGui.TextUnformatted($"Á∫µÊ∑±: {prop.DepthOffset} - {prop.DepthOffset + prop.PropInit.Depth}");
                 }
                 else
                 {
-                    ImGui.Text("—°∂®∂‡∏ˆµ¿æﬂ");
+                    ImGui.Text("ÈÄâÂÆöÂ§ö‰∏™ÈÅìÂÖ∑");
                 }
-                
-                if (ImGui.Button("÷ÿ÷√±‰ªª"))
+
+                if (ImGui.Button("ÈáçÁΩÆÂèòÊç¢"))
                 {
                     changeRecorder.BeginTransform();
-                        foreach (var prop in selectedProps)
-                            prop.ResetTransform();
+                    foreach (var prop in selectedProps)
+                        prop.ResetTransform();
                     changeRecorder.PushTransform();
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("∑≠◊™ X"))
+                if (ImGui.Button("ÁøªËΩ¨ X"))
                 {
                     changeRecorder.BeginTransform();
-                        foreach (var prop in selectedProps)
-                            prop.FlipX();
+                    foreach (var prop in selectedProps)
+                        prop.FlipX();
                     changeRecorder.PushTransform();
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("∑≠◊™ Y"))
+                if (ImGui.Button("ÁøªËΩ¨ Y"))
                 {
                     changeRecorder.BeginTransform();
-                        foreach (var prop in selectedProps)
-                            prop.FlipY();
+                    foreach (var prop in selectedProps)
+                        prop.FlipY();
                     changeRecorder.PushTransform();
                 }
 
                 ImGui.PushItemWidth(ImGui.GetTextLineHeightWithSpacing() * 10f);
-                MultiselectDragInt("‰÷»æÀ≥–Ú", "RenderOrder", 0.02f);
-                MultiselectSliderInt("◊›…Ó∆´“∆", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
-                MultiselectSliderInt("÷÷◊”", "Seed", 0, 999);
-                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "‰÷»æ ±ª˙", "RenderTime", PropRenderTimeNames);
+                MultiselectDragInt("Ê∏≤ÊüìÈ°∫Â∫è", "RenderOrder", 0.02f);
+                MultiselectSliderInt("Á∫µÊ∑±ÂÅèÁßª", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
+                MultiselectSliderInt("ÁßçÂ≠ê", "Seed", 0, 999);
+                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "Ê∏≤ÊüìÊó∂Êú∫", "RenderTime", PropRenderTimeNames);
 
                 // custom depth, if available
                 {
@@ -700,7 +701,7 @@ partial class PropEditor : IEditorMode
                     }
 
                     if (hasCustomDepth)
-                        MultiselectSliderInt("◊‘∂®“Â◊›…Ó", "CustomDepth", 1, 30, "%i", ImGuiSliderFlags.AlwaysClamp);
+                        MultiselectSliderInt("Ëá™ÂÆö‰πâÁ∫µÊ∑±", "CustomDepth", 1, 30, "%i", ImGuiSliderFlags.AlwaysClamp);
                 }
 
                 // custom color, if available
@@ -716,7 +717,7 @@ partial class PropEditor : IEditorMode
                     }
 
                     if (hasCustomColor)
-                        MultiselectListInput("◊‘∂®“Â—’…´", "CustomColor", propColorNames);
+                        MultiselectListInput("Ëá™ÂÆö‰πâÈ¢úËâ≤", "CustomColor", propColorNames);
                 }
 
                 // rope properties, if all selected props are ropes
@@ -773,13 +774,13 @@ partial class PropEditor : IEditorMode
                                 if (MathF.Abs(flexi - targetFlexi) > 0.01f)
                                 {
                                     sameFlexi = false;
-                                    
+
                                     // idk why i did this cus every rope-type prop
                                     // starts out at the same size anyway
                                     float min = 0.5f / prop.PropInit.Height;
                                     if (min > minFlexi)
                                         minFlexi = min;
-                                    
+
                                     break;
                                 }
                             }
@@ -809,7 +810,7 @@ partial class PropEditor : IEditorMode
                         };
                         foreach (var p in selectedProps)
                             ropes.Add(p.Rope!);
-                        
+
                         MultiselectEnumInput<PropRope, RopeReleaseMode>(ropes, "Release", "ReleaseMode", RopeReleaseModeNames);
 
                         if (selectedProps.Count == 1)
@@ -827,7 +828,7 @@ partial class PropEditor : IEditorMode
                             // color Zero-G Tube white
                             if (prop.PropInit.PropFlags.HasFlag(PropFlags.Colorize))
                             {
-                                if (ImGui.Checkbox("”¶”√—’…´", ref prop.ApplyColor))
+                                if (ImGui.Checkbox("Â∫îÁî®È¢úËâ≤", ref prop.ApplyColor))
                                     changeRecorder.PushSettingsChanges();
                             }
                         }
@@ -835,18 +836,18 @@ partial class PropEditor : IEditorMode
                         // rope simulation controls
                         if (affineProps)
                         {
-                            if (ImGui.Button("÷ÿ÷√ƒ£ƒ‚") || KeyShortcuts.Activated(KeyShortcut.ResetSimulation))
+                            if (ImGui.Button("ÈáçÁΩÆÊ®°Êãü") || KeyShortcuts.Activated(KeyShortcut.ResetSimulation))
                             {
                                 changeRecorder.BeginTransform();
 
                                 foreach (var prop in selectedProps)
                                     prop.Rope!.ResetModel();
-                                
+
                                 changeRecorder.PushTransform();
                             }
 
                             ImGui.SameLine();
-                            ImGui.Button("ƒ£ƒ‚");
+                            ImGui.Button("Ê®°Êãü");
 
                             if (ImGui.IsItemActive() || KeyShortcuts.Active(KeyShortcut.RopeSimulation))
                             {
@@ -881,7 +882,7 @@ partial class PropEditor : IEditorMode
                                 v: ref varV,
                                 v_min: 1,
                                 v_max: prop.PropInit.VariationCount,
-                                format: varV == 0 ? "ÀÊª˙" : "%i",
+                                format: varV == 0 ? "ÈöèÊú∫" : "%i",
                                 flags: ImGuiSliderFlags.AlwaysClamp
                             );
                             prop.Variation = Math.Clamp(varV, 0, prop.PropInit.VariationCount) - 1;
@@ -893,7 +894,7 @@ partial class PropEditor : IEditorMode
                         // apply color
                         if (prop.PropInit.PropFlags.HasFlag(PropFlags.Colorize))
                         {
-                            if (ImGui.Checkbox("”¶”√—’…´", ref prop.ApplyColor))
+                            if (ImGui.Checkbox("Â∫îÁî®È¢úËâ≤", ref prop.ApplyColor))
                                 changeRecorder.PushSettingsChanges();
                         }
 
@@ -902,16 +903,16 @@ partial class PropEditor : IEditorMode
                         //    ImGui.Checkbox("Procedurally Shaded", ref selfShaded);
                         //ImGui.EndDisabled();
                     }
-                    
+
                     // notes
                 }
 
-                ImGui.SeparatorText("◊¢“‚");
+                ImGui.SeparatorText("Ê≥®ÊÑè");
 
                 if (longProps && !affineProps)
                 {
                     ImGui.Bullet(); ImGui.SameLine();
-                    ImGui.TextWrapped("“ª∏ˆªÚ∂‡∏ˆ—°∂®µƒ…˛◊”ªÚ≥§µ¿æﬂ√ª”–◊˜Œ™æÿ–Œº”‘ÿ£¨“Ú¥À±‡º≠ ‹µΩœﬁ÷∆°£÷ÿ÷√∆‰±‰ªª“‘‘Ÿ¥Œ±‡º≠À¸°£");
+                    ImGui.TextWrapped("‰∏Ä‰∏™ÊàñÂ§ö‰∏™ÈÄâÂÆöÁöÑÁª≥Â≠êÊàñÈïøÈÅìÂÖ∑Ê≤°Êúâ‰Ωú‰∏∫Áü©ÂΩ¢Âä†ËΩΩÔºåÂõ†Ê≠§ÁºñËæëÂèóÂà∞ÈôêÂà∂„ÄÇÈáçÁΩÆÂÖ∂ÂèòÊç¢‰ª•ÂÜçÊ¨°ÁºñËæëÂÆÉ„ÄÇ");
                 }
 
                 if (selectedProps.Count == 1)
@@ -922,11 +923,11 @@ partial class PropEditor : IEditorMode
                     if (!isDecal && prop.DepthOffset <= 5 && prop.DepthOffset + prop.CustomDepth >= 6)
                     {
                         ImGui.Bullet(); ImGui.SameLine();
-                        ImGui.TextWrapped("æØ∏Ê:¥Àµ¿æﬂΩ´”Î”Œœ∑≤„œ‡Ωª(◊›…Ó5-6)£°");
+                        ImGui.TextWrapped("Ë≠¶Âëä:Ê≠§ÈÅìÂÖ∑Â∞Ü‰∏éÊ∏∏ÊàèÂ±ÇÁõ∏‰∫§(Á∫µÊ∑±5-6)ÔºÅ");
                     }
 
                     if (prop.PropInit.PropFlags.HasFlag(PropFlags.Tile))
-                        ImGui.BulletText("◊˜Œ™µ¿æﬂµƒÃ˘Õº");
+                        ImGui.BulletText("‰Ωú‰∏∫ÈÅìÂÖ∑ÁöÑË¥¥Âõæ");
 
                     if (prop.PropInit.PropFlags.HasFlag(PropFlags.Colorize))
                     {
@@ -934,20 +935,20 @@ partial class PropEditor : IEditorMode
 
                         if (prop.Rope is not null)
                         {
-                            ImGui.TextWrapped("ø…“‘Õ®π˝…Ë÷√Ω´π‹»æ≥…∞◊…´°£");
+                            ImGui.TextWrapped("ÂèØ‰ª•ÈÄöËøáËÆæÁΩÆÂ∞ÜÁÆ°ÊüìÊàêÁôΩËâ≤„ÄÇ");
                         }
                         else
                         {
-                            ImGui.TextWrapped("»Áπ˚—’…´±ªº§ªÓ£¨Ω®“È‘⁄Ãÿ–ß÷Æ∫Û‰÷»æ’‚∏ˆµ¿æﬂ£¨“ÚŒ™Ãÿ–ß≤ªª·”∞œÏ—’…´≤„°£");
+                            ImGui.TextWrapped("Â¶ÇÊûúÈ¢úËâ≤Ë¢´ÊøÄÊ¥ªÔºåÂª∫ËÆÆÂú®ÁâπÊïà‰πãÂêéÊ∏≤ÊüìËøô‰∏™ÈÅìÂÖ∑ÔºåÂõ†‰∏∫ÁâπÊïà‰∏ç‰ºöÂΩ±ÂìçÈ¢úËâ≤Â±Ç„ÄÇ");
                         }
                     }
 
                     if (!prop.PropInit.PropFlags.HasFlag(PropFlags.ProcedurallyShaded))
                     {
                         ImGui.Bullet(); ImGui.SameLine();
-                        ImGui.TextWrapped("«Î◊¢“‚£¨“ı”∞∫Õ∏ﬂπ‚≤ªª·ÀÊµ¿æﬂ–˝◊™£¨“Ú¥Àπ˝∂»–˝◊™ø…ƒ‹ª·µº÷¬¥ÌŒÛµƒ◊≈…´°£");
+                        ImGui.TextWrapped("ËØ∑Ê≥®ÊÑèÔºåÈò¥ÂΩ±ÂíåÈ´òÂÖâ‰∏ç‰ºöÈöèÈÅìÂÖ∑ÊóãËΩ¨ÔºåÂõ†Ê≠§ËøáÂ∫¶ÊóãËΩ¨ÂèØËÉΩ‰ºöÂØºËá¥ÈîôËØØÁöÑÁùÄËâ≤„ÄÇ");
                     }
-                    
+
                     // user notes
                     foreach (string note in prop.PropInit.Notes)
                     {
@@ -960,19 +961,20 @@ partial class PropEditor : IEditorMode
             }
             else
             {
-                ImGui.Text("√ª”–—°‘Òµ¿æﬂ");
+                ImGui.Text("Ê≤°ÊúâÈÄâÊã©ÈÅìÂÖ∑");
             }
 
-        } ImGui.End();
+        }
+        ImGui.End();
     }
 
     public void ShowEditMenu()
     {
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "∏¥÷∆—°∂®µƒµ¿æﬂ");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "…æ≥˝—°∂®µƒµ¿æﬂ");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleVertexMode, "«–ªª∂•µ„±‡º≠");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "Â§çÂà∂ÈÄâÂÆöÁöÑÈÅìÂÖ∑");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "Âà†Èô§ÈÄâÂÆöÁöÑÈÅìÂÖ∑");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleVertexMode, "ÂàáÊç¢È°∂ÁÇπÁºñËæë");
     }
 
     private static int Mod(int a, int b)
-        => (a%b + b)%b;
+        => (a % b + b) % b;
 }

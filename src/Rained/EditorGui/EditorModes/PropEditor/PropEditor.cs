@@ -7,22 +7,22 @@ namespace RainEd;
 
 partial class PropEditor : IEditorMode
 {
-    public string Name { get => "µ¿æﬂ"; }
+    public string Name { get => "ÈÅìÂÖ∑"; }
     private readonly LevelWindow window;
-    
+
     private readonly List<Prop> selectedProps = new();
     private List<Prop>? initSelectedProps = null; // used for add rect select mode
     private Prop[] propSelectionList = Array.Empty<Prop>(); // used for being able to select props that are behind others
     private Prop? highlightedProp = null; // used for prop selection list
-    
+
     private bool isWarpMode = false;
     private Vector2 prevMousePos;
     private Vector2 dragStartPos;
     private int snappingMode = 1; // 0 = off, 1 = precise snap, 2 = snap to grid
-    
+
     private int initDepth = -1; // the depth of the last selected prop(s)
     private bool isDoubleClick = false; // if mouse double clicks, wait until mouse release to open the selector popup
-    
+
     private ChangeHistory.PropChangeRecorder changeRecorder;
 
     private readonly Color[] OutlineColors =
@@ -40,7 +40,7 @@ partial class PropEditor : IEditorMode
         new(100, 255, 100, 255),
         new(255, 100, 100, 255)
     ];
-    
+
     private readonly List<string> propColorNames;
 
     private bool isMouseDragging = false;
@@ -81,7 +81,7 @@ partial class PropEditor : IEditorMode
         RainEd.Instance.ChangeHistory.UndidOrRedid += () =>
         {
             changeRecorder.TakeSettingsSnapshot();
-            
+
             // remove props from selection that no longer exist
             // when the user undos or redos
             var propsList = RainEd.Instance.Level.Props;
@@ -102,11 +102,11 @@ partial class PropEditor : IEditorMode
             case "off":
                 snappingMode = 0;
                 break;
-            
+
             case "0.5x":
                 snappingMode = 1;
                 break;
-            
+
             case "1x":
                 snappingMode = 2;
                 break;
@@ -142,7 +142,7 @@ partial class PropEditor : IEditorMode
     {
         if (changeRecorder.IsTransformActive)
             changeRecorder.PushTransform();
-        
+
         if (transformMode is WarpTransformMode)
         {
             selectedProps[0].TryConvertToAffine();
@@ -201,17 +201,17 @@ partial class PropEditor : IEditorMode
                 layerMin = 0;
                 layerMax = 2;
                 break;
-            
+
             case UserPreferences.PropSelectionLayerFilterOption.Current:
                 layerMin = layer;
                 layerMax = layer;
                 break;
-            
+
             case UserPreferences.PropSelectionLayerFilterOption.InFront:
                 layerMin = layer;
                 layerMax = 2;
                 break;
-            
+
             default:
                 layerMin = layer;
                 layerMax = layer;
@@ -221,13 +221,13 @@ partial class PropEditor : IEditorMode
 
     private static bool IsSublayerWithinFilter(int depthOffset, int layerMin, int layerMax)
     {
-        return depthOffset >= layerMin * 10 && depthOffset < (layerMax+1) * 10;
+        return depthOffset >= layerMin * 10 && depthOffset < (layerMax + 1) * 10;
     }
 
     private static Prop? GetPropAt(Vector2 point, int layer)
     {
         GetSelectionLayerFilter(layer, out int layerMin, out int layerMax);
-        
+
         for (int i = RainEd.Instance.Level.Props.Count - 1; i >= 0; i--)
         {
             var prop = RainEd.Instance.Level.Props[i];
@@ -236,7 +236,7 @@ partial class PropEditor : IEditorMode
             var pts = prop.QuadPoints;
             if (
                 IsPointInTriangle(point, pts[0], pts[1], pts[2]) ||
-                IsPointInTriangle(point, pts[2], pts[3], pts[0])    
+                IsPointInTriangle(point, pts[2], pts[3], pts[0])
             )
             {
                 return prop;
@@ -258,7 +258,7 @@ partial class PropEditor : IEditorMode
             var pts = prop.QuadPoints;
             if (
                 IsPointInTriangle(point, pts[0], pts[1], pts[2]) ||
-                IsPointInTriangle(point, pts[2], pts[3], pts[0])    
+                IsPointInTriangle(point, pts[2], pts[3], pts[0])
             )
             {
                 list.Add(prop);
@@ -281,7 +281,7 @@ partial class PropEditor : IEditorMode
         foreach (var prop in props)
         {
             if (excludeNonmovable && !prop.IsMovable) continue;
-            
+
             for (int i = 0; i < 4; i++)
             {
                 var pts = prop.QuadPoints;
@@ -299,7 +299,7 @@ partial class PropEditor : IEditorMode
     {
         if (prop.IsAffine)
             return prop.Rect.Center;
-        
+
         var pts = prop.QuadPoints;
         return (pts[0] + pts[1] + pts[2] + pts[3]) / 4f;
     }
@@ -308,9 +308,9 @@ partial class PropEditor : IEditorMode
     private bool DrawGizmoHandle(Vector2 pos, int colorIndex)
     {
         bool isGizmoHovered = window.IsViewportHovered && (window.MouseCellFloat - pos).Length() < 0.5f / window.ViewZoom;
-        
+
         Color color = isGizmoHovered ? OutlineGlowColors[colorIndex] : OutlineColors[colorIndex];
-        
+
         Raylib.DrawCircleV(
             pos * Level.TileSize,
             (isGizmoHovered ? 8f : 4f) / window.ViewZoom,
@@ -332,7 +332,7 @@ partial class PropEditor : IEditorMode
 
         // draw geometry/tile layers
         var drawTiles = RainEd.Instance.Preferences.ViewTiles;
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             // draw layer into framebuffer
             Raylib.BeginTextureMode(layerFrames[l]);
@@ -345,18 +345,18 @@ partial class PropEditor : IEditorMode
 
         // draw alpha-blended result into main frame
         Raylib.BeginTextureMode(mainFrame);
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             Rlgl.PushMatrix();
-                Rlgl.LoadIdentity();
+            Rlgl.LoadIdentity();
 
-                var alpha = l == window.WorkLayer ? 255 : 50;
-                RlExt.DrawRenderTexture(layerFrames[l], 0, 0, new Color(255, 255, 255, alpha));
+            var alpha = l == window.WorkLayer ? 255 : 50;
+            RlExt.DrawRenderTexture(layerFrames[l], 0, 0, new Color(255, 255, 255, alpha));
             Rlgl.PopMatrix();
         }
 
         // draw props
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             // draw layer into framebuffer
             Raylib.BeginTextureMode(layerFrames[l]);
@@ -364,22 +364,22 @@ partial class PropEditor : IEditorMode
             levelRender.RenderProps(l, 255);
         }
 
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             // draw alpha-blended result into main frame
             Raylib.BeginTextureMode(mainFrame);
             Rlgl.PushMatrix();
-                Rlgl.LoadIdentity();
+            Rlgl.LoadIdentity();
 
-                var alpha = l == window.WorkLayer ? 255 : 50;
-                RlExt.DrawRenderTexture(layerFrames[l], 0, 0, new Color(255, 255, 255, alpha));
+            var alpha = l == window.WorkLayer ? 255 : 50;
+            RlExt.DrawRenderTexture(layerFrames[l], 0, 0, new Color(255, 255, 255, alpha));
             Rlgl.PopMatrix();
         }
-        
+
         levelRender.RenderGrid();
         levelRender.RenderBorder();
         levelRender.RenderCameraBorders();
-        
+
         // highlight selected props
         if (isWarpMode)
         {
@@ -404,7 +404,7 @@ partial class PropEditor : IEditorMode
                 {
                     col = OutlineColors[1]; // white
                 }
-                
+
                 var pts = prop.QuadPoints;
                 Raylib.DrawLineV(pts[0] * Level.TileSize, pts[1] * Level.TileSize, col);
                 Raylib.DrawLineV(pts[1] * Level.TileSize, pts[2] * Level.TileSize, col);
@@ -419,7 +419,7 @@ partial class PropEditor : IEditorMode
                 if (prop == highlightedProp) continue;
 
                 var pts = prop.QuadPoints;
-                var col = prop.IsMovable ? OutlineColors[0] : OutlineColors[3];;
+                var col = prop.IsMovable ? OutlineColors[0] : OutlineColors[3]; ;
                 Raylib.DrawLineV(pts[0] * Level.TileSize, pts[1] * Level.TileSize, col);
                 Raylib.DrawLineV(pts[1] * Level.TileSize, pts[2] * Level.TileSize, col);
                 Raylib.DrawLineV(pts[2] * Level.TileSize, pts[3] * Level.TileSize, col);
@@ -442,7 +442,7 @@ partial class PropEditor : IEditorMode
         {
             bool canWarp = transformMode is WarpTransformMode ||
                 (isWarpMode && selectedProps.Count == 1);
-            
+
             var aabb = GetSelectionAABB(excludeNonmovable: transformMode is not null);
 
             // draw selection AABB if there is more than
@@ -458,7 +458,7 @@ partial class PropEditor : IEditorMode
                     OutlineColors[0]
                 );
             }
-            
+
             // scale gizmo (points on corners/edges)
             // don't draw handles if rotating
             if ((transformMode is null && !canWarp) || transformMode is ScaleTransformMode)
@@ -491,11 +491,11 @@ partial class PropEditor : IEditorMode
                     {
                         continue;
                     }
-                    
+
                     var handle1 = corners[i / 2]; // position of left corner
                     var handle2 = corners[(i + 1) / 2 % 4]; // position of right corner
                     var handlePos = (handle1 + handle2) / 2f;
-                    
+
                     // draw gizmo handle at corner
                     if (DrawGizmoHandle(handlePos, 0) && EditorWindow.IsMouseClicked(ImGuiMouseButton.Left))
                     {
@@ -520,7 +520,7 @@ partial class PropEditor : IEditorMode
                     var prop = selectedProps[0];
                     var sideDir = new Vector2(MathF.Cos(prop.Rect.Rotation), MathF.Sin(prop.Rect.Rotation));
                     handleDir = new(sideDir.Y, -sideDir.X);
-                    handleCnPos = prop.Rect.Center + handleDir * Math.Abs(prop.Rect.Size.Y) / 2f; 
+                    handleCnPos = prop.Rect.Center + handleDir * Math.Abs(prop.Rect.Size.Y) / 2f;
                 }
 
                 Vector2 rotDotPos = handleCnPos + handleDir * 5f / window.ViewZoom;
@@ -562,7 +562,7 @@ partial class PropEditor : IEditorMode
                             }
 
                             var handlePos = corners[i];
-                            
+
                             // draw gizmo handle at corner
                             if (DrawGizmoHandle(handlePos, 1) && EditorWindow.IsMouseClicked(ImGuiMouseButton.Left))
                             {
@@ -591,7 +591,7 @@ partial class PropEditor : IEditorMode
                         {
                             if (transformMode is LongTransformMode ropeMode && ropeMode.handleId != i)
                                 continue;
-                            
+
                             if (DrawGizmoHandle(i == 1 ? pB : pA, 2) && EditorWindow.IsMouseClicked(ImGuiMouseButton.Left))
                             {
                                 changeRecorder.BeginTransform();
@@ -626,7 +626,7 @@ partial class PropEditor : IEditorMode
 
             // select all props within selection rectangle
             selectedProps.Clear();
-            
+
             if (initSelectedProps is not null)
             {
                 foreach (var prop in initSelectedProps)
@@ -639,7 +639,7 @@ partial class PropEditor : IEditorMode
             {
                 if (selectedProps.Contains(prop)) continue;
                 if (!IsSublayerWithinFilter(prop.DepthOffset, layerMin, layerMax)) continue;
-                
+
                 var pc = GetPropCenter(prop);
                 if (pc.X >= minX && pc.Y >= minY && pc.X <= maxX && pc.Y <= maxY)
                     selectedProps.Add(prop);
@@ -699,7 +699,7 @@ partial class PropEditor : IEditorMode
 
                 if (ImGui.IsItemHovered())
                     highlightedProp = prop;
-                
+
                 ImGui.PopID();
             }
 
@@ -762,7 +762,7 @@ partial class PropEditor : IEditorMode
                     }
                 }
             }
-            
+
             if (hoveredProp is not null)
             {
                 window.WriteStatus(hoveredProp.PropInit.Name, 3);
@@ -803,7 +803,7 @@ partial class PropEditor : IEditorMode
                         );
                     }
                 }
-                
+
                 isMouseDragging = true;
             }
 
@@ -812,7 +812,7 @@ partial class PropEditor : IEditorMode
             {
                 if (!EditorWindow.IsKeyDown(ImGuiKey.ModShift))
                     selectedProps.Clear();
-                
+
                 var prop = GetPropAt(window.MouseCellFloat, window.WorkLayer);
                 if (prop is not null)
                 {
@@ -836,13 +836,13 @@ partial class PropEditor : IEditorMode
                 showSelectionList = isDoubleClick && EditorWindow.IsMouseReleased(ImGuiMouseButton.Left) && !isMouseDragging;
                 createProp = EditorWindow.IsMouseClicked(ImGuiMouseButton.Right);
             }
-            
+
             if (showSelectionList)
             {
                 if (!prefs.DoubleClickToCreateProp) isDoubleClick = false;
 
                 propSelectionList = propsAtCursor;
-                
+
                 if (propSelectionList.Length > 1)
                 {
                     ImGui.OpenPopup("PropSelectionList");
@@ -859,13 +859,13 @@ partial class PropEditor : IEditorMode
                 if (createProp && prefs.DoubleClickToCreateProp) isDoubleClick = false;
 
                 var createPos = window.MouseCellFloat;
-                
+
                 var snap = snappingMode / 2f;
                 if (snap > 0)
                 {
                     createPos.X = MathF.Round(createPos.X / snap) * snap;
                     createPos.Y = MathF.Round(createPos.Y / snap) * snap;
-                
+
                 }
                 if (selectedInit is not null)
                 {

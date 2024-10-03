@@ -18,7 +18,7 @@ partial class TileEditor : IEditorMode
 
     private RlManaged.Texture2D? _loadedMatPreview = null;
     private string _activeMatPreview = "";
-    
+
     private void ProcessSearch()
     {
         var tileDb = RainEd.Instance.TileDatabase;
@@ -82,7 +82,7 @@ partial class TileEditor : IEditorMode
     {
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.IncreaseBrushSize, "Increase Brush Size");
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.DecreaseBrushSize, "Decrease Brush Size");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.SetMaterial, "ÉèÖÃËùÑ¡²ÄÁÏÎªÄ¬ÈÏÖµ");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.SetMaterial, "è®¾ç½®æ‰€é€‰ææ–™ä¸ºé»˜è®¤å€¼");
     }
 
     public void DrawToolbar()
@@ -91,24 +91,24 @@ partial class TileEditor : IEditorMode
         var matDb = RainEd.Instance.MaterialDatabase;
         var prefs = RainEd.Instance.Preferences;
 
-        if (ImGui.Begin("ÌùÍ¼Ñ¡ÔñÆ÷", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("è´´å›¾é€‰æ‹©å™¨", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // work layer
             {
                 int workLayerV = window.WorkLayer + 1;
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-                ImGui.InputInt("¹¤×÷²ã¼¶", ref workLayerV);
+                ImGui.InputInt("å·¥ä½œå±‚çº§", ref workLayerV);
                 window.WorkLayer = Math.Clamp(workLayerV, 1, 3) - 1;
             }
 
             // default material button (or press E)
             int defaultMat = RainEd.Instance.Level.DefaultMaterial;
-            ImGui.TextUnformatted($"Ä¬ÈÏ²ÄÁÏ: {matDb.GetMaterial(defaultMat).Name}");
+            ImGui.TextUnformatted($"é»˜è®¤ææ–™: {matDb.GetMaterial(defaultMat).Name}");
 
             if (selectionMode != SelectionMode.Materials)
                 ImGui.BeginDisabled();
-            
-            if ((ImGui.Button("ÉèÖÃËùÑ¡²ÄÁÏÎªÄ¬ÈÏÖµ") || KeyShortcuts.Activated(KeyShortcut.SetMaterial)) && selectionMode == SelectionMode.Materials)
+
+            if ((ImGui.Button("è®¾ç½®æ‰€é€‰ææ–™ä¸ºé»˜è®¤å€¼") || KeyShortcuts.Activated(KeyShortcut.SetMaterial)) && selectionMode == SelectionMode.Materials)
             {
                 var oldMat = RainEd.Instance.Level.DefaultMaterial;
                 var newMat = selectedMaterial;
@@ -123,7 +123,7 @@ partial class TileEditor : IEditorMode
 
             if (ImGui.IsItemHovered() && selectionMode != SelectionMode.Materials)
             {
-                ImGui.SetTooltip("Ã»ÓÐ²ÄÁÏ±»Ñ¡Ôñ");
+                ImGui.SetTooltip("æ²¡æœ‰ææ–™è¢«é€‰æ‹©");
             }
 
             // search bar
@@ -146,7 +146,7 @@ partial class TileEditor : IEditorMode
                     autotilesFlags = ImGuiTabItemFlags.SetSelected;
 
                 // Materials tab
-                if (ImGuiExt.BeginTabItem("²ÄÁÏ", materialsFlags))
+                if (ImGuiExt.BeginTabItem("ææ–™", materialsFlags))
                 {
                     if (selectionMode != SelectionMode.Materials)
                     {
@@ -155,7 +155,7 @@ partial class TileEditor : IEditorMode
                     }
 
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "ËÑË÷...", ref searchQuery, 128, searchInputFlags))
+                    if (ImGui.InputTextWithHint("##Search", "æœç´¢...", ref searchQuery, 128, searchInputFlags))
                     {
                         ProcessSearch();
                     }
@@ -166,14 +166,14 @@ partial class TileEditor : IEditorMode
                         foreach (var i in matSearchResults)
                         {
                             var group = matDb.Categories[i];
-                            
+
                             if (ImGui.Selectable(group.Name, selectedMatGroup == i) || matSearchResults.Count == 1)
                                 selectedMatGroup = i;
                         }
-                        
+
                         ImGui.EndListBox();
                     }
-                    
+
                     // group listing (effects) list box
                     ImGui.SameLine();
                     if (ImGui.BeginListBox("##Materials", new Vector2(halfWidth, boxHeight)))
@@ -187,7 +187,7 @@ partial class TileEditor : IEditorMode
                             // don't show this prop if it doesn't pass search test
                             if (!mat.Name.Contains(searchQuery, StringComparison.CurrentCultureIgnoreCase))
                                 continue;
-                            
+
                             if (ImGui.Selectable(mat.Name, mat.ID == selectedMaterial))
                             {
                                 selectedMaterial = mat.ID;
@@ -211,7 +211,7 @@ partial class TileEditor : IEditorMode
                                 }
                             }
                         }
-                        
+
                         ImGui.EndListBox();
                     }
 
@@ -219,7 +219,7 @@ partial class TileEditor : IEditorMode
                 }
 
                 // Tiles tab
-                if (ImGuiExt.BeginTabItem("ÌùÍ¼", tilesFlags))
+                if (ImGuiExt.BeginTabItem("è´´å›¾", tilesFlags))
                 {
                     if (selectionMode != SelectionMode.Tiles)
                     {
@@ -228,7 +228,7 @@ partial class TileEditor : IEditorMode
                     }
 
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "ËÑË÷...", ref searchQuery, 128, searchInputFlags))
+                    if (ImGui.InputTextWithHint("##Search", "æœç´¢...", ref searchQuery, 128, searchInputFlags))
                     {
                         ProcessSearch();
                     }
@@ -246,17 +246,17 @@ partial class TileEditor : IEditorMode
 
                             if (ImGui.Selectable("  " + group.Name, selectedTileGroup == i) || tileSearchResults.Count == 1)
                                 selectedTileGroup = i;
-                            
+
                             drawList.AddRectFilled(
                                 p_min: cursor,
                                 p_max: cursor + new Vector2(10f, textHeight),
                                 ImGui.ColorConvertFloat4ToU32(new Vector4(group.Color.R / 255f, group.Color.G / 255f, group.Color.B / 255f, 1f))
                             );
                         }
-                        
+
                         ImGui.EndListBox();
                     }
-                    
+
                     // group listing (effects) list box
                     ImGui.SameLine();
                     if (ImGui.BeginListBox("##Tiles", new Vector2(halfWidth, boxHeight)))
@@ -270,7 +270,7 @@ partial class TileEditor : IEditorMode
                             // don't show this prop if it doesn't pass search test
                             if (!tile.Name.Contains(searchQuery, StringComparison.CurrentCultureIgnoreCase))
                                 continue;
-                            
+
                             if (ImGui.Selectable(tile.Name, tile == selectedTile))
                             {
                                 selectedTile = tile;
@@ -289,7 +289,7 @@ partial class TileEditor : IEditorMode
                                 ImGui.EndTooltip();
                             }
                         }
-                        
+
                         ImGui.EndListBox();
                     }
 
@@ -297,7 +297,7 @@ partial class TileEditor : IEditorMode
                 }
 
                 // Autotiles tab
-                if (ImGuiExt.BeginTabItem("×Ô¶¯Í¼¿é", autotilesFlags))
+                if (ImGuiExt.BeginTabItem("è‡ªåŠ¨å›¾å—", autotilesFlags))
                 {
                     if (selectionMode != SelectionMode.Autotiles)
                     {
@@ -318,10 +318,10 @@ partial class TileEditor : IEditorMode
 
                     // create autotile button
                     ImGui.BeginGroup();
-                    if (ImGui.Button("´´½¨×Ô¶¯Í¼¿é", new Vector2(boxWidth, 0f)))
+                    if (ImGui.Button("åˆ›å»ºè‡ªåŠ¨å›¾å—", new Vector2(boxWidth, 0f)))
                     {
                         RainEd.Instance.Autotiles.OpenCreatePopup();
-                        ImGui.OpenPopup("´´½¨×Ô¶¯Í¼¿é");
+                        ImGui.OpenPopup("åˆ›å»ºè‡ªåŠ¨å›¾å—");
                         ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
                     }
 
@@ -351,7 +351,7 @@ partial class TileEditor : IEditorMode
 
                             ImGui.PopID();
                         }
-                        
+
                         ImGui.EndListBox();
                     }
                     ImGui.EndGroup();
@@ -359,35 +359,35 @@ partial class TileEditor : IEditorMode
                     // selected autotile options
                     ImGui.SameLine();
                     ImGui.BeginGroup();
-                        if (selectedAutotile is not null)
+                    if (selectedAutotile is not null)
+                    {
+                        var autotile = selectedAutotile;
+
+                        ImGui.SeparatorText(autotile.Name);
+                        if (autotile.Type == Autotiles.AutotileType.Path)
                         {
-                            var autotile = selectedAutotile;
+                            ImGui.Text("è·¯å¾„è‡ªåŠ¨å›¾å—");
+                        }
+                        else if (autotile.Type == Autotiles.AutotileType.Rect)
+                        {
+                            ImGui.Text("çŸ©å½¢è‡ªåŠ¨å›¾å—");
+                        }
 
-                            ImGui.SeparatorText(autotile.Name);
-                            if (autotile.Type == Autotiles.AutotileType.Path)
-                            {
-                                ImGui.Text("Â·¾¶×Ô¶¯Í¼¿é");
-                            }
-                            else if (autotile.Type == Autotiles.AutotileType.Rect)
-                            {
-                                ImGui.Text("¾ØÐÎ×Ô¶¯Í¼¿é");
-                            }
+                        ImGui.Separator();
 
-                            ImGui.Separator();
-
-                            if (!autotile.IsReady)
-                            {
-                                ImGui.TextWrapped("¼ÓÔØ´Ë×Ô¶¯Í¼¿éÎÄ¼þÊ±³öÏÖÎÊÌâ¡£");
-                            }
-                            else
-                            {
-                                autotile.ConfigGui();
-                            }
+                        if (!autotile.IsReady)
+                        {
+                            ImGui.TextWrapped("åŠ è½½æ­¤è‡ªåŠ¨å›¾å—æ–‡ä»¶æ—¶å‡ºçŽ°é—®é¢˜ã€‚");
                         }
                         else
                         {
-                            ImGui.TextDisabled("(Î´Ñ¡Ôñ×Ô¶¯Í¼¿éÎÄ¼þ)");
+                            autotile.ConfigGui();
                         }
+                    }
+                    else
+                    {
+                        ImGui.TextDisabled("(æœªé€‰æ‹©è‡ªåŠ¨å›¾å—æ–‡ä»¶)");
+                    }
                     ImGui.EndGroup();
 
                     ImGui.EndTabItem();
@@ -396,14 +396,15 @@ partial class TileEditor : IEditorMode
                 forceSelection = null;
                 ImGui.EndTabBar();
             }
-        } ImGui.End();
-        
+        }
+        ImGui.End();
+
         // shift+tab to switch between tabs
         if (KeyShortcuts.Activated(KeyShortcut.SwitchTab))
         {
             forceSelection = (SelectionMode)(((int)selectionMode + 1) % 3);
         }
-        
+
         // tab to change work layer
         if (KeyShortcuts.Activated(KeyShortcut.SwitchLayer))
         {
@@ -466,11 +467,11 @@ partial class TileEditor : IEditorMode
             {
                 var mat = matDb.GetMaterial(selectedMaterial);
                 var matList = mat.Category.Materials;
-                selectedMaterial = matList[Mod(matList.IndexOf(mat) + 1, matList.Count)].ID; 
+                selectedMaterial = matList[Mod(matList.IndexOf(mat) + 1, matList.Count)].ID;
             }
         }
     }
 
     private static int Mod(int a, int b)
-        => (a%b + b)%b;
+        => (a % b + b) % b;
 }

@@ -7,10 +7,10 @@ namespace RainEd;
 
 class GeometryEditor : IEditorMode
 {
-    public string Name { get => "º∏∫Œ±‡º≠∆˜"; }
+    public string Name { get => "Âá†‰ΩïÁºñËæëÂô®"; }
 
     private readonly LevelWindow window;
-    
+
     public enum Tool : int
     {
         Wall = 0,
@@ -42,29 +42,29 @@ class GeometryEditor : IEditorMode
 
     private static readonly Dictionary<Tool, string> ToolNames = new()
     {
-        { Tool.Wall,            "«Ω"              },
-        { Tool.Air,             "ø’∆¯"               },
-        { Tool.Inverse,         "«–ªª«Ω±⁄/ø’∆¯"   },
-        { Tool.Slope,           "–±∆¬"             },
-        { Tool.Platform,        "∆ΩÃ®"          },
-        { Tool.Rock,            " ØÕ∑"              },
-        { Tool.Spear,           "√¨"             },
-        { Tool.Crack,           "¡—∑Ï"           },
-        { Tool.HorizontalBeam,  "ÀÆ∆Ω∏À◊”"   },
-        { Tool.VerticalBeam,    "¥π÷±∏À◊”"     },
-        { Tool.Glass,           "“˛–Œ«Ω"    },
-        { Tool.ShortcutEntrance,"π‹µ¿»Îø⁄" },
-        { Tool.Shortcut,        "π‹µ¿¬∑æ∂‘≤µ„"      },
-        { Tool.CreatureDen,     "…˙ŒÔ≥≤—®"      },
-        { Tool.Entrance,        "∑øº‰»Îø⁄"     },
-        { Tool.Hive,            "Ú”¨"       },
-        { Tool.ForbidFlyChain,  "Ú”¨◊Ë∞≠"  },
-        { Tool.Waterfall,       "∆Ÿ≤º"         },
+        { Tool.Wall,            "Â¢ô"              },
+        { Tool.Air,             "Á©∫Ê∞î"               },
+        { Tool.Inverse,         "ÂàáÊç¢Â¢ôÂ£Å/Á©∫Ê∞î"   },
+        { Tool.Slope,           "ÊñúÂù°"             },
+        { Tool.Platform,        "Âπ≥Âè∞"          },
+        { Tool.Rock,            "Áü≥Â§¥"              },
+        { Tool.Spear,           "Áüõ"             },
+        { Tool.Crack,           "Ë£ÇÁºù"           },
+        { Tool.HorizontalBeam,  "Ê∞¥Âπ≥ÊùÜÂ≠ê"   },
+        { Tool.VerticalBeam,    "ÂûÇÁõ¥ÊùÜÂ≠ê"     },
+        { Tool.Glass,           "ÈöêÂΩ¢Â¢ô"    },
+        { Tool.ShortcutEntrance,"ÁÆ°ÈÅìÂÖ•Âè£" },
+        { Tool.Shortcut,        "ÁÆ°ÈÅìË∑ØÂæÑÂúÜÁÇπ"      },
+        { Tool.CreatureDen,     "ÁîüÁâ©Â∑¢Á©¥"      },
+        { Tool.Entrance,        "ÊàøÈó¥ÂÖ•Âè£"     },
+        { Tool.Hive,            "Ëù†Ëùá"       },
+        { Tool.ForbidFlyChain,  "Ëù†ËùáÈòªÁ¢ç"  },
+        { Tool.Waterfall,       "ÁÄëÂ∏É"         },
         { Tool.WhackAMoleHole,  "Whack-a-mole Hole" },
-        { Tool.ScavengerHole,   " ∞ªƒ’ﬂπ‹µ¿"    },
-        { Tool.GarbageWorm,     "¿¨ª¯≥Ê"      },
-        { Tool.WormGrass,       "…‡≤›"        },
-        { Tool.CopyBackwards,   "œÚ∫Û∏¥÷∆"    },
+        { Tool.ScavengerHole,   "ÊãæËçíËÄÖÁÆ°ÈÅì"    },
+        { Tool.GarbageWorm,     "ÂûÉÂúæËô´"      },
+        { Tool.WormGrass,       "ËàåËçâ"        },
+        { Tool.CopyBackwards,   "ÂêëÂêéÂ§çÂà∂"    },
     };
 
     private static readonly Dictionary<Tool, Vector2> ToolTextureOffsets = new()
@@ -113,7 +113,7 @@ class GeometryEditor : IEditorMode
     private int lastMouseX, lastMouseY;
 
     private bool[] layerMask;
-    
+
     private enum MirrorFlags
     {
         MirrorX = 1,
@@ -133,24 +133,24 @@ class GeometryEditor : IEditorMode
         mirrorOriginY = RainEd.Instance.Level.Height / 2;
 
         window = levelView;
-        toolIcons = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath,"assets","tool-icons.png"));
+        toolIcons = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "tool-icons.png"));
 
         switch (RainEd.Instance.Preferences.GeometryViewMode)
         {
             case "overlay":
                 layerViewMode = LayerViewMode.Overlay;
                 break;
-            
+
             case "stack":
                 layerViewMode = LayerViewMode.Stack;
                 break;
-            
+
             default:
                 Log.Error("Invalid layer view mode '{ViewMode}' in preferences.json", RainEd.Instance.Preferences.GeometryViewMode);
                 break;
         }
     }
-    
+
     public enum LayerViewMode : int
     {
         Overlay = 0,
@@ -158,7 +158,7 @@ class GeometryEditor : IEditorMode
     }
 
     public LayerViewMode layerViewMode = LayerViewMode.Overlay;
-    private readonly string[] viewModeNames = ["µ˛º”", "µ•≤„" ];
+    private readonly string[] viewModeNames = ["Âè†Âä†", "ÂçïÂ±Ç"];
 
     public void Load()
     {
@@ -201,7 +201,7 @@ class GeometryEditor : IEditorMode
                 if (activeLayer >= 0) return;
                 activeLayer = i;
             }
-            
+
         }
 
         window.WorkLayer = activeLayer == -1 ? 0 : activeLayer;
@@ -226,7 +226,7 @@ class GeometryEditor : IEditorMode
                 break;
 
             default:
-                Log.Error("Invalid LayerViewMode {EnumID}", (int) layerViewMode);
+                Log.Error("Invalid LayerViewMode {EnumID}", (int)layerViewMode);
                 break;
         }
     }
@@ -285,14 +285,14 @@ class GeometryEditor : IEditorMode
 
     public void DrawToolbar()
     {
-        Vector4 textColor = ImGui.GetStyle().Colors[(int) ImGuiCol.Text];
+        Vector4 textColor = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
         var level = RainEd.Instance.Level;
 
-        if (ImGui.Begin("Ω®‘Ï", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("Âª∫ÈÄ†", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // view mode
             {
-                ImGui.Text(" ”Õºƒ£ Ω");
+                ImGui.Text("ËßÜÂõæÊ®°Âºè");
                 ImGui.SetNextItemWidth(-0.0001f);
                 if (ImGui.BeginCombo("##ViewMode", viewModeNames[(int)layerViewMode]))
                 {
@@ -301,7 +301,7 @@ class GeometryEditor : IEditorMode
                         bool isSelected = i == (int)layerViewMode;
                         if (ImGui.Selectable(viewModeNames[i], isSelected))
                         {
-                            layerViewMode = (LayerViewMode) i;
+                            layerViewMode = (LayerViewMode)i;
                         }
 
                         if (isSelected) ImGui.SetItemDefaultFocus();
@@ -317,9 +317,9 @@ class GeometryEditor : IEditorMode
             ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(2, 2));
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0));
 
-            for (int i = 0; i < (int) Tool.ToolCount; i++)
+            for (int i = 0; i < (int)Tool.ToolCount; i++)
             {
-                Tool toolEnum = (Tool) i;
+                Tool toolEnum = (Tool)i;
 
                 if (i % 4 > 0) ImGui.SameLine();
 
@@ -329,17 +329,19 @@ class GeometryEditor : IEditorMode
                 // highlight selected tool
                 if (toolEnum == selectedTool)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int) ImGuiCol.ButtonHovered]);
+                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered]);
 
-                // tool buttons will have a more transparent hover color
-                } else {
-                    Vector4 col = ImGui.GetStyle().Colors[(int) ImGuiCol.ButtonHovered];
+                    // tool buttons will have a more transparent hover color
+                }
+                else
+                {
+                    Vector4 col = ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered];
                     ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
                         new Vector4(col.X, col.Y, col.Z, col.W / 4f));
                 }
-                
+
                 ImGui.PushID(i);
-                
+
                 // create tool button, select if clicked
                 if (ImGuiExt.ImageButtonRect("ToolButton", toolIcons, 24, 24, new Rectangle(texOffset.X * 24, texOffset.Y * 24, 24, 24), textColor))
                 {
@@ -354,14 +356,14 @@ class GeometryEditor : IEditorMode
                 ImGui.PopID();
                 ImGui.PopStyleColor();
             }
-            
+
             ImGui.PopStyleVar(2);
             ImGui.PopStyleColor();
 
             // show work layers
             for (int i = 0; i < 3; i++)
             {
-                ImGui.Checkbox("≤„º∂ " + (i+1), ref layerMask[i]);
+                ImGui.Checkbox("Â±ÇÁ∫ß " + (i + 1), ref layerMask[i]);
             }
 
             ImGui.Separator();
@@ -371,8 +373,8 @@ class GeometryEditor : IEditorMode
                 bool mirrorX = mirrorFlags.HasFlag(MirrorFlags.MirrorX);
                 bool mirrorY = mirrorFlags.HasFlag(MirrorFlags.MirrorY);
 
-                ImGui.Checkbox("æµœÒ X", ref mirrorX);
-                ImGui.Checkbox("æµœÒ Y", ref mirrorY);
+                ImGui.Checkbox("ÈïúÂÉè X", ref mirrorX);
+                ImGui.Checkbox("ÈïúÂÉè Y", ref mirrorY);
 
                 mirrorFlags = 0;
                 if (mirrorX) mirrorFlags |= MirrorFlags.MirrorX;
@@ -390,12 +392,13 @@ class GeometryEditor : IEditorMode
             else
             {
                 if (ToolCanRectPlace(selectedTool))
-                    window.WriteStatus("Shift+Õœ◊ß“‘ÃÓ≥‰—°«¯");
-                
+                    window.WriteStatus("Shift+ÊãñÊãΩ‰ª•Â°´ÂÖÖÈÄâÂå∫");
+
                 if (ToolCanFloodFill(selectedTool))
-                    window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+µ„ª˜“‘∫ÈÀÆÃÓ≥‰");
+                    window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+ÁÇπÂáª‰ª•Ê¥™Ê∞¥Â°´ÂÖÖ");
             }
-        } ImGui.End();
+        }
+        ImGui.End();
 
         // simple layer shortcut
         if (KeyShortcuts.Activated(KeyShortcut.SwitchLayer))
@@ -412,10 +415,10 @@ class GeometryEditor : IEditorMode
 
         if (KeyShortcuts.Activated(KeyShortcut.ToggleLayer3))
             layerMask[2] = !layerMask[2];
-        
+
         if (KeyShortcuts.Activated(KeyShortcut.ToggleMirrorX))
             mirrorFlags ^= MirrorFlags.MirrorX;
-        
+
         if (KeyShortcuts.Activated(KeyShortcut.ToggleMirrorY))
             mirrorFlags ^= MirrorFlags.MirrorY;
     }
@@ -440,7 +443,7 @@ class GeometryEditor : IEditorMode
             LayerColors[1] = new Color(layerCol2.R, layerCol2.G, layerCol2.B, (byte)100);
             LayerColors[2] = new Color(layerCol3.R, layerCol3.G, layerCol3.B, (byte)70);
         }
-        
+
         // draw the layers
         int foregroundAlpha = 255; // this is stored for drawing objects later
         var drawTiles = RainEd.Instance.Preferences.ViewTiles;
@@ -471,7 +474,7 @@ class GeometryEditor : IEditorMode
                 levelRender.RenderObjects(0, new Color(255, 255, 255, foregroundAlpha));
 
                 break;
-            
+
             // stack: view each layer individually, each other layer is transparent
             case LayerViewMode.Stack:
                 // the only layer that is shown completely opaque
@@ -480,14 +483,14 @@ class GeometryEditor : IEditorMode
 
                 for (int l = 0; l < Level.LayerCount; l++)
                 {
-                    if (layerMask[l]) 
+                    if (layerMask[l])
                     {
                         shownLayer = l;
                         break;
                     }
                 }
 
-                for (int l = Level.LayerCount-1; l >= 0; l--)
+                for (int l = Level.LayerCount - 1; l >= 0; l--)
                 {
                     var alpha = (l == shownLayer) ? 255 : 50;
                     if (l == 0) foregroundAlpha = alpha;
@@ -587,13 +590,13 @@ class GeometryEditor : IEditorMode
         // WASD navigation
         if (!ImGui.GetIO().WantCaptureKeyboard && !ImGui.GetIO().WantTextInput)
         {
-            int toolRow = (int) selectedTool / 4;
-            int toolCol = (int) selectedTool % 4;
-            int toolCount = (int) Tool.ToolCount;
-            
+            int toolRow = (int)selectedTool / 4;
+            int toolCol = (int)selectedTool % 4;
+            int toolCount = (int)Tool.ToolCount;
+
             if (KeyShortcuts.Activated(KeyShortcut.NavRight))
             {
-                if ((int) selectedTool == (toolCount-1))
+                if ((int)selectedTool == (toolCount - 1))
                 {
                     toolCol = 0;
                     toolRow = 0;
@@ -624,22 +627,22 @@ class GeometryEditor : IEditorMode
             {
                 // if on the last row, wrap back to first row
                 // else, just go to next row
-                if (toolRow == (toolCount-1) / 4)
+                if (toolRow == (toolCount - 1) / 4)
                     toolRow = 0;
                 else
                     toolRow++;
             }
-            
+
             if (toolRow < 0)
             {
-                toolRow = (toolCount-1) / 4;
+                toolRow = (toolCount - 1) / 4;
             }
 
-            selectedTool = (Tool) Math.Clamp(toolRow*4 + toolCol, 0, toolCount-1);
+            selectedTool = (Tool)Math.Clamp(toolRow * 4 + toolCol, 0, toolCount - 1);
         }
 
         bool isMouseDown = EditorWindow.IsMouseDown(ImGuiMouseButton.Left) || EditorWindow.IsMouseDown(ImGuiMouseButton.Right);
-        
+
         if (window.IsViewportHovered && mirrorDrag == 0)
         {
             // cursor rect mode
@@ -661,7 +664,7 @@ class GeometryEditor : IEditorMode
                     ApplyToolRect(!isErasing);
                 }
             }
-            
+
             // normal cursor mode
             // if mouse is within level bounds?
             else
@@ -685,7 +688,7 @@ class GeometryEditor : IEditorMode
                     isToolActive = true;
                     window.CellChangeRecorder.BeginChange();
                 }
-                
+
                 if (isToolActive)
                 {
                     if (isClicked || window.MouseCx != lastMouseX || window.MouseCy != lastMouseY)
@@ -731,7 +734,7 @@ class GeometryEditor : IEditorMode
             isToolActive = false;
             window.CellChangeRecorder.PushChange();
         }
-        
+
         lastMouseX = window.MouseCx;
         lastMouseY = window.MouseCy;
 
@@ -813,32 +816,32 @@ class GeometryEditor : IEditorMode
         {
             if (x < 0 || y < 0) return false;
             if (x >= level.Width || y >= level.Height) return false;
-            return level.Layers[l,x,y].Geo == GeoType.Solid;
+            return level.Layers[l, x, y].Geo == GeoType.Solid;
         }
 
         GeoType newType = GeoType.Air;
         int possibleConfigs = 0;
 
         // figure out how to orient the slope using solid neighbors
-        if (IsSolid(level, layer, tx-1, ty) && IsSolid(level, layer, tx, ty+1))
+        if (IsSolid(level, layer, tx - 1, ty) && IsSolid(level, layer, tx, ty + 1))
         {
             newType = GeoType.SlopeRightUp;
             possibleConfigs++;
         }
-        
-        if (IsSolid(level, layer, tx+1, ty) && IsSolid(level, layer, tx, ty+1))
+
+        if (IsSolid(level, layer, tx + 1, ty) && IsSolid(level, layer, tx, ty + 1))
         {
             newType = GeoType.SlopeLeftUp;
             possibleConfigs++;
         }
-        
-        if (IsSolid(level, layer, tx-1, ty) && IsSolid(level, layer, tx, ty-1))
+
+        if (IsSolid(level, layer, tx - 1, ty) && IsSolid(level, layer, tx, ty - 1))
         {
             newType = GeoType.SlopeRightDown;
             possibleConfigs++;
         }
-        
-        if (IsSolid(level, layer, tx+1, ty) && IsSolid(level, layer, tx, ty-1))
+
+        if (IsSolid(level, layer, tx + 1, ty) && IsSolid(level, layer, tx, ty - 1))
         {
             newType = GeoType.SlopeLeftDown;
             possibleConfigs++;
@@ -846,7 +849,7 @@ class GeometryEditor : IEditorMode
 
         if (possibleConfigs == 1)
             return newType;
-            
+
         return GeoType.Air;
     }
 
@@ -869,7 +872,7 @@ class GeometryEditor : IEditorMode
                 case Tool.Wall:
                     cell.Geo = GeoType.Solid;
                     break;
-                
+
                 case Tool.Air:
                     cell.Geo = GeoType.Air;
                     break;
@@ -881,7 +884,7 @@ class GeometryEditor : IEditorMode
                 case Tool.Glass:
                     cell.Geo = GeoType.Glass;
                     break;
-                
+
                 case Tool.Inverse:
                     if (pressed) toolPlaceMode = cell.Geo == GeoType.Air;
                     cell.Geo = toolPlaceMode ? GeoType.Solid : GeoType.Air;
@@ -891,31 +894,31 @@ class GeometryEditor : IEditorMode
                     if (layer == 0 && pressed)
                         cell.Geo = cell.Geo == GeoType.ShortcutEntrance ? GeoType.Air : GeoType.ShortcutEntrance;
                     break;
-                
+
                 case Tool.Slope:
-                {
-                    if (!pressed) break;
-                    
-                    var slopeType = CalcPossibleSlopeType(tx, ty, layer);
-                    if (slopeType != GeoType.Air)
                     {
-                        cell.Geo = slopeType;
+                        if (!pressed) break;
+
+                        var slopeType = CalcPossibleSlopeType(tx, ty, layer);
+                        if (slopeType != GeoType.Air)
+                        {
+                            cell.Geo = slopeType;
+                        }
+
+                        break;
                     }
 
-                    break;
-                }
-
                 case Tool.CopyBackwards:
-                {
-                    int dstLayer = (layer + 1) % 3;
+                    {
+                        int dstLayer = (layer + 1) % 3;
 
-                    ref var dstCell = ref level.Layers[dstLayer, tx, ty];
-                    dstCell.Geo = cell.Geo;
-                    dstCell.Objects = cell.Objects;
-                    window.Renderer.InvalidateGeo(tx, ty, dstLayer);
+                        ref var dstCell = ref level.Layers[dstLayer, tx, ty];
+                        dstCell.Geo = cell.Geo;
+                        dstCell.Objects = cell.Objects;
+                        window.Renderer.InvalidateGeo(tx, ty, dstLayer);
 
-                    break;
-                }
+                        break;
+                    }
 
                 // the following will use the default object tool
                 // handler
@@ -926,7 +929,7 @@ class GeometryEditor : IEditorMode
                 case Tool.VerticalBeam:
                     levelObject = LevelObject.VerticalBeam;
                     break;
-                    
+
                 case Tool.Rock:
                     levelObject = LevelObject.Rock;
                     break;
@@ -938,7 +941,7 @@ class GeometryEditor : IEditorMode
                 case Tool.Crack:
                     levelObject = LevelObject.Crack;
                     break;
-                
+
                 case Tool.Hive:
                     // hives can only be placed above ground
                     if (ty < level.Height - 1 && level.Layers[layer, tx, ty + 1].Geo == GeoType.Solid)
@@ -950,15 +953,15 @@ class GeometryEditor : IEditorMode
                         levelObject = LevelObject.None;
                     }
                     break;
-                
+
                 case Tool.ForbidFlyChain:
                     levelObject = LevelObject.ForbidFlyChain;
                     break;
-                
+
                 case Tool.Waterfall:
                     levelObject = LevelObject.Waterfall;
                     break;
-                
+
                 case Tool.WormGrass:
                     levelObject = LevelObject.WormGrass;
                     break;
@@ -974,15 +977,15 @@ class GeometryEditor : IEditorMode
                 case Tool.CreatureDen:
                     levelObject = LevelObject.CreatureDen;
                     break;
-                
+
                 case Tool.WhackAMoleHole:
                     levelObject = LevelObject.WhackAMoleHole;
                     break;
-                
+
                 case Tool.GarbageWorm:
                     levelObject = LevelObject.GarbageWorm;
                     break;
-                
+
                 case Tool.ScavengerHole:
                     levelObject = LevelObject.ScavengerHole;
                     break;
@@ -1053,26 +1056,26 @@ class GeometryEditor : IEditorMode
             // go to right bounds of the scanline, spawning new scanlines above or below if detected
             while (level.IsInBounds(x, y) && level.Layers[layer, x, y].Geo == geoMedium)
             {
-                bool aboveEmpty = level.IsInBounds(x, y-1) && level.Layers[layer, x, y-1].Geo == geoMedium;
-                bool belowEmpty = level.IsInBounds(x, y+1) && level.Layers[layer, x, y+1].Geo == geoMedium;
+                bool aboveEmpty = level.IsInBounds(x, y - 1) && level.Layers[layer, x, y - 1].Geo == geoMedium;
+                bool belowEmpty = level.IsInBounds(x, y + 1) && level.Layers[layer, x, y + 1].Geo == geoMedium;
 
                 if (aboveEmpty != oldAboveEmpty && aboveEmpty)
                 {
-                    fillStack.Push((x, y-1));
+                    fillStack.Push((x, y - 1));
                 }
 
                 if (belowEmpty != oldBelowEmpty && belowEmpty)
                 {
-                    fillStack.Push((x, y+1));
+                    fillStack.Push((x, y + 1));
                 }
 
                 oldAboveEmpty = aboveEmpty;
                 oldBelowEmpty = belowEmpty;
-                
+
                 level.Layers[layer, x, y].Geo = fillGeo;
                 renderer.InvalidateGeo(x, y, layer);
                 x++;
-            } 
+            }
         }
     }
 
@@ -1116,7 +1119,7 @@ class GeometryEditor : IEditorMode
                 }
             }
         }
-        
+
         isToolRectActive = false;
     }
 
@@ -1124,7 +1127,7 @@ class GeometryEditor : IEditorMode
     {
         if (x < 0 || y < 0) return false;
         if (x >= level.Width || y >= level.Height) return false;
-        return level.Layers[l,x,y].Geo == GeoType.Solid;
+        return level.Layers[l, x, y].Geo == GeoType.Solid;
     }
 
     private void RectSlope(int layer, int rectLf, int rectTp, int rectRt, int rectBt)
@@ -1141,7 +1144,7 @@ class GeometryEditor : IEditorMode
         {
             if (x < 0 || y < 0) return false;
             if (x >= level.Width || y >= level.Height) return false;
-            return level.Layers[l,x,y].Geo == GeoType.Solid;
+            return level.Layers[l, x, y].Geo == GeoType.Solid;
         }
 
         static int CalcDirection(int x, int y, int layer)
@@ -1151,28 +1154,28 @@ class GeometryEditor : IEditorMode
             int selectedDir = -1;
 
             // right
-            if (isSolid(level, layer, x+1, y))
+            if (isSolid(level, layer, x + 1, y))
             {
                 possibleDirections++;
                 selectedDir = 0;
             }
-            
+
             // bottom
-            if (isSolid(level, layer, x, y+1))
+            if (isSolid(level, layer, x, y + 1))
             {
                 possibleDirections++;
                 selectedDir = 1;
             }
 
             // left
-            if (isSolid(level, layer, x-1, y))
+            if (isSolid(level, layer, x - 1, y))
             {
                 possibleDirections++;
                 selectedDir = 2;
             }
 
             // top
-            if (isSolid(level, layer, x, y-1))
+            if (isSolid(level, layer, x, y - 1))
             {
                 possibleDirections++;
                 selectedDir = 3;
@@ -1232,7 +1235,7 @@ class GeometryEditor : IEditorMode
             for (int x = rectLf; x <= rectRt; x++)
             {
                 int i = tileY;
-                
+
                 while (true)
                 {
                     // use ActivateTool instead of setting geo directly

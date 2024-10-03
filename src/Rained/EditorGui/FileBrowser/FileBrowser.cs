@@ -11,7 +11,7 @@ partial class FileBrowser
     private bool isOpen = false;
     private bool isDone = false;
     private string callbackStr = string.Empty;
-    
+
     public Func<string, bool, FileBrowserPreview?>? PreviewCallback;
     private FileBrowserPreview? curPreview;
 
@@ -21,7 +21,7 @@ partial class FileBrowser
 
     private readonly Stack<string> backStack = new();
     private readonly Stack<string> forwardStack = new();
-    private string folderName = "–¬Ω®Œƒº˛º–";
+    private string folderName = "Êñ∞Âª∫Êñá‰ª∂Â§π";
 
     // path display mode - breadcrumb trail or string input
     private bool enterPath;
@@ -29,7 +29,7 @@ partial class FileBrowser
 
     private string pathBuf;
     private string nameBuf;
-    
+
     private int selected = -1;
     private string selectedFilePath = "";
     private bool scrollToSelected = false;
@@ -54,7 +54,7 @@ partial class FileBrowser
     };
 
     private readonly OpenMode mode;
-    
+
     private enum EntryType { File, Directory };
     private struct Entry
     {
@@ -90,9 +90,9 @@ partial class FileBrowser
 
     private static void LoadIcons()
     {
-        icons ??= RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath,"assets","filebrowser-icons.png"));
-    } 
-    
+        icons ??= RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "filebrowser-icons.png"));
+    }
+
     private static RlManaged.Texture2D icons = null!;
     public FileBrowser(OpenMode mode, Action<string> callback, string? openDir)
     {
@@ -100,7 +100,7 @@ partial class FileBrowser
 
         this.mode = mode;
         this.callback = callback;
-        fileFilters.Add(new FileFilter("Any", [ ".*" ]));
+        fileFilters.Add(new FileFilter("Any", [".*"]));
         selectedFilter = fileFilters[0];
 
         var projectsFolderPath = string.Empty;
@@ -127,33 +127,33 @@ partial class FileBrowser
         {
             cwd = openDir ?? Boot.AppDataPath;
         }
-        
+
         SetPath(cwd);
         pathBuf = cwd;
         nameBuf = string.Empty;
 
         if (RainEd.Instance is not null && doesProjectsFolderExist)
         {
-            AddBookmark("œÓƒø", projectsFolderPath);
+            AddBookmark("È°πÁõÆ", projectsFolderPath);
         }
 
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {
-            AddBookmark("”√ªß", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            AddBookmark("Áî®Êà∑", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
         }
 
-        AddBookmark("◊¿√Ê", Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
-        AddBookmark("Œƒµµ", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-        AddBookmark("“Ù¿÷", Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
-        AddBookmark("Õº∆¨", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
-        AddBookmark(" ”∆µ", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
+        AddBookmark("Ê°åÈù¢", Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+        AddBookmark("ÊñáÊ°£", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+        AddBookmark("Èü≥‰πê", Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
+        AddBookmark("ÂõæÁâá", Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+        AddBookmark("ËßÜÈ¢ë", Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
 
         // idk why Environment.SpecialFolder doesn't have a MyDownloads enum;
         // xdg_user_dirs standardizes a download location, and mac has one as well.
         var downloadsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
         if (Directory.Exists(downloadsFolder))
         {
-            AddBookmark("œ¬‘ÿ", downloadsFolder);
+            AddBookmark("‰∏ãËΩΩ", downloadsFolder);
         }
 
         // list drives
@@ -216,7 +216,7 @@ partial class FileBrowser
                 // what the hell is free bsd
                 drives.Add(new BookmarkItem("/", "/"));
             }
-            
+
             // mac os doesn't get a drive listing i suppose
         }
         catch (Exception e)
@@ -257,7 +257,7 @@ partial class FileBrowser
         {
             var dirName = Path.GetFileName(dirPath);
             var dirInfo = File.GetAttributes(dirPath);
-            
+
             if (!dirInfo.HasFlag(FileAttributes.Hidden))
             {
                 if (!string.IsNullOrEmpty(dirName))
@@ -297,7 +297,7 @@ partial class FileBrowser
                     }
                 }
                 catch
-                {}
+                { }
             }
             else if (Path.GetExtension(filePath) == ".lua")
             {
@@ -320,7 +320,7 @@ partial class FileBrowser
         }
 
         needFilterRefresh = true;
-        
+
         return true;
     }
 
@@ -345,7 +345,7 @@ partial class FileBrowser
     /// <exception cref="Exception"></exception>
     public bool Render()
     {
-        Vector4 textColor = ImGui.GetStyle().Colors[(int) ImGuiCol.Text];
+        Vector4 textColor = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
 
         string winName = mode switch
         {
@@ -387,7 +387,8 @@ partial class FileBrowser
                         selected = -1;
                     }
                 }
-            } ImGui.SameLine();
+            }
+            ImGui.SameLine();
             ImGui.SetItemTooltip("Back");
 
             // forward button
@@ -401,8 +402,9 @@ partial class FileBrowser
                         backStack.Push(oldDir);
                         selected = -1;
                     }
-                }  
-            } ImGui.SameLine();
+                }
+            }
+            ImGui.SameLine();
             ImGui.SetItemTooltip("Forward");
 
             // pop style var before creating the up button,
@@ -471,7 +473,7 @@ partial class FileBrowser
                             catch (Exception e)
                             {
                                 Log.Error("Could not create directory!\n" + e);
-                                
+
                                 errorMsg = e.Message;
                                 ImGui.OpenPopup("Error");
                             }
@@ -495,11 +497,11 @@ partial class FileBrowser
                     ImGui.PushTextWrapPos(ImGui.GetTextLineHeight() * 30.0f);
                     ImGui.TextWrapped(errorMsg);
                     ImGui.PopTextWrapPos();
-                    
+
                     ImGui.Separator();
                     if (StandardPopupButtons.Show(PopupButtonList.OK, out _))
                         ImGui.CloseCurrentPopup();
-                    
+
                     ImGui.EndPopup();
                 }
 
@@ -516,7 +518,7 @@ partial class FileBrowser
 
                 if (!enterPath)
                     ImGui.SetKeyboardFocusHere();
-                
+
                 ImGui.SetNextItemWidth(-0.0001f);
                 if (ImGui.InputText("##Path", ref pathBuf, 128, ImGuiInputTextFlags.EnterReturnsTrue))
                 {
@@ -531,7 +533,7 @@ partial class FileBrowser
                 if (ImGuiExt.ImageButtonRect("Type", icons, 13, 13, GetIconRect(8), textColor))
                     showPathInput = true;
                 ImGui.SetItemTooltip("Open Text Input");
-                
+
                 ImGui.SameLine();
 
                 if (pathList.Count == 0)
@@ -555,7 +557,7 @@ partial class FileBrowser
                         {
                             var old = cwd;
 
-                            var newPath = Path.Combine([.. pathList[0..(i+1)]]);
+                            var newPath = Path.Combine([.. pathList[0..(i + 1)]]);
                             if (!OperatingSystem.IsWindows())
                             {
                                 newPath = '/' + newPath;
@@ -576,7 +578,7 @@ partial class FileBrowser
             var style = ImGui.GetStyle();
             var listingHeight = windowSize.Y - ImGui.GetFrameHeightWithSpacing() * 3f +
                 style.ItemSpacing.Y - style.WindowPadding.Y * 2f;
-            
+
             // list bookmarks/locations
             void ListBookmark(BookmarkItem location)
             {
@@ -662,12 +664,12 @@ partial class FileBrowser
 
                     ImGuiExt.ImageRect(icons, 13, 13, GetIconRect(entry.IconIndex), textColor);
                     ImGui.SameLine();
-                    
+
                     var entryName = entry.Name;
                     if (entry.Type == EntryType.Directory)
                     {
                         entryName += Path.DirectorySeparatorChar;
-                    } 
+                    }
 
                     if (ImGui.Selectable(entryName, selected == i, ImGuiSelectableFlags.AllowDoubleClick))
                     {
@@ -721,7 +723,7 @@ partial class FileBrowser
 
                 ImGui.SameLine();
                 if (ImGui.Button("OK"))
-                    dirSelect = true; 
+                    dirSelect = true;
             }
             else
             {
@@ -749,7 +751,7 @@ partial class FileBrowser
                             selectedFilter = filter;
                             needFilterRefresh = true;
                         }
-                        
+
                         if (isSelected)
                             ImGui.SetItemDefaultFocus();
                     }
@@ -873,7 +875,7 @@ partial class FileBrowser
                     }
                     ImGui.CloseCurrentPopup();
                 }
-                
+
                 ImGui.EndPopup();
             }
 
@@ -904,7 +906,7 @@ partial class FileBrowser
 
                 ImGui.EndPopup();
             }
-            
+
             ImGui.EndPopup();
 
             return true;
@@ -944,7 +946,7 @@ partial class FileBrowser
 
         LoadIcons();
 
-        var textColor = ImGui.GetStyle().Colors[(int) ImGuiCol.Text];
+        var textColor = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
         if (ImGuiExt.ImageButtonRect(id, icons, 13, 13, GetIconRect(5), textColor))
         {
             activeFileBrowserButton = ImGui.GetItemID();

@@ -45,22 +45,22 @@ class LevelResizeWindow
 
         var winFlags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoDocking;
         ImGuiExt.CenterNextWindow(ImGuiCond.Once);
-        if (ImGui.Begin("…Ë÷√πÿø®¥Û–°", ref IsWindowOpen, winFlags))
+        if (ImGui.Begin("ËÆæÁΩÆÂÖ≥Âç°Â§ßÂ∞è", ref IsWindowOpen, winFlags))
         {
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 8.0f);
 
-            ImGui.SeparatorText("πÿø®¥Û–°");
+            ImGui.SeparatorText("ÂÖ≥Âç°Â§ßÂ∞è");
             {
                 // tile size
                 ImGui.BeginGroup();
-                if (ImGui.InputInt("øÌ∂»", ref newWidth))
+                if (ImGui.InputInt("ÂÆΩÂ∫¶", ref newWidth))
                     screenW = (newWidth - 20) / 52f;
-                
+
                 newWidth = Math.Max(newWidth, 1); // minimum value is 1
 
-                if (ImGui.InputInt("∏ﬂ∂»", ref newHeight))
+                if (ImGui.InputInt("È´òÂ∫¶", ref newHeight))
                     screenH = (newHeight - 3) / 40f;
-                
+
                 newHeight = Math.Max(newHeight, 1); // minimum value is 1
                 ImGui.EndGroup();
 
@@ -69,13 +69,13 @@ class LevelResizeWindow
                 {
                     ImGui.SameLine();
                     ImGui.BeginGroup();
-                    if (ImGui.InputFloat("∆¡ƒªøÌ∂»", ref screenW, 0.5f, 0.125f))
+                    if (ImGui.InputFloat("Â±èÂπïÂÆΩÂ∫¶", ref screenW, 0.5f, 0.125f))
                     {
                         newWidth = (int)(screenW * 52f + 20f);
                     }
                     screenW = Math.Max(screenW, 0);
 
-                    if (ImGui.InputFloat("∆¡ƒª∏ﬂ∂»", ref screenH, 0.5f, 0.125f))
+                    if (ImGui.InputFloat("Â±èÂπïÈ´òÂ∫¶", ref screenH, 0.5f, 0.125f))
                     {
                         newHeight = (int)(screenH * 40f + 3f);
                     }
@@ -84,10 +84,10 @@ class LevelResizeWindow
                 }
             }
 
-            ImGui.SeparatorText("√™µ„");
+            ImGui.SeparatorText("ÈîöÁÇπ");
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(2f, 2f));
-                var textColor = ImGui.GetStyle().Colors[(int) ImGuiCol.Text];
+                var textColor = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
 
                 for (int y = 0; y < 3; y++)
                 {
@@ -160,12 +160,12 @@ class LevelResizeWindow
                 ImGui.PopStyleVar();
             }
 
-            ImGui.SeparatorText("±ﬂøÚÕﬂ∆¨");
+            ImGui.SeparatorText("ËæπÊ°ÜÁì¶Áâá");
             {
-                ImGui.InputInt("◊Û∑Ω", ref newBufL);
-                ImGui.InputInt("…œ∑Ω", ref newBufT);
-                ImGui.InputInt("”“∑Ω", ref newBufR);
-                ImGui.InputInt("µ◊≤ø", ref newBufB);
+                ImGui.InputInt("Â∑¶Êñπ", ref newBufL);
+                ImGui.InputInt("‰∏äÊñπ", ref newBufT);
+                ImGui.InputInt("Âè≥Êñπ", ref newBufR);
+                ImGui.InputInt("Â∫ïÈÉ®", ref newBufB);
 
                 newBufL = Math.Max(newBufL, 0);
                 newBufR = Math.Max(newBufR, 0);
@@ -176,27 +176,28 @@ class LevelResizeWindow
 
                 ImGui.Separator();
 
-                if (ImGui.Button("»∑∂®"))
+                if (ImGui.Button("Á°ÆÂÆö"))
                 {
                     Apply();
                     IsWindowOpen = false;
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("”¶”√"))
+                if (ImGui.Button("Â∫îÁî®"))
                 {
                     Apply();
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("»°œ˚"))
+                if (ImGui.Button("ÂèñÊ∂à"))
                 {
                     IsWindowOpen = false;
                 }
 
-                ImGui.Text("◊¢“‚:¥À≤Ÿ◊˜Œﬁ∑®≥∑œ˚");
+                ImGui.Text("Ê≥®ÊÑè:Ê≠§Êìç‰ΩúÊó†Ê≥ïÊí§Ê∂à");
             }
-        } ImGui.End();
+        }
+        ImGui.End();
     }
 
     private void Apply()

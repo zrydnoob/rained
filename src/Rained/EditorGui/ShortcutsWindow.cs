@@ -7,122 +7,122 @@ namespace RainEd;
 static partial class ShortcutsWindow
 {
     public static bool IsWindowOpen = false;
-    
-    private readonly static string[] NavTabs = new string[] { "³£¹æ", "»·¾³±à¼­", "¼¸ºÎ±à¼­", "ÍßÆ¬ÌùÍ¼±à¼­", "Ïà»ú±à¼­", "µÆ¹â±à¼­", "ÌØĞ§±à¼­", "µÀ¾ß±à¼­" };
+
+    private readonly static string[] NavTabs = new string[] { "å¸¸è§„", "ç¯å¢ƒç¼–è¾‘", "å‡ ä½•ç¼–è¾‘", "ç“¦ç‰‡è´´å›¾ç¼–è¾‘", "ç›¸æœºç¼–è¾‘", "ç¯å…‰ç¼–è¾‘", "ç‰¹æ•ˆç¼–è¾‘", "é“å…·ç¼–è¾‘" };
 
     private readonly static (string, string)[][] TabData = new (string, string)[][]
     {
         // General
         [
-            ("Êó±ê¹öÂÖ", "Ëõ·Å"),
-            ("[ViewZoomIn]/[ViewZoomOut]", "·Å´ó/ËõĞ¡"),
-            ("Êó±êÖĞ¼ü", "ÒÆ¶¯"),
-            ("Alt+Êó±ê×ó¼ü", "ÒÆ¶¯"),
-            ("[Undo]", "³·Ïú"),
-            ("[Redo]", "ÖØ×ö"),
-            ("[Render]", "äÖÈ¾"),
-            ("[ExportGeometry]", "äÖÈ¾Îª¹Ø¿¨.txt"),
-            ("1", "±à¼­»·¾³"),
-            ("2", "±à¼­¼¸ºÎ"),
-            ("3", "±à¼­ÍßÆ¬ÌùÍ¼"),
-            ("4", "±à¼­Ïà»ú"),
-            ("5", "±à¼­µÆ¹â"),
-            ("6", "±à¼­ÌØĞ§"),
-            ("7", "±à¼­µÀ¾ß"),
+            ("é¼ æ ‡æ»šè½®", "ç¼©æ”¾"),
+            ("[ViewZoomIn]/[ViewZoomOut]", "æ”¾å¤§/ç¼©å°"),
+            ("é¼ æ ‡ä¸­é”®", "ç§»åŠ¨"),
+            ("Alt+é¼ æ ‡å·¦é”®", "ç§»åŠ¨"),
+            ("[Undo]", "æ’¤é”€"),
+            ("[Redo]", "é‡åš"),
+            ("[Render]", "æ¸²æŸ“"),
+            ("[ExportGeometry]", "æ¸²æŸ“ä¸ºå…³å¡.txt"),
+            ("1", "ç¼–è¾‘ç¯å¢ƒ"),
+            ("2", "ç¼–è¾‘å‡ ä½•"),
+            ("3", "ç¼–è¾‘ç“¦ç‰‡è´´å›¾"),
+            ("4", "ç¼–è¾‘ç›¸æœº"),
+            ("5", "ç¼–è¾‘ç¯å…‰"),
+            ("6", "ç¼–è¾‘ç‰¹æ•ˆ"),
+            ("7", "ç¼–è¾‘é“å…·"),
         ],
 
         // Environment
         [
-            ("Êó±ê×ó¼ü", "ÉèÖÃË®Ãæ¸ß¶È")
+            ("é¼ æ ‡å·¦é”®", "è®¾ç½®æ°´é¢é«˜åº¦")
         ],
 
         // Geometry
         [
-            ("[NavUp][NavLeft][NavDown][NavRight]", "Ñ¡ÔñÍßÆ¬"),
-            ("Êó±ê×ó¼ü", "·ÅÖÃ/É¾³ı"),
-            ("Êó±êÓÒ¼ü", "É¾³ı¶ÔÏó"),
-            ("Shift+Êó±ê×ó¼ü", "Ìî³äÑ¡Çø"),
-            ("[FloodFill]+Êó±ê×ó¼ü", "ºéË®Ìî³ä"),
-            ("[SwitchLayer]", "Ñ­»·²ã¼¶"),
-            ("[ToggleLayer1]", "ÇĞ»»²ã1"),
-            ("[ToggleLayer2]", "ÇĞ»»²ã2"),
-            ("[ToggleLayer3]", "ÇĞ»»²ã3"),
-            ("[ToggleMirrorX]", "ÇĞ»»¾µÏñX"),
-            ("[ToggleMirrorY]", "ÇĞ»»¾µÏñY")
+            ("[NavUp][NavLeft][NavDown][NavRight]", "é€‰æ‹©ç“¦ç‰‡"),
+            ("é¼ æ ‡å·¦é”®", "æ”¾ç½®/åˆ é™¤"),
+            ("é¼ æ ‡å³é”®", "åˆ é™¤å¯¹è±¡"),
+            ("Shift+é¼ æ ‡å·¦é”®", "å¡«å……é€‰åŒº"),
+            ("[FloodFill]+é¼ æ ‡å·¦é”®", "æ´ªæ°´å¡«å……"),
+            ("[SwitchLayer]", "å¾ªç¯å±‚çº§"),
+            ("[ToggleLayer1]", "åˆ‡æ¢å±‚1"),
+            ("[ToggleLayer2]", "åˆ‡æ¢å±‚2"),
+            ("[ToggleLayer3]", "åˆ‡æ¢å±‚3"),
+            ("[ToggleMirrorX]", "åˆ‡æ¢é•œåƒX"),
+            ("[ToggleMirrorY]", "åˆ‡æ¢é•œåƒY")
         ],
 
         // Tile
         [
-            ("[SwitchLayer]", "ÇĞ»»²ã¼¶"),
-            ("[SwitchTab]", "ÇĞ»»Ñ¡ÔñÆ÷Ñ¡Ïî¿¨"),
-            ("[NavUp]/[NavDown]", "ä¯ÀÀËùÑ¡Àà±ğ"),
-            ("[NavLeft]/[NavRight]", "ä¯ÀÀÍßÆ¬Àà±ğ"),
-            ("Shift+Êó±ê¹öÂÖ", "¸ü¸Ä²ÄÖÊ±ÊË¢´óĞ¡"),
-            ("[DecreaseBrushSize]/[IncreaseBrushSize]", "¸ü¸Ä²ÄÖÊ±ÊË¢´óĞ¡"),
-            ("[Eyedropper]", "´Ó²ã¼¶ÖĞÑ¡È¡²ÄÖÊ"),
-            ("[SetMaterial]", "½«Ñ¡¶¨ÄÚÈİÉèÖÃÎªÄ¬ÈÏ²ÄÖÊ"),
-            ("Êó±ê×ó¼ü", "·ÅÖÃÌùÍ¼/²ÄÁÏ"),
-            ("Êó±êÓÒ¼ü", "É¾³ıÌùÍ¼/²ÄÁÏ"),
-            ("Shift+Êó±ê×ó¼ü", "¾ØĞÎÌî³äÌùÍ¼/²ÄÁÏ"),
-            ("Shift+Êó±êÓÒ¼ü", "¾ØĞÎÉ¾³ıÌùÍ¼/²ÄÁÏ"),
-            ("[TileIgnoreDifferent]+Êó±ê×ó¼ü", "ºöÂÔ²»Í¬µÄ²ÄÁÏ"),
-            ("[TileIgnoreDifferent]+Êó±ê×ó¼ü", "ºöÂÔ²ÄÖÊ»òÍßÆ¬"),
-            ("[TileForcePlacement]+Êó±ê×ó¼ü", "Ç¿ÖÆÆ½ÆÌ·ÅÖÃ"),
-            ("[TileForceGeometry]+Êó±ê×ó¼ü", "Ç¿ÖÆÆ½ÆÌÍßÆ¬"),
-            ("[TileForceGeometry]+Êó±êÓÒ¼ü", "É¾³ıÌùÍ¼¼°ÍßÆ¬"),
+            ("[SwitchLayer]", "åˆ‡æ¢å±‚çº§"),
+            ("[SwitchTab]", "åˆ‡æ¢é€‰æ‹©å™¨é€‰é¡¹å¡"),
+            ("[NavUp]/[NavDown]", "æµè§ˆæ‰€é€‰ç±»åˆ«"),
+            ("[NavLeft]/[NavRight]", "æµè§ˆç“¦ç‰‡ç±»åˆ«"),
+            ("Shift+é¼ æ ‡æ»šè½®", "æ›´æ”¹æè´¨ç¬”åˆ·å¤§å°"),
+            ("[DecreaseBrushSize]/[IncreaseBrushSize]", "æ›´æ”¹æè´¨ç¬”åˆ·å¤§å°"),
+            ("[Eyedropper]", "ä»å±‚çº§ä¸­é€‰å–æè´¨"),
+            ("[SetMaterial]", "å°†é€‰å®šå†…å®¹è®¾ç½®ä¸ºé»˜è®¤æè´¨"),
+            ("é¼ æ ‡å·¦é”®", "æ”¾ç½®è´´å›¾/ææ–™"),
+            ("é¼ æ ‡å³é”®", "åˆ é™¤è´´å›¾/ææ–™"),
+            ("Shift+é¼ æ ‡å·¦é”®", "çŸ©å½¢å¡«å……è´´å›¾/ææ–™"),
+            ("Shift+é¼ æ ‡å³é”®", "çŸ©å½¢åˆ é™¤è´´å›¾/ææ–™"),
+            ("[TileIgnoreDifferent]+é¼ æ ‡å·¦é”®", "å¿½ç•¥ä¸åŒçš„ææ–™"),
+            ("[TileIgnoreDifferent]+é¼ æ ‡å·¦é”®", "å¿½ç•¥æè´¨æˆ–ç“¦ç‰‡"),
+            ("[TileForcePlacement]+é¼ æ ‡å·¦é”®", "å¼ºåˆ¶å¹³é“ºæ”¾ç½®"),
+            ("[TileForceGeometry]+é¼ æ ‡å·¦é”®", "å¼ºåˆ¶å¹³é“ºç“¦ç‰‡"),
+            ("[TileForceGeometry]+é¼ æ ‡å³é”®", "åˆ é™¤è´´å›¾åŠç“¦ç‰‡"),
         ],
 
         // Camera
         [
-            ("Ë«»÷", "´´½¨Ïà»ú"),
-            ("[NewObject]", "´´½¨Ïà»ú"),
-            ("Êó±ê×ó¼ü", "Ñ¡ÔñÏà»ú"),
-            ("Êó±êÓÒ¼ü", "ÖØÖÃÉãÏñ»ú½Ç"),
-            ("[RemoveObject]", "É¾³ıËùÑ¡Ïà»ú"),
-            ("[Duplicate]", "¸´ÖÆÑ¡¶¨µÄÉãÏñ»ú"),
-            ("[CameraSnapX]/[NavUp]/[NavDown]", "½«XÖá²¶×½µ½ÆäËûÏà»ú"),
-            ("[CameraSnapY]/[NavLeft]/[NavRight]", "½«YÖá²¶×½µ½ÆäËûÏà»ú"),
+            ("åŒå‡»", "åˆ›å»ºç›¸æœº"),
+            ("[NewObject]", "åˆ›å»ºç›¸æœº"),
+            ("é¼ æ ‡å·¦é”®", "é€‰æ‹©ç›¸æœº"),
+            ("é¼ æ ‡å³é”®", "é‡ç½®æ‘„åƒæœºè§’"),
+            ("[RemoveObject]", "åˆ é™¤æ‰€é€‰ç›¸æœº"),
+            ("[Duplicate]", "å¤åˆ¶é€‰å®šçš„æ‘„åƒæœº"),
+            ("[CameraSnapX]/[NavUp]/[NavDown]", "å°†Xè½´æ•æ‰åˆ°å…¶ä»–ç›¸æœº"),
+            ("[CameraSnapY]/[NavLeft]/[NavRight]", "å°†Yè½´æ•æ‰åˆ°å…¶ä»–ç›¸æœº"),
         ],
 
         // Light
         [
-            ("[NavUp][NavLeft][NavDown][NavRight]", "ä¯ÀÀ»­±ÊÄ¿Â¼"),
-            ("[ZoomLightIn]", "ÏòÄÚÒÆ¶¯¹âÏß"),
-            ("[ZoomLightOut]", "ÏòÍâÒÆ¶¯¹âÏß"),
-            ("[RotateLightCW]", "Ë³Ê±ÕëĞı×ª¹âÏß"),
-            ("[RotateLightCCW]", "Ë³Ê±ÕëĞı×ª¹âÏß"),
-            ("[ScaleLightBrush]+Êó±êÒÆ¶¯", "Ëõ·Å±ÊË¢"),
-            ("[RotateLightBrush]+Êó±êÒÆ¶¯", "Ğı×ª±ÊË¢"),
-            ("[ResetBrushTransform]", "ÖØÖÃ±ÊË¢±ä»»"),
-            ("Êó±ê×ó¼ü", "»æÖÆÒõÓ°"),
-            ("Êó±êÓÒ¼ü", "»æÖÆ¹âÏß"),
+            ("[NavUp][NavLeft][NavDown][NavRight]", "æµè§ˆç”»ç¬”ç›®å½•"),
+            ("[ZoomLightIn]", "å‘å†…ç§»åŠ¨å…‰çº¿"),
+            ("[ZoomLightOut]", "å‘å¤–ç§»åŠ¨å…‰çº¿"),
+            ("[RotateLightCW]", "é¡ºæ—¶é’ˆæ—‹è½¬å…‰çº¿"),
+            ("[RotateLightCCW]", "é¡ºæ—¶é’ˆæ—‹è½¬å…‰çº¿"),
+            ("[ScaleLightBrush]+é¼ æ ‡ç§»åŠ¨", "ç¼©æ”¾ç¬”åˆ·"),
+            ("[RotateLightBrush]+é¼ æ ‡ç§»åŠ¨", "æ—‹è½¬ç¬”åˆ·"),
+            ("[ResetBrushTransform]", "é‡ç½®ç¬”åˆ·å˜æ¢"),
+            ("é¼ æ ‡å·¦é”®", "ç»˜åˆ¶é˜´å½±"),
+            ("é¼ æ ‡å³é”®", "ç»˜åˆ¶å…‰çº¿"),
         ],
 
         // Effects
         [
-            ("Êó±ê×ó¼ü", "»æÖÆÌØĞ§"),
-            ("Shift+Êó±ê×ó¼ü", "Ç¿Á¦»æÖÆÌØĞ§"),
-            ("Êó±êÓÒ¼ü", "²Á³ıÌØĞ§"),
-            ("Shift+Êó±ê¹öÂÖ", "¸ü¸Ä±ÊË¢´óĞ¡"),
-            ("[DecreaseBrushSize]/[IncreaseBrushSize]", "¸ü¸Ä±ÊË¢´óĞ¡"),
+            ("é¼ æ ‡å·¦é”®", "ç»˜åˆ¶ç‰¹æ•ˆ"),
+            ("Shift+é¼ æ ‡å·¦é”®", "å¼ºåŠ›ç»˜åˆ¶ç‰¹æ•ˆ"),
+            ("é¼ æ ‡å³é”®", "æ“¦é™¤ç‰¹æ•ˆ"),
+            ("Shift+é¼ æ ‡æ»šè½®", "æ›´æ”¹ç¬”åˆ·å¤§å°"),
+            ("[DecreaseBrushSize]/[IncreaseBrushSize]", "æ›´æ”¹ç¬”åˆ·å¤§å°"),
         ],
 
         // Props
         [
-            ("[SwitchLayer]", "ÇĞ»»²ã¼¶"),
-            ("[SwitchTab]", "ÇĞ»»Ñ¡ÔñÆ÷Ñ¡Ïî¿¨"),
-            ("[NavUp]/[NavDown]", "ä¯ÀÀËùÑ¡Àà±ğ"),
-            ("[NavLeft]/[NavRight]", "ä¯ÀÀµÀ¾ßÀà±ğ"),
-            ("[Eyedropper]", "ÎüÈ¡Êó±êÏÂµÄµÀ¾ß"),
-            ("ÓÒ¼üµã»÷", "´´½¨µÀ¾ß"),
-            ("[NewObject]", "´´½¨µÀ¾ß"),
-            ("Êó±ê×ó¼ü", "Ñ¡ÔñµÀ¾ß"),
-            ("Shift+Êó±ê×ó¼ü", "½«µÀ¾ßÌí¼Óµ½Ñ¡ÔñÁĞ±í"),
-            ("Ë«»÷", "²éÔçÊó±êÏÂµÄµÀ¾ß"),
-            ("[RemoveObject]", "É¾³ıËùÑ¡µÀ¾ß"),
-            ("[ToggleVertexMode]", "ÇĞ»»¶¥µãÄ£Ê½"),
-            ("[Duplicate]", "¸´ÖÆÑ¡¶¨µÄµÀ¾ß"),
-            ("[RopeSimulation]", "Ä£ÄâÑ¡¶¨µÄÉşË÷µÀ¾ß")
+            ("[SwitchLayer]", "åˆ‡æ¢å±‚çº§"),
+            ("[SwitchTab]", "åˆ‡æ¢é€‰æ‹©å™¨é€‰é¡¹å¡"),
+            ("[NavUp]/[NavDown]", "æµè§ˆæ‰€é€‰ç±»åˆ«"),
+            ("[NavLeft]/[NavRight]", "æµè§ˆé“å…·ç±»åˆ«"),
+            ("[Eyedropper]", "å¸å–é¼ æ ‡ä¸‹çš„é“å…·"),
+            ("å³é”®ç‚¹å‡»", "åˆ›å»ºé“å…·"),
+            ("[NewObject]", "åˆ›å»ºé“å…·"),
+            ("é¼ æ ‡å·¦é”®", "é€‰æ‹©é“å…·"),
+            ("Shift+é¼ æ ‡å·¦é”®", "å°†é“å…·æ·»åŠ åˆ°é€‰æ‹©åˆ—è¡¨"),
+            ("åŒå‡»", "æŸ¥æ—©é¼ æ ‡ä¸‹çš„é“å…·"),
+            ("[RemoveObject]", "åˆ é™¤æ‰€é€‰é“å…·"),
+            ("[ToggleVertexMode]", "åˆ‡æ¢é¡¶ç‚¹æ¨¡å¼"),
+            ("[Duplicate]", "å¤åˆ¶é€‰å®šçš„é“å…·"),
+            ("[RopeSimulation]", "æ¨¡æ‹Ÿé€‰å®šçš„ç»³ç´¢é“å…·")
         ]
     };
 
@@ -131,17 +131,17 @@ static partial class ShortcutsWindow
         if (!IsWindowOpen) return;
 
         var editMode = RainEd.Instance.LevelView.EditMode;
-        if (ImGui.Begin("¿ì½İ¼ü", ref IsWindowOpen))
+        if (ImGui.Begin("å¿«æ·é”®", ref IsWindowOpen))
         {
-            if (ImGui.BeginTabBar("¿ì½İ¼ü"))
+            if (ImGui.BeginTabBar("å¿«æ·é”®"))
             {
-                if (ImGui.BeginTabItem("³£¹æ"))
+                if (ImGui.BeginTabItem("å¸¸è§„"))
                 {
                     ShowTab(0);
                     ImGui.EndTabItem();
                 }
 
-                if (ImGui.BeginTabItem("µ±Ç°±à¼­Ä£Ê½"))
+                if (ImGui.BeginTabItem("å½“å‰ç¼–è¾‘æ¨¡å¼"))
                 {
                     ShowTab(editMode + 1);
                     ImGui.EndTabItem();
@@ -174,7 +174,8 @@ static partial class ShortcutsWindow
             ImGui.BeginChild("Controls", ImGui.GetContentRegionAvail());
             ShowTab();
             ImGui.EndChild();*/
-        } ImGui.End();
+        }
+        ImGui.End();
     }
 
     private static void ShowTab(int navTab)
@@ -184,8 +185,8 @@ static partial class ShortcutsWindow
         var tableFlags = ImGuiTableFlags.RowBg;
         if (ImGui.BeginTable("ControlTable", 2, tableFlags))
         {
-            ImGui.TableSetupColumn("¿ì½İ¼ü", ImGuiTableColumnFlags.WidthFixed, ImGui.GetTextLineHeight() * 10.0f);
-            ImGui.TableSetupColumn("¹¦ÄÜ");
+            ImGui.TableSetupColumn("å¿«æ·é”®", ImGuiTableColumnFlags.WidthFixed, ImGui.GetTextLineHeight() * 10.0f);
+            ImGui.TableSetupColumn("åŠŸèƒ½");
             ImGui.TableHeadersRow();
 
             var tabData = TabData[navTab];
@@ -201,7 +202,7 @@ static partial class ShortcutsWindow
                 ImGui.TableSetColumnIndex(1);
                 ImGui.Text(tuple.Item2);
             }
-            
+
             ImGui.EndTable();
         }
     }

@@ -5,7 +5,7 @@ namespace RainEd;
 
 static class EmergencySaveWindow
 {
-    public const string WindowName = "¼ì²âµ½½ô¼±±£´æÎÄ¼ş£¡";
+    public const string WindowName = "æ£€æµ‹åˆ°ç´§æ€¥ä¿å­˜æ–‡ä»¶ï¼";
     public static bool IsWindowOpen = false;
 
     private static string[] savList = [];
@@ -27,7 +27,7 @@ static class EmergencySaveWindow
 
             savList[i] = emSavList[i];
             savDisplays[i] = levelName[0..levelName.LastIndexOf('-')];
-            dateList[i] = writeTime.ToString(culture.DateTimeFormat.ShortDatePattern, culture) + " ÔÚ " + writeTime.ToString(culture.DateTimeFormat.ShortTimePattern, culture);
+            dateList[i] = writeTime.ToString(culture.DateTimeFormat.ShortDatePattern, culture) + " åœ¨ " + writeTime.ToString(culture.DateTimeFormat.ShortTimePattern, culture);
         }
     }
 
@@ -44,15 +44,15 @@ static class EmergencySaveWindow
         if (ImGuiExt.BeginPopupModal(WindowName, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             ImGui.PushTextWrapPos(ImGui.GetTextLineHeight() * 32.0f);
-            ImGui.TextWrapped("Rained¼ì²âµ½Ò»¸ö»ò¶à¸ö½ô¼±±£´æ¡£Äã¿ÉÒÔÑ¡ÔñÈçºÎ´¦ÀíËüÃÇ¡£");
-            ImGui.TextWrapped("Èç¹ûÑ¡Ôñ´ò¿ªÎÄ¼ş£¬½¨ÒéÄú²é¿´¹Ø¿¨£¬Èç¹ûĞèÒª£¬Ê¹ÓÃ¡°Áí´æÎª¡±½«Ô­Ê¼¹Ø¿¨ÎÄ¼şÌæ»»Îª½ô¼±±£´æ¡£");
+            ImGui.TextWrapped("Rainedæ£€æµ‹åˆ°ä¸€ä¸ªæˆ–å¤šä¸ªç´§æ€¥ä¿å­˜ã€‚ä½ å¯ä»¥é€‰æ‹©å¦‚ä½•å¤„ç†å®ƒä»¬ã€‚");
+            ImGui.TextWrapped("å¦‚æœé€‰æ‹©æ‰“å¼€æ–‡ä»¶ï¼Œå»ºè®®æ‚¨æŸ¥çœ‹å…³å¡ï¼Œå¦‚æœéœ€è¦ï¼Œä½¿ç”¨â€œå¦å­˜ä¸ºâ€å°†åŸå§‹å…³å¡æ–‡ä»¶æ›¿æ¢ä¸ºç´§æ€¥ä¿å­˜ã€‚");
             ImGui.PopTextWrapPos();
-            
+
             var tableFlags = ImGuiTableFlags.RowBg;
-            if (ImGui.BeginTable("½ô¼±±£´æÁĞ±í", 2, tableFlags))
+            if (ImGui.BeginTable("ç´§æ€¥ä¿å­˜åˆ—è¡¨", 2, tableFlags))
             {
-                ImGui.TableSetupColumn("ÎÄ¼şÃû");
-                ImGui.TableSetupColumn("ÈÕÆÚ");
+                ImGui.TableSetupColumn("æ–‡ä»¶å");
+                ImGui.TableSetupColumn("æ—¥æœŸ");
                 ImGui.TableHeadersRow();
 
                 for (int i = 0; i < savList.Length; i++)
@@ -69,7 +69,7 @@ static class EmergencySaveWindow
 
             ImGui.Separator();
 
-            if (ImGui.Button("´ò¿ªËùÓĞ", StandardPopupButtons.ButtonSize))
+            if (ImGui.Button("æ‰“å¼€æ‰€æœ‰", StandardPopupButtons.ButtonSize))
             {
                 foreach (var save in savList)
                 {
@@ -81,14 +81,14 @@ static class EmergencySaveWindow
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("ºöÂÔ", StandardPopupButtons.ButtonSize))
+            if (ImGui.Button("å¿½ç•¥", StandardPopupButtons.ButtonSize))
             {
                 ImGui.CloseCurrentPopup();
                 IsWindowOpen = false;
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("·ÅÆúËùÓĞ", StandardPopupButtons.ButtonSize))
+            if (ImGui.Button("æ”¾å¼ƒæ‰€æœ‰", StandardPopupButtons.ButtonSize))
             {
                 RainEd.DiscardEmergencySaves();
                 ImGui.CloseCurrentPopup();

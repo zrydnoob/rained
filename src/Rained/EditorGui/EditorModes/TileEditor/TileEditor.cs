@@ -9,7 +9,7 @@ namespace RainEd;
 
 partial class TileEditor : IEditorMode
 {
-    public string Name { get => "ÌùÍ¼"; }
+    public string Name { get => "è´´å›¾"; }
 
     private readonly LevelWindow window;
     private Tile selectedTile;
@@ -55,8 +55,9 @@ partial class TileEditor : IEditorMode
 
     enum RectMode { Inactive, Place, Remove };
     private RectMode rectMode = 0;
-    
-    public TileEditor(LevelWindow window) {
+
+    public TileEditor(LevelWindow window)
+    {
         this.window = window;
         lastSelectionMode = selectionMode;
         selectedTile = RainEd.Instance.TileDatabase.Categories[0].Tiles[0];
@@ -94,19 +95,19 @@ partial class TileEditor : IEditorMode
             // an empty cell (-1) would mean any tile is accepted
             Raylib.DrawLineV(
                 startPos: new Vector2(x * Level.TileSize + 5, y * Level.TileSize + 5),
-                endPos: new Vector2((x+1) * Level.TileSize - 5, (y+1) * Level.TileSize - 5),
+                endPos: new Vector2((x + 1) * Level.TileSize - 5, (y + 1) * Level.TileSize - 5),
                 color
             );
 
             Raylib.DrawLineV(
-                startPos: new Vector2((x+1) * Level.TileSize - 5, y * Level.TileSize + 5),
-                endPos: new Vector2(x * Level.TileSize + 5, (y+1) * Level.TileSize - 5),
+                startPos: new Vector2((x + 1) * Level.TileSize - 5, y * Level.TileSize + 5),
+                endPos: new Vector2(x * Level.TileSize + 5, (y + 1) * Level.TileSize - 5),
                 color
             );
         }
         else if (tileInt > 0)
         {
-            var cellType = (GeoType) tileInt;
+            var cellType = (GeoType)tileInt;
             switch (cellType)
             {
                 case GeoType.Solid:
@@ -115,14 +116,14 @@ partial class TileEditor : IEditorMode
                         color
                     );
                     break;
-                
+
                 case GeoType.Platform:
                     RlExt.DrawRectangleLinesRec(
                         new Rectangle(x * Level.TileSize, y * Level.TileSize, Level.TileSize, 10),
                         color
                     );
                     break;
-                
+
                 case GeoType.Glass:
                     RlExt.DrawRectangleLinesRec(
                         new Rectangle(x * Level.TileSize, y * Level.TileSize, Level.TileSize, Level.TileSize),
@@ -139,8 +140,8 @@ partial class TileEditor : IEditorMode
 
                 case GeoType.SlopeLeftDown:
                     Raylib.DrawTriangleLines(
-                        new Vector2(x+1, y+1) * Level.TileSize,
-                        new Vector2(x+1, y) * Level.TileSize,
+                        new Vector2(x + 1, y + 1) * Level.TileSize,
+                        new Vector2(x + 1, y) * Level.TileSize,
                         new Vector2(x, y) * Level.TileSize,
                         color
                     );
@@ -148,27 +149,27 @@ partial class TileEditor : IEditorMode
 
                 case GeoType.SlopeLeftUp:
                     Raylib.DrawTriangleLines(
-                        new Vector2(x, y+1) * Level.TileSize,
-                        new Vector2(x+1, y+1) * Level.TileSize,
-                        new Vector2(x+1, y) * Level.TileSize,
+                        new Vector2(x, y + 1) * Level.TileSize,
+                        new Vector2(x + 1, y + 1) * Level.TileSize,
+                        new Vector2(x + 1, y) * Level.TileSize,
                         color
                     );
                     break;
 
                 case GeoType.SlopeRightDown:
                     Raylib.DrawTriangleLines(
-                        new Vector2(x+1, y) * Level.TileSize,
+                        new Vector2(x + 1, y) * Level.TileSize,
                         new Vector2(x, y) * Level.TileSize,
-                        new Vector2(x, y+1) * Level.TileSize,
+                        new Vector2(x, y + 1) * Level.TileSize,
                         color
                     );
                     break;
 
                 case GeoType.SlopeRightUp:
                     Raylib.DrawTriangleLines(
-                        new Vector2(x+1, y+1) * Level.TileSize,
+                        new Vector2(x + 1, y + 1) * Level.TileSize,
                         new Vector2(x, y) * Level.TileSize,
-                        new Vector2(x, y+1) * Level.TileSize,
+                        new Vector2(x, y + 1) * Level.TileSize,
                         color
                     );
                     break;
@@ -191,7 +192,7 @@ partial class TileEditor : IEditorMode
 
         // draw layers
         var drawProps = RainEd.Instance.Preferences.ViewProps;
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             // draw layer into framebuffer
             Raylib.BeginTextureMode(layerFrames[l]);
@@ -201,16 +202,16 @@ partial class TileEditor : IEditorMode
             window.BeginLevelScissorMode();
 
             Rlgl.PushMatrix();
-                levelRender.RenderGeometry(l, LevelWindow.GeoColor(255));
-                levelRender.RenderTiles(l, 255);
-                if (drawProps)
-                    levelRender.RenderProps(l, 100);
+            levelRender.RenderGeometry(l, LevelWindow.GeoColor(255));
+            levelRender.RenderTiles(l, 255);
+            if (drawProps)
+                levelRender.RenderProps(l, 100);
             Rlgl.PopMatrix();
         }
 
         // draw alpha-blended result into main frame
         Raylib.BeginTextureMode(mainFrame);
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             Rlgl.PushMatrix();
             Rlgl.LoadIdentity();
@@ -258,7 +259,7 @@ partial class TileEditor : IEditorMode
             lastMouseY = window.MouseCy;
             removedOnSameCell = false;
         }
-        
+
         modifyGeometry = KeyShortcuts.Active(KeyShortcut.TileForceGeometry);
         forcePlace = KeyShortcuts.Active(KeyShortcut.TileForcePlacement);
         disallowMatOverwrite = KeyShortcuts.Active(KeyShortcut.TileIgnoreDifferent);
@@ -299,7 +300,7 @@ partial class TileEditor : IEditorMode
                     window.WriteStatus("Force Geometry");
                 else if (forcePlace)
                     window.WriteStatus("Force Placement");
-                
+
                 if (disallowMatOverwrite)
                     window.WriteStatus("Ignore Materials");
             }
@@ -345,7 +346,7 @@ partial class TileEditor : IEditorMode
                 {
                     isMouseHeldInMode = false;
                 }
-                
+
                 // render selected tile
                 switch (selectionMode)
                 {
@@ -390,7 +391,7 @@ partial class TileEditor : IEditorMode
                         if (mouseCell.HasTile())
                         {
                             var tile = level.Layers[tileLayer, tileX, tileY].TileHead;
-                            
+
                             if (tile is null)
                             {
                                 Log.UserLogger.Error("Could not find tile head");
@@ -430,7 +431,7 @@ partial class TileEditor : IEditorMode
                     // remove tile on right click
                     if (!removedOnSameCell && isMouseHeldInMode && EditorWindow.IsMouseDown(ImGuiMouseButton.Right) && mouseCell.HasTile())
                     {
-                        if (selectionMode == SelectionMode.Autotiles ||selectionMode == SelectionMode.Tiles || (selectionMode == SelectionMode.Materials && !disallowMatOverwrite))
+                        if (selectionMode == SelectionMode.Autotiles || selectionMode == SelectionMode.Tiles || (selectionMode == SelectionMode.Materials && !disallowMatOverwrite))
                         {
                             removedOnSameCell = true;
                             level.RemoveTileCell(window.WorkLayer, window.MouseCx, window.MouseCy, modifyGeometry);
@@ -465,14 +466,14 @@ partial class TileEditor : IEditorMode
             lastPlaceL = -1;
             removedOnSameCell = false;
         }
-        
+
         Raylib.EndScissorMode();
     }
 
     private void ProcessChainAttach()
     {
-        var chainX = (int) Math.Floor(window.MouseCellFloat.X + 0.5f);
-        var chainY = (int) Math.Floor(window.MouseCellFloat.Y + 0.5f);
+        var chainX = (int)Math.Floor(window.MouseCellFloat.X + 0.5f);
+        var chainY = (int)Math.Floor(window.MouseCellFloat.Y + 0.5f);
 
         RainEd.Instance.Level.SetChainData(
             chainHolderL, chainHolderX, chainHolderY,
@@ -598,7 +599,7 @@ partial class TileEditor : IEditorMode
                     materialBrushSize += 2;
                 else if (Raylib.GetMouseWheelMove() < 0.0f || KeyShortcuts.Activated(KeyShortcut.DecreaseBrushSize))
                     materialBrushSize -= 2;
-                
+
                 materialBrushSize = Math.Clamp(materialBrushSize, 1, 21);
             }
 
@@ -626,7 +627,7 @@ partial class TileEditor : IEditorMode
                 else if (EditorWindow.IsMouseDown(ImGuiMouseButton.Right))
                     placeMode = 2;
             }
-            
+
             if (placeMode != 0 && (placeMode == 1 || !removedOnSameCell))
             {
                 // place or remove materials inside cursor
@@ -698,8 +699,8 @@ partial class TileEditor : IEditorMode
 
             var gridW = (float)(window.MouseCellFloat.X - rectStart.X) / tileWidth;
             var gridH = (float)(window.MouseCellFloat.Y - rectStart.Y) / tileHeight;
-            var rectW = (int) (gridW > 0f ? MathF.Ceiling(gridW) : (MathF.Floor(gridW) - 1)) * tileWidth;
-            var rectH = (int) (gridH > 0f ? MathF.Ceiling(gridH) : (MathF.Floor(gridH) - 1)) * tileHeight;
+            var rectW = (int)(gridW > 0f ? MathF.Ceiling(gridW) : (MathF.Floor(gridW) - 1)) * tileWidth;
+            var rectH = (int)(gridH > 0f ? MathF.Ceiling(gridH) : (MathF.Floor(gridH) - 1)) * tileHeight;
 
             // update minX and minY to fit new rect size
             float minX, minY;
@@ -708,7 +709,7 @@ partial class TileEditor : IEditorMode
                 minX = rectStart.X;
             else
                 minX = rectStart.X + rectW + tileWidth;
-            
+
             if (gridH > 0f)
                 minY = rectStart.Y;
             else
@@ -760,7 +761,7 @@ partial class TileEditor : IEditorMode
 
                             if (level.Layers[window.WorkLayer, gx, gy].HasTile())
                                 level.RemoveTileCell(window.WorkLayer, gx, gy, modifyGeometry);
-                            
+
                             if (!disallowMatOverwrite)
                                 level.Layers[window.WorkLayer, gx, gy].Material = 0;
                         }
@@ -808,7 +809,7 @@ partial class TileEditor : IEditorMode
                         Rlgl.PushMatrix();
                         Rlgl.Translatef(tileOriginX * Level.TileSize + 2, tileOriginY * Level.TileSize + 2, 0);
 
-                        sbyte tileInt = selectedTile.Requirements2[x,y];
+                        sbyte tileInt = selectedTile.Requirements2[x, y];
                         DrawTile(tileInt, x, y, 1f / window.ViewZoom, prefs.TileSpec2.ToRGBA(255));
                         Rlgl.PopMatrix();
                     }
@@ -823,7 +824,7 @@ partial class TileEditor : IEditorMode
                     Rlgl.PushMatrix();
                     Rlgl.Translatef(tileOriginX * Level.TileSize, tileOriginY * Level.TileSize, 0);
 
-                    sbyte tileInt = selectedTile.Requirements[x,y];
+                    sbyte tileInt = selectedTile.Requirements[x, y];
                     DrawTile(tileInt, x, y, 1f / window.ViewZoom, prefs.TileSpec1.ToRGBA(255));
                     Rlgl.PopMatrix();
                 }
@@ -840,7 +841,7 @@ partial class TileEditor : IEditorMode
                 );
             else
                 validationStatus = TilePlacementStatus.OutOfBounds;
-            
+
             // draw tile preview
             Rectangle srcRect, dstRect;
             dstRect = new Rectangle(
@@ -905,7 +906,8 @@ partial class TileEditor : IEditorMode
                 }
                 else if (EditorWindow.IsMouseClicked(ImGuiMouseButton.Left))
                 {
-                    string errStr = validationStatus switch {
+                    string errStr = validationStatus switch
+                    {
                         TilePlacementStatus.OutOfBounds => "Tile is out of bounds",
                         TilePlacementStatus.Overlap => "Tile is overlapping another",
                         TilePlacementStatus.Geometry => "Tile geometry requirements not met",
@@ -931,7 +933,7 @@ partial class TileEditor : IEditorMode
 
     private void ProcessAutotiles()
     {
-        var time = (float) Raylib.GetTime();
+        var time = (float)Raylib.GetTime();
         bool deactivate = false;
         bool endOnClick = RainEd.Instance.Preferences.AutotileMouseMode == UserPreferences.AutotileMouseModeOptions.Click;
 
@@ -946,7 +948,8 @@ partial class TileEditor : IEditorMode
                     selectedAutotile.CanActivate
                 )
                 {
-                    activePathBuilder = selectedAutotile.Type switch {
+                    activePathBuilder = selectedAutotile.Type switch
+                    {
                         AutotileType.Path => new AutotilePathBuilder(selectedAutotile),
                         AutotileType.Rect => new AutotileRectBuilder(selectedAutotile, new Vector2i(window.MouseCx, window.MouseCy)),
                         _ => null

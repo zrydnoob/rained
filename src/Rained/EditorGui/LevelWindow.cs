@@ -30,10 +30,11 @@ class LevelWindow
     public bool IsViewportHovered { get => canvasWidget.IsHovered; }
 
     private readonly List<IEditorMode> editorModes = new();
-    private int selectedMode = (int) EditModeEnum.Environment;
-    private int queuedEditMode = (int) EditModeEnum.None;
+    private int selectedMode = (int)EditModeEnum.Environment;
+    private int queuedEditMode = (int)EditModeEnum.None;
 
-    public int EditMode {
+    public int EditMode
+    {
         get => selectedMode;
         set => queuedEditMode = value;
     }
@@ -50,7 +51,7 @@ class LevelWindow
         return editorModes[editMode];
     }
 
-    public IEditorMode GetEditor(EditModeEnum editMode) => GetEditor((int) editMode);
+    public IEditorMode GetEditor(EditModeEnum editMode) => GetEditor((int)editMode);
 
     public T GetEditor<T>()
     {
@@ -58,7 +59,7 @@ class LevelWindow
         {
             if (editor is T subclass) return subclass;
         }
-        
+
         throw new Exception("Could not find editor mode");
     }
 
@@ -90,7 +91,7 @@ class LevelWindow
         else
         {
             var col = RainEd.Instance.Preferences.LayerColor1;
-            return new Color(col.R, col.G, col.B, (byte)alpha);  
+            return new Color(col.R, col.G, col.B, (byte)alpha);
         }
     }
 
@@ -114,7 +115,7 @@ class LevelWindow
             (byte)(col.G * (1f - fade) + 255f * fade),
             (byte)(col.B * (1f - fade) + 255f * fade),
             (byte)alpha
-        );  
+        );
     }
 
     public LevelWindow()
@@ -126,7 +127,7 @@ class LevelWindow
         {
             layerRenderTextures[i] = RlManaged.RenderTexture2D.Load(1, 1);
         }
-        
+
         Renderer = new LevelEditRender();
         cellChangeRecorder = new ChangeHistory.CellChangeRecorder();
         RainEd.Instance.ChangeHistory.Cleared += () =>
@@ -164,7 +165,7 @@ class LevelWindow
         prefs.UsePalette = Renderer.Palette != -1;
         prefs.PaletteFadeIndex = Renderer.FadePalette;
         prefs.PaletteFade = Renderer.PaletteMix;
-        
+
         foreach (var mode in editorModes)
         {
             mode.SavePreferences(prefs);
@@ -213,8 +214,8 @@ class LevelWindow
     /// <param name="extraSpace">Extra text space to reserve for the text</param>
     public void WriteStatus(string text, int extraSpace = 0)
     {
-        int spaces = 6 * (extraSpace+1);
-        StatusText += text.PadRight(((int)MathF.Floor((text.Length+1) / spaces) + 1) * spaces, ' ');
+        int spaces = 6 * (extraSpace + 1);
+        StatusText += text.PadRight(((int)MathF.Floor((text.Length + 1) / spaces) + 1) * spaces, ' ');
     }
 
     public void Render()
@@ -233,16 +234,16 @@ class LevelWindow
 
             queuedEditMode = -1;
         }
-        
+
         if (IsWindowOpen)
         {
-            if (ImGui.Begin("πÿø®"))
+            if (ImGui.Begin("ÂÖ≥Âç°"))
             {
                 var newEditMode = selectedMode;
 
                 // edit mode
                 ImGui.AlignTextToFramePadding();
-                ImGui.Text("±‡º≠ƒ£ Ω");
+                ImGui.Text("ÁºñËæëÊ®°Âºè");
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 8f);
                 if (ImGui.BeginCombo("##EditMode", editorModes[selectedMode].Name))
@@ -267,8 +268,8 @@ class LevelWindow
                 StatusText = string.Empty;
 
                 {
-                    var zoomText = $"Àı∑≈: {Math.Floor(ViewZoom * 100f)}%";
-                    var mouseText = $" Û±Í: ({MouseCx}, {MouseCy})";
+                    var zoomText = $"Áº©Êîæ: {Math.Floor(ViewZoom * 100f)}%";
+                    var mouseText = $"Èº†Ê†á: ({MouseCx}, {MouseCy})";
                     WriteStatus(zoomText.PadRight(12, ' ') + mouseText);
                 }
                 //ImGui.TextUnformatted($"Zoom: {Math.Floor(viewZoom * 100f)}%      {StatusText}");
@@ -277,33 +278,33 @@ class LevelWindow
                 if (!ImGui.GetIO().WantTextInput)
                 {
                     // scroll keybinds
-                    var moveX = (EditorWindow.IsKeyDown(ImGuiKey.RightArrow)?1:0) - (EditorWindow.IsKeyDown(ImGuiKey.LeftArrow)?1:0);
-                    var moveY = (EditorWindow.IsKeyDown(ImGuiKey.DownArrow)?1:0) - (EditorWindow.IsKeyDown(ImGuiKey.UpArrow)?1:0);
+                    var moveX = (EditorWindow.IsKeyDown(ImGuiKey.RightArrow) ? 1 : 0) - (EditorWindow.IsKeyDown(ImGuiKey.LeftArrow) ? 1 : 0);
+                    var moveY = (EditorWindow.IsKeyDown(ImGuiKey.DownArrow) ? 1 : 0) - (EditorWindow.IsKeyDown(ImGuiKey.UpArrow) ? 1 : 0);
                     var moveSpeed = EditorWindow.IsKeyDown(ImGuiKey.ModShift) ? 60f : 30f;
                     ViewOffset.X += moveX * Level.TileSize * moveSpeed * dt;
                     ViewOffset.Y += moveY * Level.TileSize * moveSpeed * dt;
 
                     // edit mode keybinds
                     if (EditorWindow.IsKeyPressed(ImGuiKey._1))
-                        newEditMode = (int) EditModeEnum.Environment;
-                    
+                        newEditMode = (int)EditModeEnum.Environment;
+
                     if (EditorWindow.IsKeyPressed(ImGuiKey._2))
-                        newEditMode = (int) EditModeEnum.Geometry;
-                    
+                        newEditMode = (int)EditModeEnum.Geometry;
+
                     if (EditorWindow.IsKeyPressed(ImGuiKey._3))
-                        newEditMode = (int) EditModeEnum.Tile;
-                    
+                        newEditMode = (int)EditModeEnum.Tile;
+
                     if (EditorWindow.IsKeyPressed(ImGuiKey._4))
-                        newEditMode = (int) EditModeEnum.Camera;
-                    
+                        newEditMode = (int)EditModeEnum.Camera;
+
                     if (EditorWindow.IsKeyPressed(ImGuiKey._5))
-                        newEditMode = (int) EditModeEnum.Light;
-                    
+                        newEditMode = (int)EditModeEnum.Light;
+
                     if (EditorWindow.IsKeyPressed(ImGuiKey._6))
-                        newEditMode = (int) EditModeEnum.Effect;
+                        newEditMode = (int)EditModeEnum.Effect;
 
                     if (EditorWindow.IsKeyPressed(ImGuiKey._7))
-                        newEditMode = (int) EditModeEnum.Prop;
+                        newEditMode = (int)EditModeEnum.Prop;
                 }
 
                 // change edit mode if requested
@@ -337,7 +338,7 @@ class LevelWindow
                             renderTex = RlManaged.RenderTexture2D.Load(canvasW, canvasH);
                         }
                     }
-                    
+
                     if (!RainEd.Instance.IsLevelLocked)
                     {
                         Raylib.BeginTextureMode(canvasWidget.RenderTexture);
@@ -350,7 +351,7 @@ class LevelWindow
             }
             ImGui.End();
         }
-        
+
         editorModes[selectedMode].DrawToolbar();
     }
 
@@ -383,8 +384,8 @@ class LevelWindow
         // obtain mouse coordinates
         mouseCellFloat.X = (canvasWidget.MouseX / doc.ViewZoom + doc.ViewOffset.X) / Level.TileSize;
         mouseCellFloat.Y = (canvasWidget.MouseY / doc.ViewZoom + doc.ViewOffset.Y) / Level.TileSize;
-        mouseCx = (int) Math.Floor(mouseCellFloat.X);
-        mouseCy = (int) Math.Floor(mouseCellFloat.Y);
+        mouseCx = (int)Math.Floor(mouseCellFloat.X);
+        mouseCy = (int)Math.Floor(mouseCellFloat.Y);
 
         // draw viewport
         // the blending functions here are some stupid hack
@@ -393,7 +394,7 @@ class LevelWindow
         // blend into the imgui background when rendered.
         // Good thing I downloaded renderdoc, otherwise there was no way
         // I would've figured that was the problem!
-        
+
         // glSrcRGB: Silk.NET.OpenGL.BlendingFactor.SrcAlpha
         // glDstRGB: Silk.NET.OpenGL.BlendingFactor.OneMinusSrcAlpha
         // glSrcAlpha: 1
@@ -432,7 +433,7 @@ class LevelWindow
             int borderH = borderBottom - resizeData.InputBufferTop;
             int borderLeft = resizeData.InputBufferLeft + (int)newOrigin.X;
             int borderTop = resizeData.InputBufferTop + (int)newOrigin.Y;
-            
+
             Raylib.DrawRectangleLinesEx(
                 new Rectangle(
                     borderLeft * Level.TileSize, borderTop * Level.TileSize,
@@ -468,7 +469,7 @@ class LevelWindow
             var wheelMove = Raylib.GetMouseWheelMove();
             if (!canvasWidget.IsHovered)
                 wheelMove = 0f;
-            
+
             if (KeyShortcuts.Activated(KeyShortcut.ViewZoomIn))
             {
                 wheelMove = 1f;
@@ -513,10 +514,10 @@ class LevelWindow
     public void BeginLevelScissorMode()
     {
         Raylib.BeginScissorMode(
-            (int) (-ViewOffset.X * ViewZoom),
-            (int) (-ViewOffset.Y * ViewZoom),
-            (int) (RainEd.Instance.Level.Width * Level.TileSize * ViewZoom),
-            (int) (RainEd.Instance.Level.Height * Level.TileSize * ViewZoom)
+            (int)(-ViewOffset.X * ViewZoom),
+            (int)(-ViewOffset.Y * ViewZoom),
+            (int)(RainEd.Instance.Level.Width * Level.TileSize * ViewZoom),
+            (int)(RainEd.Instance.Level.Height * Level.TileSize * ViewZoom)
         );
     }
 }

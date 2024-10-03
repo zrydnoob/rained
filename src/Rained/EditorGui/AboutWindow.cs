@@ -50,19 +50,19 @@ static class AboutWindow
 
         if (ImGui.BeginPopupModal(WindowName, ref IsWindowOpen, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
-            rainedLogo0 ??= RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath,"assets","rained-logo-colorless.png"));
-            rainedLogo1 ??= RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath,"assets","rained-logo-color.png"));
+            rainedLogo0 ??= RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "rained-logo-colorless.png"));
+            rainedLogo1 ??= RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "rained-logo-color.png"));
 
             ImGui.SameLine(Math.Max(0f, (ImGui.GetWindowWidth() - rainedLogo0.Width) / 2.0f));
-            
+
             // draw rained logo, with the outline colored according to the theme 
             var initCursor = ImGui.GetCursorPos();
-            var themeColor = ImGui.GetStyle().Colors[(int) ImGuiCol.Button];
+            var themeColor = ImGui.GetStyle().Colors[(int)ImGuiCol.Button];
             ImGuiExt.Image(rainedLogo0);
             ImGui.SetCursorPos(initCursor);
             ImGuiExt.Image(rainedLogo1.GlibTexture!, new Glib.Color(themeColor.X, themeColor.Y, themeColor.Z, themeColor.W));
-            
-            ImGui.Text("“ª∏ˆ”Í ¿ΩÁπÿø®±‡º≠∆˜ - " + RainEd.Version);
+
+            ImGui.Text("‰∏Ä‰∏™Èõ®‰∏ñÁïåÂÖ≥Âç°ÁºñËæëÂô® - " + RainEd.Version);
             ImGui.NewLine();
             ImGui.Text("(c) 2024 pkhead - MIT License");
             ImGui.Text("Rain World - Videocult/Adult Swim Games/Akapura Games");
@@ -77,12 +77,12 @@ static class AboutWindow
             if (RainEd.Instance.LatestVersionInfo is not null && RainEd.Instance.LatestVersionInfo.VersionName != RainEd.Version)
             {
                 ImGui.NewLine();
-                ImGui.Text("∑¢œ÷–¬∞Ê±æ£°");
+                ImGui.Text("ÂèëÁé∞Êñ∞ÁâàÊú¨ÔºÅ");
                 ImGui.SameLine();
                 ImGuiExt.LinkText(RainEd.Instance.LatestVersionInfo.VersionName, RainEd.Instance.LatestVersionInfo.GitHubReleaseUrl);
             }
 
-            ImGui.SeparatorText("œµÕ≥–≈œ¢:");
+            ImGui.SeparatorText("Á≥ªÁªü‰ø°ÊÅØ:");
             {
                 var sysInfo = systemInfo ?? GetSystemInfo();
                 ImGui.BulletText(".NET: " + sysInfo.FrameworkName);
@@ -96,7 +96,7 @@ static class AboutWindow
                 ImGui.TextWrapped("Gfx Driver: " + sysInfo.GraphicsRenderer);
                 ImGui.PopTextWrapPos();
             }
-            
+
             ImGui.EndPopup();
         }
     }

@@ -5,7 +5,7 @@ namespace RainEd;
 
 class EnvironmentEditor : IEditorMode
 {
-    public string Name { get => "»·¾³"; }
+    public string Name { get => "çŽ¯å¢ƒ"; }
     private readonly LevelWindow window;
 
     private ChangeHistory.EnvironmentChangeRecorder changeRecorder;
@@ -46,26 +46,27 @@ class EnvironmentEditor : IEditorMode
     {
         var level = RainEd.Instance.Level;
 
-        if (ImGui.Begin("»·¾³", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("çŽ¯å¢ƒ", ImGuiWindowFlags.NoFocusOnAppearing))
         {
-            ImGui.Text("ÍßÆ¬Ëæ»úÖÖ×Ó");
+            ImGui.Text("ç“¦ç‰‡éšæœºç§å­");
             ImGui.SetNextItemWidth(-0.001f);
 
             ImGui.SliderInt("##seed", ref level.TileSeed, 0, 400, "%i", ImGuiSliderFlags.AlwaysClamp);
             RecordItemChanges();
 
-            ImGui.Checkbox("·â±Õ·¿¼ä", ref level.DefaultMedium);
+            ImGui.Checkbox("å°é—­æˆ¿é—´", ref level.DefaultMedium);
             RecordItemChanges();
 
-            ImGui.Checkbox("ÈÕ¹â", ref level.HasSunlight);
+            ImGui.Checkbox("æ—¥å…‰", ref level.HasSunlight);
             RecordItemChanges();
 
-            ImGui.Checkbox("Ë®", ref level.HasWater);
+            ImGui.Checkbox("æ°´", ref level.HasWater);
             RecordItemChanges();
 
-            ImGui.Checkbox("Ë®äÖÈ¾ÔÚ×îÇ°Ãæ", ref level.IsWaterInFront);
+            ImGui.Checkbox("æ°´æ¸²æŸ“åœ¨æœ€å‰é¢", ref level.IsWaterInFront);
             RecordItemChanges();
-        } ImGui.End();
+        }
+        ImGui.End();
     }
 
     private void DrawWater()
@@ -104,12 +105,12 @@ class EnvironmentEditor : IEditorMode
 
         // draw level background (solid white)
         Raylib.DrawRectangle(0, 0, level.Width * Level.TileSize, level.Height * Level.TileSize, LevelWindow.BackgroundColor);
-        
+
         // draw the layers
         var drawTiles = RainEd.Instance.Preferences.ViewTiles;
         var drawProps = RainEd.Instance.Preferences.ViewProps;
 
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             var alpha = l == 0 ? 255 : 50;
             var color = LevelWindow.GeoColor(alpha);
@@ -121,10 +122,10 @@ class EnvironmentEditor : IEditorMode
 
             if (drawTiles)
                 levelRender.RenderTiles(l, (int)(alpha * (100.0f / 255.0f)));
-            
+
             if (drawProps)
                 levelRender.RenderProps(l, (int)(alpha * (100.0f / 255.0f)));
-            
+
             Rlgl.PopMatrix();
 
             // draw water behind first layer if set
