@@ -38,7 +38,7 @@ jobs:
             - name: Update Tag
               run: |
                   git tag -f workflow-build HEAD
-                  git push -f origin workflow-
+                  git push -f origin workflow-build
             - name: Create release
               uses: softprops/action-gh-release@v2
               with:
