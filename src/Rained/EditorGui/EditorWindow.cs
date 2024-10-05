@@ -357,9 +357,27 @@ static class EditorWindow
 
             if (ImGui.BeginMenu("帮助"))
             {
-                if (ImGui.MenuItem("向导..."))
+                if (ImGui.MenuItem("README..."))
                 {
-                    GuideViewerWindow.IsWindowOpen = true;
+                    Platform.OpenURL(Path.Combine(Boot.AppDataPath, "README.md"));
+                }
+
+                if (ImGui.MenuItem("文档..."))
+                {
+                    #if DEBUG
+                    var docPath = Path.Combine("dist", "docs", "index.html");
+                    #else
+                    var docPath = Path.Combine(Boot.AppDataPath, "docs", "index.html");
+                    #endif
+
+                    if (File.Exists(docPath))
+                    {
+                        Platform.OpenURL(docPath);
+                    }
+                    else
+                    {
+                        ShowNotification("无法打开文档");
+                    }
                 }
 
                 if (ImGui.MenuItem("关于..."))
