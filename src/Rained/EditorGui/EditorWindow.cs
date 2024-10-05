@@ -345,12 +345,12 @@ static class EditorWindow
 
             if (ImGui.BeginMenu("帮助"))
             {
-                if (ImGui.MenuItem("向导..."))
+                if (ImGui.MenuItem("README..."))
                 {
                     Platform.OpenURL(Path.Combine(Boot.AppDataPath, "README.md"));
                 }
 
-                if (ImGui.MenuItem("Documentation..."))
+                if (ImGui.MenuItem("文档..."))
                 {
                     #if DEBUG
                     var docPath = Path.Combine("dist", "docs", "index.html");
@@ -364,7 +364,7 @@ static class EditorWindow
                     }
                     else
                     {
-                        ShowNotification("Could not open documentation.");
+                        ShowNotification("无法打开文档");
                     }
                 }
 
