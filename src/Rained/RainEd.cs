@@ -21,7 +21,7 @@ public class RainEdStartupException : Exception
 /// </summary>
 sealed class RainEd
 {
-    public const string Version = "wfd-v2.1.6";
+    public const string Version = "wfb-v2.1.6";
 
     public static RainEd Instance = null!;
 

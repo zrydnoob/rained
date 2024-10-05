@@ -343,6 +343,18 @@ static class EditorWindow
                 ImGui.EndMenu();
             }
 
+            if (ImGui.BeginMenu("mod 工具"))
+            {
+                if (ImGui.MenuItem("modinfo 文件生成")){
+                    ModInfoWindow.IsWindowOpen = !ModInfoWindow.IsWindowOpen;
+                }
+
+                if (ImGui.MenuItem("word 配置文件编辑")){
+                    Log.Information("编辑 word 配置文件...");
+                }
+                ImGui.EndMenu();
+            }
+
             if (ImGui.BeginMenu("帮助"))
             {
                 if (ImGui.MenuItem("向导..."))
@@ -501,6 +513,9 @@ static class EditorWindow
         LogsWindow.ShowWindow();
         EmergencySaveWindow.ShowWindow();
         GuideViewerWindow.ShowWindow();
+
+        //Mod tools
+        ModInfoWindow.ShowWindow();
     }
 
     /// <summary>
