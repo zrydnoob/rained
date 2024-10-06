@@ -95,6 +95,8 @@ static class AboutWindow
                 ImGui.Text("- 修改了AutoTile的逻辑来支持鼠标右键清除AutoTile");
                 ImGui.Text("- 添加了 mod 工具 菜单，来方便生成修改各种文件");
                 ImGui.Text("- 修改了更新链接，此后从汉化版仓库中检查更新");
+                ImGui.Text("- 添加了Data的下载地址，下载加速服务由llkk.cc提供");
+                ImGuiExt.LinkText("llkk.cc", "https://gh.llkk.cc/");
                 ImGui.Bullet();
                 ImGuiExt.LinkText("Rained Github", "https://github.com/pkhead/rained");
                 ImGui.Bullet();
