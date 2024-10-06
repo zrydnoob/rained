@@ -33,7 +33,7 @@ class AppSetup
 
     如果您之前安装了官方编辑器或者像社区编辑器一样的编辑器, 那么您将选择包含可执行文件的文件夹。否则，您应该找到并选择上编辑器的 Drizzle 数据文件夹。
 
-    如果不知道如何做，请点击“下载数据文件”按钮。 注意，数据文件存放在Github上，因网络原因可能会下载失败，可自行前往镜像网站下载。本fork在接下来的版本会提供国内加速镜像。
+    如果不知道如何做，请点击“下载数据文件”按钮。 注意，数据文件存放在Github上，因网络原因可能会下载失败，可使用镜像网站下载。
     """;
 
     private enum SetupState
@@ -136,10 +136,17 @@ class AppSetup
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("下载数据文件"))
+        if (ImGui.Button("下载数据文件（Github）"))
         {
             setupState = SetupState.Downloading;
-            downloadTask = DownloadData();
+            downloadTask = DownloadData("https://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip");
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("下载数据文件（llkk.cc加速）"))
+        {
+            setupState = SetupState.Downloading;
+            downloadTask = DownloadData("https://gh.llkk.cc/https://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip");
         }
 
         // show missing dirs popup
@@ -176,7 +183,7 @@ class AppSetup
     {
         if (downloadStage == 1)
         {
-            ImGui.Text("正在下载\nhttps://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip...");
+            ImGui.Text("正在下载\n Data数据包... \n注：使用镜像以下进度条有bug，下载未完成前均是0%，可打开任务管理器查看内存占用估计下载进度，这个文件的大小大概是128MB");
         }
         else if (downloadStage == 2)
         {
@@ -241,7 +248,7 @@ class AppSetup
         }
     }
 
-    private async Task DownloadData()
+    private async Task DownloadData(string url)
     {
         var tempZipFile = Path.GetTempFileName();
         Console.WriteLine("Zip located at " + tempZipFile);
@@ -254,7 +261,7 @@ class AppSetup
             {
                 using var outputStream = File.OpenWrite(tempZipFile);
 
-                var response = await client.GetAsync("https://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip");
+                var response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
 
                 var contentLength = response.Content.Headers.ContentLength;
