@@ -419,7 +419,7 @@ class DrizzleRender : IDisposable
                     if (i == effects.CurrentEffect - 1)
                         builder.Append("> ");
                     else
-                        builder.Append("  ");
+                        builder.Append("       ");
 
                     builder.Append(effects.EffectNames[i]);
                     builder.Append('\n');

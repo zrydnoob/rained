@@ -489,7 +489,7 @@ partial class PropEditor : IEditorMode
                         foreach ((var i, var group) in tileSearchResults)
                         {
                             var cursor = ImGui.GetCursorScreenPos();
-                            if (ImGui.Selectable("  " + propDb.TileCategories[i].Name, selectedTileGroup == i) || tileSearchResults.Count == 1)
+                            if (ImGui.Selectable("       " + propDb.TileCategories[i].Name, selectedTileGroup == i) || tileSearchResults.Count == 1)
                             {
                                 if (i != selectedTileGroup)
                                 {

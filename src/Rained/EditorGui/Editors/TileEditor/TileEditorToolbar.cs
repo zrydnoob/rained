@@ -243,7 +243,7 @@ partial class TileEditor : IEditorMode
                             var group = tileDb.Categories[i];
                             var cursor = ImGui.GetCursorScreenPos();
 
-                            if (ImGui.Selectable("  " + group.Name, selectedTileGroup == i) || tileSearchResults.Count == 1)
+                            if (ImGui.Selectable("       " + group.Name, selectedTileGroup == i) || tileSearchResults.Count == 1)
                                 selectedTileGroup = i;
 
                             drawList.AddRectFilled(
