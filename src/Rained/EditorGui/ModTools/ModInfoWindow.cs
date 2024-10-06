@@ -13,6 +13,8 @@ public class ModInfoWindow
     private static string ModVersion = "";
     private static string ModAuthors = "";
     private static string ModDescription = "";
+    private static List<string> ModRequirements = ["demo1","demo2","demo3"];
+    private static List<string> ModRequirementsNames = [];
 
     private static bool ChecksumOverrideVersion = false;
 
@@ -33,7 +35,21 @@ public class ModInfoWindow
 
             ImGui.SeparatorText("依赖信息");
             {
-                // TODO 以列表形式展示依赖信息
+                var selectedRequirement = "";
+                if (ImGui.BeginListBox("依赖列表"))
+                {
+                    foreach(var i in ModRequirements)
+                    {
+                        if (ImGui.Selectable(i, selectedRequirement == i) || ModRequirements.Count == 1)
+                            selectedRequirement = i;
+                    }
+                    ImGui.EndListBox();
+                    ImGui.Button("添加");
+                    ImGui.SameLine();
+                    ImGui.Button("修改");
+                    ImGui.SameLine();
+                    ImGui.Button("移除");
+                }
             }
 
             ImGui.SeparatorText("更新");
@@ -49,9 +65,14 @@ public class ModInfoWindow
 
             if (ImGui.Button("生成"))
             {
-                // TODO
+                GenerateModInfoFile();
             }
         }
         ImGui.End();
+    }
+
+    public static void GenerateModInfoFile()
+    {
+
     }
 }
