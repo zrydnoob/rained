@@ -68,7 +68,7 @@ static class AssetManagerGUI
                     var cursor = ImGui.GetCursorScreenPos();
                     
                     // pad beginning of selectable to reserve space for the color square
-                    if (ImGui.Selectable("  " + group.Name, i == selected))
+                    if (ImGui.Selectable("       " + group.Name, i == selected))
                     {
                         if (selected != i)
                             groupIndex = 0;

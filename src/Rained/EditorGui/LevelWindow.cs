@@ -244,9 +244,9 @@ class LevelWindow
 
             // edit mode switch radial menu
             {
-                if (EditorWindow.IsKeyPressed(ImGuiKey.GraveAccent))
+                if (KeyShortcuts.Activated(KeyShortcut.SelectEditor))
                     RadialMenu.OpenPopupRadialMenu("模式切换");
-
+                
                 Span<string> options = ["环境", "几何", "贴图", "相机", "灯光", "效果", "道具"];
                 var sel = RadialMenu.PopupRadialMenu("模式切换", options, selectedMode);
                 if (sel != -1)

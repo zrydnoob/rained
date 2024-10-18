@@ -1,0 +1,919 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="brief.html">
+      
+      
+        <link rel="next" href="asset-management.html">
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.39">
+    
+    
+      
+        <title>User interface - Rained</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.8c3ca2c6.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#user-interface" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="index.html" title="Rained" class="md-header__button md-logo" aria-label="Rained" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Rained
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              User interface
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="index.html" title="Rained" class="md-nav__button md-logo" aria-label="Rained" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Rained
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="index.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Manual
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Manual
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="brief.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Brief
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    User interface
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="user-interface.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    User interface
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Windows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Windows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#floating-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Floating windows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docked-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docked windows
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#widgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Widgets
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Widgets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#slider" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slider
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drag-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      Drag input
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#menubar" class="md-nav__link">
+    <span class="md-ellipsis">
+      Menubar
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="asset-management.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Asset management
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="updates.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Updates
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Editing the level
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            Editing the level
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="overview.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Overview
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="editors/env.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="editors/geo.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Geometry
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="editors/tiles.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tiles
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="editors/cameras.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cameras
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="editors/light.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Light
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="editors/effects.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Effects
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="editors/props.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Props
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="playing-your-level.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playing your level
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="resources.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Further reading
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Windows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Windows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#floating-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Floating windows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docked-windows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docked windows
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#widgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Widgets
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Widgets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#slider" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slider
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drag-input" class="md-nav__link">
+    <span class="md-ellipsis">
+      Drag input
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#menubar" class="md-nav__link">
+    <span class="md-ellipsis">
+      Menubar
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="user-interface">User interface</h1>
+<p>The user interface is comprised of windows, with each window containing many widgets such as buttons, sliders, text, e.t.c.</p>
+<h2 id="windows">Windows</h2>
+<h3 id="floating-windows">Floating windows</h3>
+<p><img alt="A floating window." src="img/floating-window.png" /></p>
+<ul>
+<li><strong>Collapse</strong>: The window's contents will be hidden, leaving only the titlebar visible. Click again to expand the window, restoring it to normal.</li>
+<li><strong>Close</strong>: This button may not be on all windows. For those that are, once closed, the window can be re-opened from one of the menus.</li>
+<li><strong>Resize</strong>: Drag this and move your mouse to resize the window. You may also drag them by the edges to resize them along that edge.</li>
+</ul>
+<p>A window can be moved by clicking and dragging from either the title bar or an unoccupied space from within the window. If dragged by the titlebar, the window can be docked. Overlays will appear on the user interface, and dragging your mouse over one of them will allow you to choose where a window will be docked.
+<img alt="Docking overlays" src="img/docking-window.png" /></p>
+<p>In addition, windows can be dragged by its titlebar without showing the docking overlays by holding <kbd>Shift</kbd>. After being docked, the window can be undocked by dragging it by its titlebar.</p>
+<h3 id="docked-windows">Docked windows</h3>
+<p><img alt="A docked window." src="img/docked-window.png" /></p>
+<p>Docked windows will have a button that resembles an upside-down "eject" icon. This is used as either a vertical tab list, for docked windows that are tabbed into the same space, or a button to open a popup that allows you to hide or show the tab bar.</p>
+<p>When the tab bar is hidden, a little right triangle will be visible on the top left of the window. Clicking the triangle will once again show the tab bar.</p>
+<h2 id="widgets">Widgets</h2>
+<p>Most widgets are obvious, but some have special interactions that should be noted.</p>
+<h3 id="slider">Slider</h3>
+<p><img alt="Slider" src="img/slider.png" /></p>
+<p>Click and drag your mouse horizontally on this widget to change its value.
+If <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> is held while clicking, you can type in the value of the slider.</p>
+<h3 id="drag-input">Drag input</h3>
+<p><img alt="Drag input" src="img/draginput.png" /></p>
+<p>These work identically to sliders, except that there is no visual knob and also no limit on the minimum or maximum value.
+Like sliders, if <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> is held while clicking, you can type in the value of the input.</p>
+<h2 id="menubar">Menubar</h2>
+<p>Rained adopts the standard concept of a "menubar", a collection of menus/submenus in a bar that is located at the very top of the window.</p>
+<dl>
+<dt><strong>File</strong></dt>
+<dd>
+<ul>
+<li><strong>New</strong>: Create a new level.</li>
+<li><strong>Open</strong>: Open a level from disk.</li>
+<li><strong>Open Recent</strong>: Open a level that was recently opened.</li>
+<li><strong>Save</strong>: Save the level to disk.</li>
+<li><strong>Save As</strong>: Choose a file on disk and save the level to it.</li>
+<li><strong>Render</strong>: Render the level using Drizzle.</li>
+<li><strong>Export Geometry</strong>: Export the geometry of the level without rendering the visuals, using Drizzle.</li>
+<li><strong>Preferences</strong>: Open the preferences window.</li>
+<li><strong>Quit</strong>: Quit Rained.</li>
+</ul>
+</dd>
+<dt><strong>Edit</strong></dt>
+<dd>
+<ul>
+<li><strong>Undo</strong>: Undo an action.</li>
+<li><strong>Redo</strong>: Redo an action.</li>
+<li><strong>Resize Level</strong>: Open the level resize window.</li>
+<li><strong>Commands</strong>: List of plugin/script commands that can be executed.</li>
+<li>Edit actions for the current edit mode will be shown in this menu.</li>
+</ul>
+</dd>
+<dt><strong>View</strong></dt>
+<dd>
+<ul>
+<li><strong>Zoom In</strong>: Zoom the viewport inwards.</li>
+<li><strong>Zoom Out</strong>: Zoom the viewport outwards.</li>
+<li><strong>Reset View</strong>: Reset the viewport zoom and pan.</li>
+<li><strong>Grid</strong>: Toggle the visibility of the grid.</li>
+<li><strong>Tiles</strong>: Toggle the visibility of tiles outside of the Tiles edit mode.</li>
+<li><strong>Props</strong>: Toggle the visibility of props outside of the Props edit mode.</li>
+<li><strong>Camera Borders</strong>: Toggle the visibility of camera boundaries.</li>
+<li><strong>Tile Graphics</strong>: Toggle whether or not tiles are rendered using the in-game render or the editor preview.</li>
+<li><strong>Obscured Beams</strong>: If on, will show negative space for a horizontal or vertical beam if placed inside a wall.</li>
+<li><strong>Tile Heads</strong>: If on, will show a cross at the location of each tile head in the level.</li>
+<li><strong>Keyboard Shortcuts</strong>: Toggle the visibility of the keyboard shortcuts window.</li>
+<li><strong>Logs</strong>: Toggle the visibility of the logs window.</li>
+<li><strong>Palettes</strong>: Toggle the visibility of the palettes window.</li>
+<li><strong>Show Data Folder</strong>: Open the system's file browser to the Drizzle data folder.</li>
+<li><strong>Show Render Folder</strong>: Open the system's file browser to the folder where Drizzle outputs level renders.</li>
+</ul>
+</dd>
+<dt><strong>Help</strong></dt>
+<dd>
+<ul>
+<li><strong>Manual</strong>: Opens your preferred file browser to this website.</li>
+<li><strong>About</strong>: Shows/hides the about window.</li>
+</ul>
+</dd>
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.tabs.link"], "search": "assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="assets/javascripts/bundle.525ec568.min.js"></script>
+      
+    
+  </body>
+</html>

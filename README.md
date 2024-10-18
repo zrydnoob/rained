@@ -15,7 +15,10 @@ Note: This fork is a Chinese translation. If you need the English version, pleas
 # Rained
 <p align="center">
     <img src="rained-logo.png" />
+    <br />
+    <a href="https://github.com/pkhead/rained/releases">Downloads</a>
 </p>
+
 
 Another Rain World level editor. Read [this document](dist/README.md), which is bundled with every release package, for more information on how to use this software.
 
@@ -68,7 +71,7 @@ dotnet cake
 dotnet cake --gles=false
 
 # run the project!
-dotnet run --project --no-build src/Rained/Rained.csproj
+dotnet run --no-build --project src/Rained/Rained.csproj
 ```
 Upon first startup, you can configure where your Data folder is located. If you chose to download and install it, Rained will download and extract [this repository](https://github.com/SlimeCubed/Drizzle.Data/tree/community).
 
