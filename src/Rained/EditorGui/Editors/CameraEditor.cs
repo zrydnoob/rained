@@ -328,12 +328,24 @@ class CameraEditor : IEditorMode
                     {
                         minDistX = distX;
                         activeCamera.Position.X = camera.Position.X;
+                        Raylib.DrawLineV(
+                            new Vector2(camCenter.X * Level.TileSize,camCenter.Y * Level.TileSize),
+                            new Vector2((activeCamera.Position.X + Camera.WidescreenSize.X / 2) * Level.TileSize,
+                                (activeCamera.Position.Y + Camera.WidescreenSize.Y / 2) * Level.TileSize),
+                            Color.Red
+                        );
                     }
 
                     if (vertSnap && distY < snapThreshold && distY < minDistY)
                     {
                         minDistY = distY;
                         activeCamera.Position.Y = camera.Position.Y;
+                        Raylib.DrawLineV(
+                            new Vector2(camCenter.X * Level.TileSize,camCenter.Y * Level.TileSize),
+                            new Vector2((activeCamera.Position.X + Camera.WidescreenSize.X / 2) * Level.TileSize,
+                                (activeCamera.Position.Y + Camera.WidescreenSize.Y / 2) * Level.TileSize),
+                            Color.Red
+                        );
                     }
                 }
 
