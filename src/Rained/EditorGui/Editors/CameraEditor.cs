@@ -56,9 +56,9 @@ class CameraEditor : IEditorMode
 
     public void ShowEditMenu()
     {
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "Delete Selected Camera");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "Duplicate Camera");
-        if (ImGui.MenuItem("Reset Camera Corners") && selectedCameras.Count > 0)
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "删除选定的摄像机");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "复制摄像机");
+        if (ImGui.MenuItem("重置摄像机边角") && selectedCameras.Count > 0)
         {
             changeRecorder.BeginChange();
 
@@ -77,13 +77,13 @@ class CameraEditor : IEditorMode
         ImGui.Separator();
 
         ImGui.BeginDisabled(selectedCameras.Count != 1);
-        if (ImGui.MenuItem("Prioritize Camera"))
+        if (ImGui.MenuItem("优先处理摄像机"))
         {
             RainEd.Instance.Level.PrioritizedCamera = selectedCameras[0];
         }
         ImGui.EndDisabled();
 
-        if (ImGui.MenuItem("Clear Priority"))
+        if (ImGui.MenuItem("清除优先"))
         {
             RainEd.Instance.Level.PrioritizedCamera = null;
         }
@@ -163,15 +163,15 @@ class CameraEditor : IEditorMode
 
         if (horizSnap && vertSnap)
         {
-            window.WriteStatus("X and Y Snap");
+            window.WriteStatus("X Y 对齐");
         }
         else if (horizSnap)
         {
-            window.WriteStatus("X snap");
+            window.WriteStatus("X 对齐");
         }
         else if (vertSnap)
         {
-            window.WriteStatus("Y snap");
+            window.WriteStatus("Y 对齐");
         }
 
         if (window.IsViewportHovered)
