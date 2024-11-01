@@ -10,12 +10,12 @@ partial class FileBrowser
 {
     private bool isOpen = false;
     private bool isDone = false;
-    private string callbackStr = string.Empty;
-
+    private string[] callbackData = [];
+    
     public Func<string, bool, FileBrowserPreview?>? PreviewCallback;
     private FileBrowserPreview? curPreview;
 
-    private readonly Action<string> callback;
+    private readonly Action<string[]> callback;
     private string cwd; // current directory of file browser
     private readonly List<string> pathList = new(); // path as a list
 
@@ -29,12 +29,12 @@ partial class FileBrowser
 
     private string pathBuf;
     private string nameBuf;
-
-    private int selected = -1;
+    
+    private List<int> selected = [];
     private string selectedFilePath = "";
     private bool scrollToSelected = false;
     private readonly List<Entry> entries = new();
-    private readonly List<(int, Entry)> filteredEntries = new();
+    private readonly List<(int index, Entry entry)> filteredEntries = new();
     private readonly List<FileFilter> fileFilters = new();
     private FileFilter selectedFilter;
     private bool needFilterRefresh = false;
@@ -50,11 +50,14 @@ partial class FileBrowser
     {
         Write,
         Read,
-        Directory
+        MultiRead,
+        Directory,
+        MultiDirectory
     };
 
     private readonly OpenMode mode;
-
+    private readonly bool multiSelect;
+    
     private enum EntryType { File, Directory };
     private struct Entry
     {
@@ -94,11 +97,12 @@ partial class FileBrowser
     }
 
     private static RlManaged.Texture2D icons = null!;
-    public FileBrowser(OpenMode mode, Action<string> callback, string? openDir)
+    public FileBrowser(OpenMode mode, Action<string[]> callback, string? openDir)
     {
         LoadIcons();
 
         this.mode = mode;
+        multiSelect = mode is OpenMode.MultiRead or OpenMode.MultiDirectory;
         this.callback = callback;
         fileFilters.Add(new FileFilter("Any", [".*"]));
         selectedFilter = fileFilters[0];
@@ -351,7 +355,9 @@ partial class FileBrowser
         {
             OpenMode.Write => "Save File",
             OpenMode.Read => "Open File",
+            OpenMode.MultiRead => "Open File(s)",
             OpenMode.Directory => "Open Folder",
+            OpenMode.MultiDirectory => "Open Folder(s)",
             _ => throw new Exception("Invalid open mode")
         };
 
@@ -384,7 +390,7 @@ partial class FileBrowser
                     if (SetPath(newPath!))
                     {
                         forwardStack.Push(oldDir);
-                        selected = -1;
+                        selected.Clear();
                     }
                 }
             }
@@ -400,7 +406,7 @@ partial class FileBrowser
                     if (SetPath(newPath!))
                     {
                         backStack.Push(oldDir);
-                        selected = -1;
+                        selected.Clear();
                     }
                 }
             }
@@ -416,7 +422,7 @@ partial class FileBrowser
                 var oldDir = cwd;
                 if (SetPath(Path.Combine(cwd, "..")))
                 {
-                    selected = -1;
+                    selected.Clear();
                     backStack.Push(oldDir);
                     forwardStack.Clear();
                 }
@@ -522,7 +528,13 @@ partial class FileBrowser
                 ImGui.SetNextItemWidth(-0.0001f);
                 if (ImGui.InputText("##Path", ref pathBuf, 128, ImGuiInputTextFlags.EnterReturnsTrue))
                 {
-                    SetPath(Path.GetFullPath(pathBuf));
+                    var fullPath = Path.GetFullPath(pathBuf);
+                    if (!Path.EndsInDirectorySeparator(fullPath)) fullPath += Path.DirectorySeparatorChar;
+                    
+                    if (fullPath != cwd && SetPath(fullPath))
+                    {
+                        selected.Clear();
+                    }
                 }
 
                 enterPath = !closeTextInput;
@@ -591,7 +603,7 @@ partial class FileBrowser
                         {
                             backStack.Push(old);
                             forwardStack.Clear();
-                            selected = -1;
+                            selected.Clear();
                         }
                     }
                 }
@@ -632,7 +644,7 @@ partial class FileBrowser
             }
 
             // update currently selected file for the preview
-            var curFileName = (selected < 0 || selected >= entries.Count) ? "" : Path.Combine(cwd, entries[selected].Name);
+            var curFileName = selected.Count != 1 ? "" : Path.Combine(cwd, entries[selected[0]].Name);
             if (curFileName != selectedFilePath)
             {
                 selectedFilePath = curFileName;
@@ -641,7 +653,7 @@ partial class FileBrowser
                 curPreview = null;
 
                 if (curFileName != "")
-                    curPreview = PreviewCallback?.Invoke(selectedFilePath, entries[selected].IconIndex == 7);
+                    curPreview = PreviewCallback?.Invoke(selectedFilePath, entries[selected[0]].IconIndex == 7);
             }
 
             float listingWidth = ImGui.GetContentRegionAvail().X;
@@ -654,7 +666,7 @@ partial class FileBrowser
             {
                 foreach ((var i, var entry) in filteredEntries)
                 {
-                    if (selected == i && scrollToSelected)
+                    if (selected.Count == 1 && selected[0] == i && scrollToSelected)
                     {
                         ImGui.SetScrollHereY();
                     }
@@ -671,9 +683,9 @@ partial class FileBrowser
                         entryName += Path.DirectorySeparatorChar;
                     }
 
-                    if (ImGui.Selectable(entryName, selected == i, ImGuiSelectableFlags.AllowDoubleClick))
-                    {
-                        selected = i;
+                    if (ImGui.Selectable(entryName, selected.Contains(i), ImGuiSelectableFlags.AllowDoubleClick))
+                    {                        
+                        SelectIndex(i);
                     }
 
                     if (ImGui.IsItemClicked() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
@@ -716,7 +728,7 @@ partial class FileBrowser
             scrollToSelected = false;
 
             // ok and cancel buttons
-            if (mode == OpenMode.Directory)
+            if (mode is OpenMode.Directory or OpenMode.MultiDirectory)
             {
                 if (ImGui.Button("Open"))
                     ok = true;
@@ -738,7 +750,7 @@ partial class FileBrowser
             ImGui.SameLine();
 
             // file filter
-            if (mode != OpenMode.Directory)
+            if (!(mode is OpenMode.Directory or OpenMode.MultiDirectory))
             {
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeight() * 12f);
                 if (ImGui.BeginCombo("##Filter", selectedFilter.FilterName))
@@ -766,7 +778,7 @@ partial class FileBrowser
             var oldName = nameBuf;
             var enterPressed = ImGui.InputTextWithHint(
                 "##Name",
-                mode == OpenMode.Directory ? "Folder Name" : "File Name",
+                mode is OpenMode.Directory or OpenMode.MultiDirectory ? "Folder Name" : "File Name",
                 ref nameBuf, 128,
                 ImGuiInputTextFlags.EnterReturnsTrue
             );
@@ -776,13 +788,14 @@ partial class FileBrowser
             {
                 // modify name to match current filter
                 string name = selectedFilter.Enforce(nameBuf);
-                selected = -1;
+                selected.Clear();;
 
-                for (int i = 0; i < entries.Count; i++)
+                for (int i = 0; i < filteredEntries.Count; i++)
                 {
-                    if (entries[i].Name == name)
+                    if (filteredEntries[i].entry.Name == name)
                     {
-                        selected = i;
+                        if (!selected.Contains(filteredEntries[i].index))
+                            selected.Add(filteredEntries[i].index);
                         scrollToSelected = true;
                         break;
                     }
@@ -792,10 +805,14 @@ partial class FileBrowser
             if (enterPressed) ok = true;
             if (ok)
             {
+                var selectedDirs = selected.Where(x => entries[x].Type == EntryType.Directory);
+
                 if (mode == OpenMode.Write)
                 {
-                    if (selected >= 0 && entries[selected].Type == EntryType.Directory)
-                        ActivateEntry(entries[selected]);
+                    if (selectedDirs.Any())
+                    {
+                        if (selectedDirs.Count() == 1) ActivateEntry(entries[selectedDirs.First()]);
+                    }
                     else
                     {
                         if (nameBuf != "" && nameBuf != "." && nameBuf != "..")
@@ -811,46 +828,46 @@ partial class FileBrowser
                             else
                             {
                                 isDone = true;
-                                callbackStr = Path.Combine(cwd, name);
+                                callbackData = [Path.Combine(cwd, name)];
                             }
                         }
                     }
                 }
-                else if (mode == OpenMode.Read && selected >= 0)
+                else if (mode is OpenMode.Read or OpenMode.MultiRead && selected.Count > 0)
                 {
-                    var ent = entries[selected];
-                    if (ent.Type == EntryType.Directory)
-                        ActivateEntry(ent);
+                    if (selectedDirs.Any())
+                    {
+                        if (selectedDirs.Count() == 1) ActivateEntry(entries[selectedDirs.First()]);
+                    }
                     else
                     {
                         isDone = true;
-                        callbackStr = Path.Combine(cwd, ent.Name);
+                        callbackData = [..selected.Select(x => Path.Combine(cwd, entries[x].Name))];
                     }
                 }
-                else if (mode == OpenMode.Directory && selected >= 0)
+                else if (mode is OpenMode.Directory or OpenMode.MultiDirectory && selected.Count > 0)
                 {
-                    var ent = entries[selected];
-                    if (ent.Type == EntryType.Directory)
-                        ActivateEntry(ent);
+                    if (selectedDirs.Any() && selectedDirs.Count() == 1)
+                        ActivateEntry(entries[selectedDirs.First()]);
                 }
             }
 
             // Directory Mode folder submit
             if (dirSelect)
             {
-                if (selected >= 0)
+                if (selected.Count > 0)
                 {
-                    var ent = entries[selected];
-                    if (ent.Type == EntryType.Directory)
-                    {
-                        isDone = true;
-                        callbackStr = Path.Combine(cwd, ent.Name);
-                    }
+                    //var ent = entries[selected];
+                    //if (ent.Type == EntryType.Directory)
+                    //{
+                    isDone = true;
+                    callbackData = [..selected.Select(x => Path.Combine(cwd, entries[x].Name))];
+                    //}
                 }
                 else
                 {
                     isDone = true;
-                    callbackStr = cwd;
+                    callbackData = [cwd];
                 }
             }
 
@@ -871,7 +888,7 @@ partial class FileBrowser
                     if (btn == 0) // yes
                     {
                         isDone = true;
-                        callbackStr = overwriteFileName;
+                        callbackData = [overwriteFileName];
                     }
                     ImGui.CloseCurrentPopup();
                 }
@@ -884,7 +901,7 @@ partial class FileBrowser
                 ImGui.CloseCurrentPopup();
                 curPreview?.Dispose();
                 curPreview = null;
-                callback(callbackStr);
+                callback(callbackData);
             }
 
             // show error popup if necessary
@@ -915,6 +932,60 @@ partial class FileBrowser
         return false;
     }
 
+    private void SelectIndex(int idx)
+    {
+        var filterSet = new HashSet<int>();
+        foreach (var (index, _) in filteredEntries)
+            filterSet.Add(index);
+
+        if (multiSelect && ImGui.IsKeyDown(ImGuiKey.ModShift))
+        {
+            // shift-click: add all items inbetween
+            // the last selected item and the newly selected one
+            if (selected.Count == 0)
+            {
+                selected.Add(idx);
+            }
+            else
+            {
+                var rangeStart = selected[^1];
+                var rangeEnd = idx;
+                int dir = rangeEnd >= rangeStart ? 1 : -1;
+                var i = rangeStart;
+                var steps = Math.Abs(rangeEnd - rangeStart);
+
+                if (selected.Contains(idx))
+                {
+                    for (var n = 0; n <= steps; n++)
+                    {
+                        selected.Remove(i);
+                        i += dir;
+                    }
+                }
+                else
+                {
+                    for (var n = 0; n <= steps; n++)
+                    {
+                        if (filterSet.Contains(i) && !selected.Contains(i))
+                            selected.Add(i);
+                        i += dir;
+                    }
+                }
+            }
+        }
+        else if (multiSelect && ImGui.IsKeyDown(ImGuiKey.ModCtrl))
+        {
+            // ctrl-click: basic multi-select
+            if (!selected.Remove(idx))
+                selected.Add(idx);
+        }
+        else
+        {
+            selected.Clear();
+            selected.Add(idx);
+        }
+    }
+
     private void ActivateEntry(Entry entry)
     {
         if (entry.Type == EntryType.Directory)
@@ -924,7 +995,7 @@ partial class FileBrowser
             {
                 backStack.Push(oldPath);
                 forwardStack.Clear();
-                selected = -1;
+                selected.Clear();
             }
         }
     }
@@ -937,11 +1008,14 @@ partial class FileBrowser
 
     public static bool Button(string id, OpenMode openMode, ref string path)
     {
-        static void Callback(string path)
+        if (openMode is OpenMode.MultiRead or OpenMode.MultiDirectory)
+            throw new ArgumentException("Cannot use a multiselect mode for FileBrowser.Button.", nameof(openMode));
+        
+        static void Callback(string[] path)
         {
-            if (string.IsNullOrEmpty(path)) return;
+            if (path.Length == 0) return;
             fileBrowserReturn = true;
-            fileBrowserReturnValue = path;
+            fileBrowserReturnValue = path[0];
         }
 
         LoadIcons();

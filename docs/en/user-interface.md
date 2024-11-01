@@ -3,19 +3,28 @@ The user interface is comprised of windows, with each window containing many wid
 
 ## Windows
 ### Floating windows
-![A floating window.](img/floating-window.png)
+
+<figure markdown="span">
+    ![A floating window.](../img/floating-window.png)
+</figure>
 
 - **Collapse**: The window's contents will be hidden, leaving only the titlebar visible. Click again to expand the window, restoring it to normal.
 - **Close**: This button may not be on all windows. For those that are, once closed, the window can be re-opened from one of the menus.
 - **Resize**: Drag this and move your mouse to resize the window. You may also drag them by the edges to resize them along that edge.
 
 A window can be moved by clicking and dragging from either the title bar or an unoccupied space from within the window. If dragged by the titlebar, the window can be docked. Overlays will appear on the user interface, and dragging your mouse over one of them will allow you to choose where a window will be docked.
-![Docking overlays](img/docking-window.png)
+
+<figure markdown="span">
+    ![Docking overlays](../img/docking-window.png)
+</figure>
 
 In addition, windows can be dragged by its titlebar without showing the docking overlays by holding <kbd>Shift</kbd>. After being docked, the window can be undocked by dragging it by its titlebar.
 
 ### Docked windows
-![A docked window.](img/docked-window.png)
+
+<figure markdown="span">
+    ![A docked window.](../img/docked-window.png)
+</figure>
 
 Docked windows will have a button that resembles an upside-down "eject" icon. This is used as either a vertical tab list, for docked windows that are tabbed into the same space, or a button to open a popup that allows you to hide or show the tab bar.
 
@@ -25,19 +34,21 @@ When the tab bar is hidden, a little right triangle will be visible on the top l
 Most widgets are obvious, but some have special interactions that should be noted.
 
 ### Slider
-![Slider](img/slider.png)
+![Slider](../img/slider.png)
 
 Click and drag your mouse horizontally on this widget to change its value.
 If <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> is held while clicking, you can type in the value of the slider.
 
 ### Drag input
-![Drag input](img/draginput.png)
+![Drag input](../img/draginput.png)
 
 These work identically to sliders, except that there is no visual knob and also no limit on the minimum or maximum value.
 Like sliders, if <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> is held while clicking, you can type in the value of the input.
 
 ## Menubar
 Rained adopts the standard concept of a "menubar", a collection of menus/submenus in a bar that is located at the very top of the window.
+
+Whenever this documentation refers to an item in the menubar, it will do so by first naming the menu the item is in, followed by a `>`, and then finally the name of the item with or without ellipses at the end if present, all within preformatted text. For example, `File > Open` or `Help > About`.
 
 **File**
 :   - **New**: Create a new level.

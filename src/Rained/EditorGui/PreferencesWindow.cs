@@ -401,6 +401,21 @@ static class PreferencesWindow
             if (ImGui.Checkbox("Hide screen size parameters in the resize window", ref hideScreenSize))
                 prefs.HideScreenSize = hideScreenSize;
             
+            bool removeCangleLimit = prefs.RemoveCameraAngleLimit;
+            if (ImGui.Checkbox("Unlock camera angles", ref removeCangleLimit))
+                prefs.RemoveCameraAngleLimit = removeCangleLimit;
+
+            ImGui.SameLine();
+            ImGui.TextDisabled("(?)");
+            if (ImGui.BeginItemTooltip())
+            {
+                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
+                ImGui.TextWrapped("Normally, there is a limit to how large you can make the strength of a camera angle, unless you hold SHIFT. With this enabled, the limit will be removed without the need to hold SHIFT, and doing so will instead impose the limit.");
+                ImGui.PopTextWrapPos();
+
+                ImGui.End();
+            }
+            
             
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 10f);
             
@@ -441,6 +456,31 @@ static class PreferencesWindow
                     - In Front: Will only allow you to select
                     props in the current layer as well as all
                     layers behind it.
+                    """
+                );
+                ImGui.End();
+            }
+
+            // light editor control scheme
+            var lightEditorControlScheme = (int) prefs.LightEditorControlScheme;
+            if (ImGui.Combo("Light editor control scheme", ref lightEditorControlScheme, "Mouse\0Keyboard\0"))
+                prefs.LightEditorControlScheme = (UserPreferences.LightEditorControlSchemeOption) lightEditorControlScheme;
+
+            ImGui.SameLine();
+            ImGui.TextDisabled("(?)");
+            if (ImGui.BeginItemTooltip())
+            {
+                ImGui.TextUnformatted(
+                    """
+                    This changes how the brush in the light
+                    editor will be scaled and rotated.
+
+                    - Mouse: Hold Q/E and move the mouse for
+                    scaling and rotation, respectively.
+
+                    - Keyboard: Mimics the controls in the
+                    original level editor: WASD to
+                    scale and Q/E to rotate.
                     """
                 );
                 ImGui.End();
@@ -524,6 +564,13 @@ static class PreferencesWindow
 
         ImGui.SeparatorText("Editing");
         ShortcutButton(KeyShortcut.SelectEditor);
+        ShortcutButton(KeyShortcut.EnvironmentEditor);
+        ShortcutButton(KeyShortcut.GeometryEditor);
+        ShortcutButton(KeyShortcut.TileEditor);
+        ShortcutButton(KeyShortcut.CameraEditor);
+        ShortcutButton(KeyShortcut.LightEditor);
+        ShortcutButton(KeyShortcut.EffectsEditor);
+        ShortcutButton(KeyShortcut.PropEditor);
         ImGui.Separator();
         ShortcutButton(KeyShortcut.NavUp);
         ShortcutButton(KeyShortcut.NavDown);
@@ -575,11 +622,18 @@ static class PreferencesWindow
         ShortcutButton(KeyShortcut.ZoomLightOut);
         ShortcutButton(KeyShortcut.RotateLightCW);
         ShortcutButton(KeyShortcut.RotateLightCCW);
+        ImGui.Separator();
+        ShortcutButton(KeyShortcut.RotateBrushCW);
+        ShortcutButton(KeyShortcut.RotateBrushCCW);
+        ShortcutButton(KeyShortcut.PreviousBrush);
+        ShortcutButton(KeyShortcut.NextBrush);
 
         ImGui.SeparatorText("Props");
         ShortcutButton(KeyShortcut.ToggleVertexMode);
         ShortcutButton(KeyShortcut.RopeSimulation);
         ShortcutButton(KeyShortcut.ResetSimulation);
+        ShortcutButton(KeyShortcut.RotatePropCCW);
+        ShortcutButton(KeyShortcut.RotatePropCW);
     }
 
     private static readonly List<string> availableThemes = [];

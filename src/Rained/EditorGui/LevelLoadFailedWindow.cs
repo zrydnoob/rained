@@ -4,10 +4,12 @@ namespace Rained.EditorGui;
 
 static class LevelLoadFailedWindow
 {
-    public const string WindowName = "加载失败";
+    public const string WindowName = "未识别的资产";
     public static bool IsWindowOpen = false;
 
     public static LevelLoadResult? LoadResult = null;
+
+    public static Action? LoadAnywayCallback = null;
 
     public static void ShowWindow()
     {
@@ -21,7 +23,8 @@ static class LevelLoadFailedWindow
 
         if (ImGui.BeginPopupModal(WindowName, ref IsWindowOpen, ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
-            ImGui.Text("由于无法识别的资产，无法加载该关卡。");
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
+            ImGui.TextWrapped("该关卡包含无法识别的资产。试图在这种状态下加载关卡将会删除资产实例。");
 
             // show unknown props
             if (LoadResult!.UnrecognizedProps.Length > 0)
@@ -63,8 +66,24 @@ static class LevelLoadFailedWindow
                 }
             }
 
+            if (LoadResult!.UnrecognizedTiles.Length > 0)
+            {
+                ImGui.TextWrapped("You will need to turn off \"Optimized Tile Previews\" to see the bodies of the affected tiles.");
+            }
+
+            ImGui.PopTextWrapPos();
             ImGui.Separator();
-            if (StandardPopupButtons.Show(PopupButtonList.OK, out _))
+
+            if (ImGui.Button("Load anyway", StandardPopupButtons.ButtonSize))
+            {
+                LoadAnywayCallback?.Invoke();
+
+                ImGui.CloseCurrentPopup();
+                IsWindowOpen = false;
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Cancel", StandardPopupButtons.ButtonSize))
             {
                 ImGui.CloseCurrentPopup();
                 IsWindowOpen = false;

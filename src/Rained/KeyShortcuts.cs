@@ -9,6 +9,10 @@ enum KeyShortcut : int
     None = -1,
 
     RightMouse,
+
+    // Edit modes
+    EnvironmentEditor, GeometryEditor, TileEditor,
+    CameraEditor, LightEditor, EffectsEditor, PropEditor, 
     
     // General
     NavUp, NavLeft, NavDown, NavRight,
@@ -38,6 +42,9 @@ enum KeyShortcut : int
     RotateLightCW, RotateLightCCW,
     ScaleLightBrush, RotateLightBrush,
 
+    RotateBrushCW, RotateBrushCCW,
+    PreviousBrush, NextBrush,
+
     // Camera
     CameraSnapX, CameraSnapY,
 
@@ -47,6 +54,7 @@ enum KeyShortcut : int
     // View settings shortcuts
     ToggleViewGrid, ToggleViewTiles, ToggleViewProps,
     ToggleViewCameras, ToggleViewGraphics,
+    RotatePropCW, RotatePropCCW,
 
     /// <summary>
     /// Do not bind - this is just the number of shortcut IDs
@@ -321,6 +329,14 @@ static class KeyShortcuts
     {
         Register("Right Mouse Substitute", KeyShortcut.RightMouse, ImGuiKey.None, ImGuiModFlags.None);
 
+        Register("Environment Editor", KeyShortcut.EnvironmentEditor, ImGuiKey._1, ImGuiModFlags.None);
+        Register("Geometry Editor", KeyShortcut.GeometryEditor, ImGuiKey._2, ImGuiModFlags.None);
+        Register("Tile Editor", KeyShortcut.TileEditor, ImGuiKey._3, ImGuiModFlags.None);
+        Register("Camera Editor", KeyShortcut.CameraEditor, ImGuiKey._4, ImGuiModFlags.None);
+        Register("Light Editor", KeyShortcut.LightEditor, ImGuiKey._5, ImGuiModFlags.None);
+        Register("Effects Editor", KeyShortcut.EffectsEditor, ImGuiKey._6, ImGuiModFlags.None);
+        Register("Prop Editor", KeyShortcut.PropEditor, ImGuiKey._7, ImGuiModFlags.None);
+
         Register("Navigate Up", KeyShortcut.NavUp, ImGuiKey.W, ImGuiModFlags.None, true);
         Register("Navigate Left", KeyShortcut.NavLeft, ImGuiKey.A, ImGuiModFlags.None, true);
         Register("Navigate Down", KeyShortcut.NavDown, ImGuiKey.S, ImGuiModFlags.None, true);
@@ -384,8 +400,17 @@ static class KeyShortcuts
         Register("Move Light Outward", KeyShortcut.ZoomLightOut, ImGuiKey.S, ImGuiModFlags.Shift);
         Register("Rotate Light CW", KeyShortcut.RotateLightCW, ImGuiKey.D, ImGuiModFlags.Shift);
         Register("Rotate Light CCW", KeyShortcut.RotateLightCCW, ImGuiKey.A, ImGuiModFlags.Shift);
-        Register("Scale Brush", KeyShortcut.ScaleLightBrush, ImGuiKey.Q, ImGuiModFlags.None);
-        Register("Rotate Brush", KeyShortcut.RotateLightBrush, ImGuiKey.E, ImGuiModFlags.None);
+        Register("Mouse Scale Brush", KeyShortcut.ScaleLightBrush, ImGuiKey.Q, ImGuiModFlags.None);
+        Register("Mouse Rotate Brush", KeyShortcut.RotateLightBrush, ImGuiKey.E, ImGuiModFlags.None);
+
+        Register("Rotate Brush CW", KeyShortcut.RotateBrushCW, ImGuiKey.E, ImGuiModFlags.None);
+        Register("Rotate Brush CCW", KeyShortcut.RotateBrushCCW, ImGuiKey.Q, ImGuiModFlags.None);
+        Register("Previous Brush", KeyShortcut.PreviousBrush, ImGuiKey.Z, ImGuiModFlags.None,
+            allowRepeat: true
+        );
+        Register("Next Brush", KeyShortcut.NextBrush, ImGuiKey.X, ImGuiModFlags.None,
+            allowRepeat: true
+        );
 
         // Camera Editor
         Register("Camera Snap X", KeyShortcut.CameraSnapX, ImGuiKey.Q, ImGuiModFlags.None);
@@ -395,6 +420,9 @@ static class KeyShortcuts
         Register("Toggle Vertex Mode", KeyShortcut.ToggleVertexMode, ImGuiKey.F, ImGuiModFlags.None);
         Register("Rope Simulation", KeyShortcut.RopeSimulation, ImGuiKey.Space, ImGuiModFlags.None);
         Register("Reset Rope Simulation", KeyShortcut.ResetSimulation, ImGuiKey.None, ImGuiModFlags.None);
+        
+        Register("Rotate Prop CW", KeyShortcut.RotatePropCW, ImGuiKey.E, ImGuiModFlags.None);
+        Register("Rotate Prop CCW", KeyShortcut.RotatePropCCW, ImGuiKey.Q, ImGuiModFlags.None);
 
         // View options
         Register("View Grid", KeyShortcut.ToggleViewGrid, ImGuiKey.G, ImGuiModFlags.Ctrl);

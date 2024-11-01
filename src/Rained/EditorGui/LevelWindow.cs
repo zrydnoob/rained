@@ -301,26 +301,26 @@ class LevelWindow
                     ViewOffset.Y += moveY * Level.TileSize * moveSpeed * dt;
 
                     // edit mode keybinds
-                    if (EditorWindow.IsKeyPressed(ImGuiKey._1))
-                        newEditMode = (int)EditModeEnum.Environment;
+                    if (KeyShortcuts.Activated(KeyShortcut.EnvironmentEditor))
+                        newEditMode = (int) EditModeEnum.Environment;
+                    
+                    if (KeyShortcuts.Activated(KeyShortcut.GeometryEditor))
+                        newEditMode = (int) EditModeEnum.Geometry;
+                    
+                    if (KeyShortcuts.Activated(KeyShortcut.TileEditor))
+                        newEditMode = (int) EditModeEnum.Tile;
+                    
+                    if (KeyShortcuts.Activated(KeyShortcut.CameraEditor))
+                        newEditMode = (int) EditModeEnum.Camera;
+                    
+                    if (KeyShortcuts.Activated(KeyShortcut.LightEditor))
+                        newEditMode = (int) EditModeEnum.Light;
+                    
+                    if (KeyShortcuts.Activated(KeyShortcut.EffectsEditor))
+                        newEditMode = (int) EditModeEnum.Effect;
 
-                    if (EditorWindow.IsKeyPressed(ImGuiKey._2))
-                        newEditMode = (int)EditModeEnum.Geometry;
-
-                    if (EditorWindow.IsKeyPressed(ImGuiKey._3))
-                        newEditMode = (int)EditModeEnum.Tile;
-
-                    if (EditorWindow.IsKeyPressed(ImGuiKey._4))
-                        newEditMode = (int)EditModeEnum.Camera;
-
-                    if (EditorWindow.IsKeyPressed(ImGuiKey._5))
-                        newEditMode = (int)EditModeEnum.Light;
-
-                    if (EditorWindow.IsKeyPressed(ImGuiKey._6))
-                        newEditMode = (int)EditModeEnum.Effect;
-
-                    if (EditorWindow.IsKeyPressed(ImGuiKey._7))
-                        newEditMode = (int)EditModeEnum.Prop;
+                    if (KeyShortcuts.Activated(KeyShortcut.PropEditor))
+                        newEditMode = (int) EditModeEnum.Prop;
                 }
 
                 // change edit mode if requested

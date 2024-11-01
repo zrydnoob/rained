@@ -66,6 +66,9 @@ sealed class RainEd
     // when the user hasn't interacted with the window in a while
     private float remainingActiveTime = 2f;
 
+    // time since the last AssetGraphics.ClearTextureCache() call
+    private float lastTexCacheClear = 0f;
+    
     private double lastRopeUpdateTime = 0f;
     private float simTimeLeftOver = 0f;
     public float SimulationTimeRemainder { get => simTimeLeftOver; }
@@ -380,11 +383,19 @@ sealed class RainEd
         var tab = new LevelTab();
         _tabs.Add(tab);
         CurrentTab = tab;
-        //AssetGraphics.ClearTextureCache();
+    }
+
+    public void OpenLevel(Level level, string filePath = "")
+    {
+        var tab = new LevelTab(level, filePath);
+        _tabs.Add(tab);
+        CurrentTab = tab;
     }
 
     public void LoadLevel(string path)
     {
+        TryClearTextureCache();
+        
         if (!string.IsNullOrEmpty(path))
         {
             Log.Information("Loading level {Path}...", path);
@@ -393,7 +404,7 @@ sealed class RainEd
             {
                 var loadRes = LevelSerialization.Load(path);
 
-                if (loadRes.Level is not null)
+                if (!loadRes.HadUnrecognizedAssets)
                 {
                     var tab = new LevelTab(loadRes.Level, path);
                     _tabs.Add(tab);
@@ -405,13 +416,17 @@ sealed class RainEd
                     // level failed to load due to unrecognized assets
                     LevelLoadFailedWindow.LoadResult = loadRes;
                     LevelLoadFailedWindow.IsWindowOpen = true;
+                    LevelLoadFailedWindow.LoadAnywayCallback = () =>
+                    {
+                        var tab = new LevelTab(loadRes.Level, path);
+                        _tabs.Add(tab);
+                        CurrentTab = tab;
+                    };
                 }
 
                 // i think it may be useful to add it to the list
                 // even if the level failed to load due to unrecognized assets
                 AddToRecentFiles(path);
-
-                //AssetGraphics.ClearTextureCache();
             }
             catch (Exception e)
             {
@@ -432,6 +447,8 @@ sealed class RainEd
     /// <param name="path"></param>
     public void SaveLevel(string path)
     {
+        TryClearTextureCache();
+
         Log.Information("Saving level to {Path}...", path);
         IsLevelLocked = true;
 
@@ -582,6 +599,20 @@ sealed class RainEd
         IsLevelLocked = false;
     }
 
+    /// <summary>
+    /// Checks if enough time has passed since the last call to
+    /// AssetGraphics.ClearTextureCache() before calling it.
+    /// </summary>
+    private void TryClearTextureCache()
+    {
+        // time interval: 5mins
+        if ((float)Raylib.GetTime() >= lastTexCacheClear + 60f*5f)
+        {
+            AssetGraphics.ClearTextureCache();
+            lastTexCacheClear = (float)Raylib.GetTime();
+        }
+    }
+
     private void SwitchTab(LevelTab? tab)
     {
         if (tab == _currentTab) return;
@@ -693,8 +724,8 @@ sealed class RainEd
         }
 
         EditorWindow.UpdateMouseState();
-
-        Raylib.ClearBackground(Color.DarkGray);
+        
+        Raylib.ClearBackground(new Color(51, 51, 51, 255));
         KeyShortcuts.Update();
         //ImGui.DockSpaceOverViewport();
 
