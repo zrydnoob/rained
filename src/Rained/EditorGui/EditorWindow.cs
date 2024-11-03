@@ -216,8 +216,8 @@ static class EditorWindow
 
                 ImGui.Separator();
 
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Render, "Render...", enabled: fileActive);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ExportGeometry, "Export Geometry...", enabled: fileActive);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.Render, "渲染", enabled: fileActive);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ExportGeometry, "渲染几何", enabled: fileActive);
                 if (ImGui.MenuItem("批量渲染..."))
                 {
                     MassRenderWindow.OpenWindow();
