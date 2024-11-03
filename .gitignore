@@ -40,3 +40,4 @@
 
 # mkdocs generated output
 /dist/docs
+neovide_backtraces.log

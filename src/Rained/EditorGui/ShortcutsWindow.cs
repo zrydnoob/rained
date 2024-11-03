@@ -81,7 +81,7 @@ static partial class ShortcutsWindow
             ("[Duplicate]", "复制选定的摄像机"),
             ("[CameraSnapX]/[NavUp]/[NavDown]", "将X轴捕捉到其他相机"),
             ("[CameraSnapY]/[NavLeft]/[NavRight]", "将Y轴捕捉到其他相机"),
-            ("按住 Shift", "锁定/解锁摄像机视角"),
+            ("按住 Shift", "锁定/解锁摄像机边缘限制"),
         ],
 
         // Light

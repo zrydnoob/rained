@@ -7,7 +7,7 @@ namespace Rained.EditorGui.Editors;
 
 class LightEditor : IEditorMode
 {
-    public string Name { get => "Light"; }
+    public string Name { get => "灯光"; }
     private readonly LevelWindow window;
 
     private Vector2 brushSize = new(50f, 70f);
@@ -41,7 +41,7 @@ class LightEditor : IEditorMode
     }
 
     public void ReloadLevel()
-    {   
+    {
         changeRecorder?.Dispose();
         changeRecorder = new ChangeHistory.LightChangeRecorder(RainEd.Instance.Level.LightMap.GetImage());
         changeRecorder.UpdateParametersSnapshot();
@@ -70,7 +70,7 @@ class LightEditor : IEditorMode
 
     public void ShowEditMenu()
     {
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ResetBrushTransform, "Reset Brush Transform");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ResetBrushTransform, "重置笔刷变换");
     }
 
     public void DrawToolbar()
@@ -82,20 +82,20 @@ class LightEditor : IEditorMode
         var brushDb = RainEd.Instance.LightBrushDatabase;
         var prefs = RainEd.Instance.Preferences;
 
-        if (ImGui.Begin("Light###Light Catalog", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("灯光###Light Catalog", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             if (changeRecorder is null) ImGui.BeginDisabled();
 
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 8.0f);
 
-            ImGui.SliderAngle("Light Angle", ref level.LightAngle, 0f, 360f, "%.1f deg");
+            ImGui.SliderAngle("光线角度", ref level.LightAngle, 0f, 360f, "%.1f deg");
             if (ImGui.IsItemDeactivatedAfterEdit())
                 changeRecorder?.PushParameterChanges();
-            
-            ImGui.SliderFloat("Light Distance", ref level.LightDistance, 1f, Level.MaxLightDistance, "%.3f", ImGuiSliderFlags.AlwaysClamp);
+
+            ImGui.SliderFloat("光线距离", ref level.LightDistance, 1f, Level.MaxLightDistance, "%.3f", ImGuiSliderFlags.AlwaysClamp);
             if (ImGui.IsItemDeactivatedAfterEdit())
                 changeRecorder?.PushParameterChanges();
-            
+
             ImGui.PopItemWidth();
 
             // draw light angle ring
@@ -106,33 +106,36 @@ class LightEditor : IEditorMode
 
                 var drawList = ImGui.GetWindowDrawList();
                 var screenCursor = ImGui.GetCursorScreenPos();
-                
+
                 var minRadius = 8f;
                 var maxRadius = 70f;
                 var radius = (level.LightDistance - 1f) / (Level.MaxLightDistance - 1f) * (maxRadius - minRadius) + minRadius;
                 var centerRadius = (5f - 1f) / (Level.MaxLightDistance - 1f) * (maxRadius - minRadius) + minRadius;
 
+                centerRadius *= Boot.WindowScale;
+                radius *= Boot.WindowScale;
+
                 var color = ImGui.ColorConvertFloat4ToU32( ImGui.GetStyle().Colors[(int) ImGuiCol.Text] );
 
-                var circleCenter = screenCursor + new Vector2(avail.X / 2f, maxRadius);
+                var circleCenter = screenCursor + new Vector2(avail.X / 2f, maxRadius * Boot.WindowScale);
                 drawList.AddCircle(circleCenter, centerRadius, color); // draw center circle
                 drawList.AddCircle(circleCenter, radius, color); // draw distance circle
-                
+
                 // draw angle
                 var correctedAngle = MathF.PI / 2f + level.LightAngle;
 
                 drawList.AddCircleFilled(
                     new Vector2(MathF.Cos(correctedAngle), MathF.Sin(correctedAngle)) * radius + circleCenter,
-                    6f,
+                    6f * Boot.WindowScale,
                     color
                 );
 
-                ImGui.InvisibleButton("闪电", new Vector2(avail.X, maxRadius * 2f));
+                ImGui.InvisibleButton("闪电", new Vector2(avail.X, maxRadius * 2f * Boot.WindowScale));
                 if (ImGui.IsItemActive())
                 {
                     isChangingParameters = true;
 
-                    var vecDiff = ImGui.GetMousePos() - circleCenter;
+                    var vecDiff = (ImGui.GetMousePos() - circleCenter) / Boot.WindowScale;
 
                     level.LightAngle = MathF.Atan2(vecDiff.Y, vecDiff.X) - MathF.PI / 2f;
                     if (level.LightAngle < 0)
@@ -147,11 +150,12 @@ class LightEditor : IEditorMode
             }
 
             if (changeRecorder is null) ImGui.EndDisabled();
-        } ImGui.End();
+        }
+        ImGui.End();
 
-        if (ImGui.Begin("Brush", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("笔刷", ImGuiWindowFlags.NoFocusOnAppearing))
         {
-            if (ImGui.Button("Reset Brush") || KeyShortcuts.Activated(KeyShortcut.ResetBrushTransform))
+            if (ImGui.Button("重设笔刷") || KeyShortcuts.Activated(KeyShortcut.ResetBrushTransform))
             {
                 brushSize = new(50f, 70f);
                 brushRotation = 0f;
@@ -167,21 +171,23 @@ class LightEditor : IEditorMode
                 foreach (var brush in RainEd.Instance.LightBrushDatabase.Brushes)
                 {
                     var texture = brush.Texture;
-                    
+
                     // highlight selected brush
                     if (i == selectedBrush)
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int) ImGuiCol.ButtonHovered]);
-                    
-                    // buttons will have a more transparent hover color
-                    } else {
-                        Vector4 col = ImGui.GetStyle().Colors[(int) ImGuiCol.ButtonHovered];
+                        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered]);
+
+                        // buttons will have a more transparent hover color
+                    }
+                    else
+                    {
+                        Vector4 col = ImGui.GetStyle().Colors[(int)ImGuiCol.ButtonHovered];
                         ImGui.PushStyleColor(ImGuiCol.ButtonHovered,
                             new Vector4(col.X, col.Y, col.Z, col.W / 4f));
                     }
 
                     ImGui.PushID(i);
-                    if (ImGuiExt.ImageButtonRect("##Texture", texture, 64, 64, new Rectangle(0, 0, texture.Width, texture.Height)))
+                    if (ImGuiExt.ImageButtonRect("##Texture", texture, 64 * Boot.WindowScale, 64 * Boot.WindowScale, new Rectangle(0, 0, texture.Width, texture.Height)))
                     {
                         selectedBrush = i;
                     }
@@ -202,7 +208,8 @@ class LightEditor : IEditorMode
                 ImGui.PopStyleColor();
             }
             ImGui.EndChild();
-        } ImGui.End();
+        }
+        ImGui.End();
 
         // keyboard catalog navigation
         if (prefs.LightEditorControlScheme == UserPreferences.LightEditorControlSchemeOption.Mouse)
@@ -252,7 +259,7 @@ class LightEditor : IEditorMode
             // D to move right
             if (KeyShortcuts.Activated(KeyShortcut.NavRight))
                 selectedBrush = (selectedBrush + 1) % brushDb.Brushes.Count;
-            
+
             // A to move left
             if (KeyShortcuts.Activated(KeyShortcut.NavLeft))
             {
@@ -331,7 +338,7 @@ class LightEditor : IEditorMode
     private void DrawOcclusionPlane()
     {
         var level = RainEd.Instance.Level;
-        
+
         // render light plane
         var levelBoundsW = level.Width * 20;
         var levelBoundsH = level.Height * 20;
@@ -374,14 +381,14 @@ class LightEditor : IEditorMode
             level.Height * Level.TileSize - (int)lightMapOffset.Y,
             Color.White
         );
-        
+
         // draw level background (solid white)
         Raylib.DrawRectangle(0, 0, level.Width * Level.TileSize, level.Height * Level.TileSize, LevelWindow.BackgroundColor);
-        
+
         // draw the layers
         var drawTiles = RainEd.Instance.Preferences.ViewTiles;
         var drawProps = RainEd.Instance.Preferences.ViewProps;
-        for (int l = Level.LayerCount-1; l >= 0; l--)
+        for (int l = Level.LayerCount - 1; l >= 0; l--)
         {
             var alpha = l == 0 ? 255 : 50;
             var color = LevelWindow.GeoColor(30f / 255f, alpha);
@@ -393,10 +400,10 @@ class LightEditor : IEditorMode
 
             if (drawTiles)
                 levelRender.RenderTiles(l, (int)(alpha * (100.0f / 255.0f)));
-            
+
             if (drawProps)
                 levelRender.RenderProps(l, (int)(alpha * (100.0f / 255.0f)));
-            
+
             Rlgl.PopMatrix();
         }
 
@@ -460,7 +467,7 @@ class LightEditor : IEditorMode
 
                 changeRecorder.RecordAtom(atom);
                 LightMap.DrawAtom(atom);
-                
+
                 Raylib.BeginTextureMode(mainFrame);
             }
             else
@@ -478,7 +485,7 @@ class LightEditor : IEditorMode
                     brushRotation,
                     new Color(0, 0, 0, 80)
                 );
-                
+
                 DrawOcclusionPlane();
 
                 // draw preview on on occlusion plane
@@ -546,7 +553,7 @@ class LightEditor : IEditorMode
             }
 
             brushSize.X = MathF.Max(0f, brushSize.X);
-            brushSize.Y  = MathF.Max(0f, brushSize.Y);
+            brushSize.Y = MathF.Max(0f, brushSize.Y);
         }
         else
         {
@@ -554,7 +561,7 @@ class LightEditor : IEditorMode
         }
 
         Raylib.EndShaderMode();
-        
+
         // record stroke data at the end of the stroke
         if (wasDrawing && !isDrawing)
         {
@@ -564,9 +571,9 @@ class LightEditor : IEditorMode
         // handle cursor lock when transforming brush
         if (!isCursorEnabled)
         {
-            Raylib.SetMousePosition((int)savedMousePos.X, (int)savedMousePos.Y);    
+            Raylib.SetMousePosition((int)savedMousePos.X, (int)savedMousePos.Y);
         }
-        
+
         if (wasCursorEnabled != isCursorEnabled)
         {
             if (isCursorEnabled)
