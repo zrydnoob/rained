@@ -34,6 +34,10 @@ namespace Rained
 
         // window scale for dpi
         public static float WindowScale { get; set; } = 1.0f;
+        
+        // this is just the window scale, floored.
+        public static int PixelIconScale { get; set; } = 1;
+
         public readonly static CultureInfo UserCulture = Thread.CurrentThread.CurrentCulture;
 
         private static void Main(string[] args)
@@ -303,18 +307,21 @@ namespace Rained
                         }
 
                         Raylib.BeginDrawing();
-                        ImGuiController!.Update(Raylib.GetFrameTime());
-                        app.Draw(Raylib.GetFrameTime());
+                        PixelIconScale = (int) curWindowScale;
 
                         // save style sizes and scale to dpi before rendering
                         // restore it back to normal afterwards
                         // (this is so the style editor works)
                         unsafe
                         {
-                            ImGuiStyle styleCopy = *ImGui.GetStyle().NativePtr;
+                            ImGuiExt.StoreStyle();
                             ImGui.GetStyle().ScaleAllSizes(curWindowScale);
+
+                            ImGuiController!.Update(Raylib.GetFrameTime());
+                            app.Draw(Raylib.GetFrameTime());
+
                             ImGuiController!.Render();
-                            *ImGui.GetStyle().NativePtr = styleCopy;
+                            ImGuiExt.LoadStyle();
                         }
                         
                         Raylib.EndDrawing();

@@ -179,6 +179,7 @@ sealed class RainEd
         try
 #endif
         {
+            DrizzleCast.Initialize();
             AssetGraphics = new AssetGraphicsProvider();
 
             initPhase = "materials";
@@ -226,7 +227,6 @@ sealed class RainEd
             Log.UserLogger.Information("Reading Props/Init.txt");
             PropDatabase = new PropDatabase(TileDatabase);
 
-            DrizzleCast.Initialize();
             Log.UserLogger.Information("Asset initialization done!");
             Log.Information("----- ASSET INIT DONE! -----");
         }

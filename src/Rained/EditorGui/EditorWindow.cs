@@ -356,9 +356,9 @@ static class EditorWindow
                 if (ImGui.MenuItem("文档..."))
                 {
                     #if DEBUG
-                    var docPath = Path.Combine("dist", "docs", "index.html");
+                    var docPath = Path.Combine("dist", "docs", "en", "index.html");
                     #else
-                    var docPath = Path.Combine(Boot.AppDataPath, "docs", "index.html");
+                    var docPath = Path.Combine(Boot.AppDataPath, "docs", "en", "index.html");
                     #endif
 
                     if (File.Exists(docPath))

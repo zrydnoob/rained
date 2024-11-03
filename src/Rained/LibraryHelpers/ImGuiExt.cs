@@ -211,8 +211,22 @@ static class ImGuiExt
             ImGui.Image(TextureID(tex), new Vector2(tex.Width, tex.Height), new Vector2(0f, 0f), new Vector2(1f, 1f), (Vector4) color);
     }
 
+    public static void ImageRenderTextureScaled(Framebuffer framebuffer, Vector2 scale, int slot, Glib.Color color)
+    {
+        var tex = framebuffer.GetTexture(slot);
+
+        // determine if vertical flip is necessary
+        if (Rained.RainEd.RenderContext!.OriginBottomLeft)
+            ImGui.Image(TextureID(tex), new Vector2(tex.Width, tex.Height) * scale, new Vector2(0f, 1f), new Vector2(1f, 0f), (Vector4) color);
+        else
+            ImGui.Image(TextureID(tex), new Vector2(tex.Width, tex.Height) * scale, new Vector2(0f, 0f), new Vector2(1f, 1f), (Vector4) color);
+    }
+
     public static void ImageRenderTexture(Framebuffer framebuffer, int slot = 0)
         => ImageRenderTexture(framebuffer, slot, Glib.Color.White);
+    
+    public static void ImageRenderTextureScaled(Framebuffer framebuffer, Vector2 scale, int slot = 0)
+        => ImageRenderTextureScaled(framebuffer, scale, slot, Glib.Color.White);
 
     public static bool ImageButtonRect(string id, Texture tex, float width, float height, Glib.Rectangle srcRec, Glib.Color color)
     {
@@ -240,6 +254,9 @@ static class ImGuiExt
 
     public static void ImageRenderTexture(RenderTexture2D framebuffer)
         => ImageRenderTexture(framebuffer.ID!);
+    
+    public static void ImageRenderTextureScaled(RenderTexture2D framebuffer, Vector2 scale)
+        => ImageRenderTextureScaled(framebuffer.ID!, scale);
     
     public static void ImageRenderTexture(RenderTexture2D framebuffer, Raylib_cs.Color color)
         => ImageRenderTexture(framebuffer.ID!, 0, Raylib.ToGlibColor(color));
@@ -482,5 +499,50 @@ static class ImGuiExt
         ImGui.PopStyleVar();
 
         return returnValue;
+    }
+
+    private static unsafe ImGuiStyle* _storedStylePtr = null;
+
+    /// <summary>
+    /// Store the current style.
+    /// </summary>
+    public static unsafe void StoreStyle()
+    {
+        if (_storedStylePtr is null)
+            _storedStylePtr = (ImGuiStyle*) NativeMemory.Alloc((nuint)sizeof(ImGuiStyle));
+
+        *_storedStylePtr = *ImGui.GetStyle().NativePtr;
+    }
+
+    /// <summary>
+    /// Load the previously stored style.
+    /// </summary>
+    public static unsafe void LoadStyle()
+    {
+        if (_storedStylePtr is null)
+            throw new NullReferenceException("Style has not been stored.");
+        
+        *ImGui.GetStyle().NativePtr = *_storedStylePtr;
+    }
+
+    /*public static unsafe ref ImGuiStyle StoredStyle
+    {
+        get
+        {
+            if (_storedStylePtr is null) throw new NullReferenceException("Stored style is null");
+            return ref Unsafe.AsRef<ImGuiStyle>(_storedStylePtr);
+        }
+    }*/
+
+    /// <summary>
+    /// Obtain the ImGuiStylePtr unaffected by the content scale.
+    /// </summary>
+    public static unsafe ImGuiStylePtr Style
+    {
+        get
+        {
+            if (_storedStylePtr is null) return ImGui.GetStyle();
+            return new ImGuiStylePtr(_storedStylePtr);
+        }
     }
 }
