@@ -33,8 +33,6 @@ static class LogsWindow
             {
                 var filtersInt = (int)filters;
                 ImGui.SameLine();
-                ImGui.CheckboxFlags("All", ref filtersInt, (int)(Filters.Information | Filters.Warning | Filters.Error));
-                ImGui.SameLine();
                 ImGui.CheckboxFlags("Info", ref filtersInt, (int)Filters.Information);
                 ImGui.SameLine();
                 ImGui.CheckboxFlags("Warnings", ref filtersInt, (int)Filters.Warning);
@@ -54,7 +52,7 @@ static class LogsWindow
                 bool showErrors = filters.HasFlag(Filters.Error);
 
                 if (wrap)
-                    ImGui.PushTextWrapPos(ImGui.GetContentRegionAvail().X);
+                    ImGui.PushTextWrapPos(ImGui.GetContentRegionAvail().X - 1f);
                 else
                     ImGui.PushTextWrapPos(float.PositiveInfinity);
                 

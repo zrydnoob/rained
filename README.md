@@ -16,13 +16,13 @@ Note: This fork is a Chinese translation. If you need the English version, pleas
 <p align="center">
     <img src="rained-logo.png" />
     <br />
-    <a href="https://github.com/pkhead/rained/releases">Downloads</a>
+    <a href="https://github.com/pkhead/rained/releases">Downloads</a> | <a href="https://pkhead.github.io/rained/en/">Manual</a>
 </p>
 
 
 Another Rain World level editor. Read [this document](dist/README.md), which is bundled with every release package, for more information on how to use this software.
 
-Please note that the "main" branch is ahead of the latest release. If you want to access the repository
+Please note that the "main" branch is ahead of the latest release, but is in sync with Nightly. If you want to access the repository
 at the time of a certain release, use the Git tags system.
 
 ## Features
@@ -80,4 +80,4 @@ Report bugs and other complaints by creating an issue or pinging @chromosoze on 
 
 Pull requests are welcome.
 
-Documentation about the development setup is found [here](docs/developing.md).
+Documentation about the development setup is found [here](https://pkhead.github.io/rained/en/developing.html).

@@ -21,7 +21,7 @@ public class RainEdStartupException : Exception
 /// </summary>
 sealed class RainEd
 {
-    public const string Version = "wfb-v2.1.7";
+    public const string Version = "wfb-v2.2.0";
 
     public static RainEd Instance = null!;
 
@@ -31,7 +31,7 @@ sealed class RainEd
     public static Glib.RenderContext RenderContext => Glib.RenderContext.Instance!;
 
     public readonly RlManaged.Texture2D LevelGraphicsTexture;
-    private readonly LevelWindow levelView;
+    private LevelWindow? levelView;
 
     private readonly string prefFilePath;
     public UserPreferences Preferences;
@@ -59,15 +59,12 @@ sealed class RainEd
     public LevelTab? CurrentTab { get => _currentTab; set => SwitchTab(value); }
 
     public Level Level { get => CurrentTab!.Level; }
-    public LevelWindow LevelView { get => levelView; }
+    public LevelWindow LevelView { get => levelView!; }
     public ChangeHistory.ChangeHistory ChangeHistory { get => CurrentTab!.ChangeHistory; }
 
     // this is used to set window IsEventDriven to true
     // when the user hasn't interacted with the window in a while
     private float remainingActiveTime = 2f;
-
-    // time since the last AssetGraphics.ClearTextureCache() call
-    private float lastTexCacheClear = 0f;
     
     private double lastRopeUpdateTime = 0f;
     private float simTimeLeftOver = 0f;
@@ -108,7 +105,6 @@ sealed class RainEd
 
         Log.Information("========================");
         Log.Information("Rained {Version} started", Version);
-        Log.Information("App data located in {AppDataPath}", Boot.AppDataPath);
 
         // load user preferences
         KeyShortcuts.InitShortcuts();
@@ -197,14 +193,14 @@ sealed class RainEd
             // (trying to get lua error messages to show as soon as possible)
             try
             {
-                LuaInterface.Initialize();
+                LuaScripting.LuaInterface.Initialize();
             }
             catch (LuaScriptException e)
             {
                 Exception actualException = e.IsNetException ? e.InnerException! : e;
                 string? stackTrace = actualException.Data["Traceback"] as string;
 
-                var displayMsg = "RainEd could not start due to an error in a Lua script:\n\n" + actualException.Message;
+                var displayMsg = "Rained could not start due to an error in a Lua script:\n\n" + actualException.Message;
                 if (stackTrace is not null)
                 {
                     displayMsg += "\n" + stackTrace;
@@ -243,17 +239,14 @@ sealed class RainEd
         }
 #endif
 
-        _tabs.Add(new LevelTab());
-        _currentTab = _tabs[0];
+        if (TileDatabase.HasErrors || PropDatabase.HasErrors)
+            InitErrorsWindow.IsWindowOpen = true;
 
-        LevelGraphicsTexture = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "level-graphics.png"));
-
-        Log.Information("Creating level view...");
-        levelView = new LevelWindow();
+        LevelGraphicsTexture = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath,"assets","level-graphics.png"));
 
         if (Preferences.StaticDrizzleLingoRuntime)
         {
-            Log.Information("Initializing Zygote runtime...");
+            Log.Information("Initializing Lingo runtime...");
             Drizzle.DrizzleRender.InitStaticRuntime();
         }
 
@@ -294,11 +287,6 @@ sealed class RainEd
             {
                 Log.Information("Version check successful!");
                 Log.Information(LatestVersionInfo.VersionName);
-
-                if (LatestVersionInfo.VersionName != Version)
-                {
-                    EditorWindow.ShowNotification("New version available! Check the About window for more info.");
-                }
             }
             else
             {
@@ -345,7 +333,7 @@ sealed class RainEd
         Autotiles.SaveConfig();
 
         // save user preferences
-        levelView.SavePreferences(Preferences);
+        levelView?.SavePreferences(Preferences);
         Preferences.ViewKeyboardShortcuts = ShortcutsWindow.IsWindowOpen;
         Preferences.ShowPaletteWindow = PaletteWindow.IsWindowOpen;
 
@@ -355,7 +343,7 @@ sealed class RainEd
         Preferences.DataPath = AssetDataPath;
 
         UserPreferences.SaveToFile(Preferences, prefFilePath);
-        levelView.Renderer.Dispose();
+        levelView?.Renderer.Dispose();
     }
 
     public void ShowPathInSystemBrowser(string path, bool reveal)
@@ -393,12 +381,10 @@ sealed class RainEd
     }
 
     public void LoadLevel(string path)
-    {
-        TryClearTextureCache();
-        
+    {        
         if (!string.IsNullOrEmpty(path))
         {
-            Log.Information("Loading level {Path}...", path);
+            Log.Information("Loading level {Path}...", Path.GetFileName(path));
 
             try
             {
@@ -410,6 +396,7 @@ sealed class RainEd
                     _tabs.Add(tab);
                     CurrentTab = tab;
                     Log.Information("Done!");
+                    levelView!.LoadView();
                 }
                 else
                 {
@@ -421,6 +408,7 @@ sealed class RainEd
                         var tab = new LevelTab(loadRes.Level, path);
                         _tabs.Add(tab);
                         CurrentTab = tab;
+                        levelView!.LoadView();
                     };
                 }
 
@@ -436,8 +424,6 @@ sealed class RainEd
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            levelView.ReloadLevel();
-            levelView.LoadView();
         }
     }
 
@@ -447,8 +433,6 @@ sealed class RainEd
     /// <param name="path"></param>
     public void SaveLevel(string path)
     {
-        TryClearTextureCache();
-
         Log.Information("Saving level to {Path}...", path);
         IsLevelLocked = true;
 
@@ -599,20 +583,6 @@ sealed class RainEd
         IsLevelLocked = false;
     }
 
-    /// <summary>
-    /// Checks if enough time has passed since the last call to
-    /// AssetGraphics.ClearTextureCache() before calling it.
-    /// </summary>
-    private void TryClearTextureCache()
-    {
-        // time interval: 5mins
-        if ((float)Raylib.GetTime() >= lastTexCacheClear + 60f*5f)
-        {
-            AssetGraphics.ClearTextureCache();
-            lastTexCacheClear = (float)Raylib.GetTime();
-        }
-    }
-
     private void SwitchTab(LevelTab? tab)
     {
         if (tab == _currentTab) return;
@@ -622,6 +592,7 @@ sealed class RainEd
         _currentTab = tab;
         if (_currentTab is not null)
         {
+            levelView ??= new LevelWindow();
             levelView.ReloadLevel();
             levelView.Renderer.ReloadLevel();
             UpdateTitle();
@@ -630,14 +601,21 @@ sealed class RainEd
 
     public bool CloseTab(LevelTab tab)
     {
-        tab.Level.Dispose();
+        tab.Dispose();
         return _tabs.Remove(tab);
     }
 
     private void UpdateTitle()
     {
-        string levelName = CurrentTab!.Name;
-        Raylib.SetWindowTitle($"Rained - {levelName}");
+        if (CurrentTab is not null)
+        {
+            string levelName = CurrentTab.Name;
+            Raylib.SetWindowTitle($"Rained - {levelName}");
+        }
+        else
+        {
+            Raylib.SetWindowTitle("Rained");
+        }
     }
 
     /// <summary>
@@ -710,7 +688,8 @@ sealed class RainEd
             AsyncCloseWindowRequest();
 
         AssetGraphics.Maintenance();
-
+        AssetGraphics.CleanUpTextures();
+        
         foreach (var f in deferredActions) f();
         deferredActions.Clear();
 

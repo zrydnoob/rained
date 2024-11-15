@@ -74,6 +74,9 @@ static class EditorWindow
     private static float notifFlash = 0f;
     private static int timerDelay = 10;
 
+    private static bool homeTab = true;
+    private static bool switchToHomeTab = false;
+
     private static DrizzleRenderWindow? drizzleRenderWindow = null;
     private static LevelResizeWindow? levelResizeWin = null;
     public static LevelResizeWindow? LevelResizeWindow { get => levelResizeWin; }
@@ -175,36 +178,9 @@ static class EditorWindow
                 KeyShortcuts.ImGuiMenuItem(KeyShortcut.New, "新建");
                 KeyShortcuts.ImGuiMenuItem(KeyShortcut.Open, "打开");
 
-                var recentFiles = RainEd.Instance.Preferences.RecentFiles;
                 if (ImGui.BeginMenu("最近打开"))
                 {
-                    if (recentFiles.Count == 0)
-                    {
-                        ImGui.MenuItem("(无最近的文件)", false);
-                    }
-                    else
-                    {
-                        // traverse backwards
-                        for (int i = recentFiles.Count - 1; i >= 0; i--)
-                        {
-                            var filePath = recentFiles[i];
-
-                            if (ImGui.MenuItem(Path.GetFileName(filePath)))
-                            {
-                                if (File.Exists(filePath))
-                                {
-                                    RainEd.Instance.LoadLevel(filePath);
-                                }
-                                else
-                                {
-                                    ShowNotification("无法访问文件");
-                                    recentFiles.RemoveAt(i);
-                                }
-                            }
-
-                        }
-                    }
-
+                    RecentLevelsList();
                     ImGui.EndMenu();
                 }
 
@@ -297,25 +273,33 @@ static class EditorWindow
 
                 ImGui.Separator();
 
-                var renderer = RainEd.Instance.LevelView.Renderer;
-
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGrid, "显示网格", renderer.ViewGrid);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewTiles, "显示贴图", prefs.ViewTiles);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewProps, "显示道具", prefs.ViewProps);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewCameras, "显示相机边框", renderer.ViewCameras);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGraphics, "显示贴图预览", prefs.ViewPreviews);
-
-                if (ImGui.MenuItem("显示被遮挡的杆子", null, renderer.ViewObscuredBeams))
+                Rendering.LevelEditRender? renderer = null;
+                if (RainEd.Instance.CurrentTab is not null)
                 {
-                    renderer.ViewObscuredBeams = !renderer.ViewObscuredBeams;
-                    renderer.InvalidateGeo(0);
-                    renderer.InvalidateGeo(1);
-                    renderer.InvalidateGeo(2);
+                    renderer = RainEd.Instance.LevelView.Renderer;
                 }
 
-                if (ImGui.MenuItem("显示瓦片主要格", null, renderer.ViewTileHeads))
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGrid, "显示网格", prefs.ViewGrid);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewTiles, "显示贴图", prefs.ViewTiles);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewProps, "显示道具", prefs.ViewProps);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewCameras, "显示相机边框", prefs.ViewCameras);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGraphics, "显示贴图预览", prefs.ViewPreviews);
+
+                if (ImGui.MenuItem("显示被遮挡的杆", null, prefs.ViewObscuredBeams))
                 {
-                    renderer.ViewTileHeads = !renderer.ViewTileHeads;
+                    prefs.ViewObscuredBeams = !prefs.ViewObscuredBeams;
+
+                    if (renderer is not null)
+                    {
+                        renderer.InvalidateGeo(0);
+                        renderer.InvalidateGeo(1);
+                        renderer.InvalidateGeo(2);
+                    }
+                }
+
+                if (ImGui.MenuItem("显示瓦片主要格", null, prefs.ViewTileHeads))
+                {
+                    prefs.ViewTileHeads = !prefs.ViewTileHeads;
                 }
 
                 ImGui.Separator();
@@ -335,6 +319,29 @@ static class EditorWindow
                     PaletteWindow.IsWindowOpen = !PaletteWindow.IsWindowOpen;
                 }
 
+                if (ImGui.BeginMenu("瓦片预览"))
+                {
+                    var viewGfx = prefs.ViewTileGraphicPreview;
+                    var viewSpecs = prefs.ViewTileSpecPreview;
+                    var specsTooltip = prefs.ViewTileSpecsOnTooltip;
+
+                    if (ImGui.MenuItem("图像预览窗口", null, ref viewGfx))
+                        prefs.ViewTileGraphicPreview = viewGfx;
+                    
+                    if (ImGui.MenuItem("几何预览窗口", null, ref viewSpecs))
+                        prefs.ViewTileSpecPreview = viewSpecs;
+                    
+                    if (ImGui.MenuItem("悬停预览", null, ref specsTooltip))
+                        prefs.ViewTileSpecsOnTooltip = specsTooltip;
+                    
+                    ImGui.EndMenu();
+                }
+
+                if (ImGui.MenuItem("主页", !homeTab))
+                {
+                    homeTab = true;
+                    switchToHomeTab = true;
+                }
                 ImGui.Separator();
 
                 if (ImGui.MenuItem("打开数据文件夹..."))
@@ -355,20 +362,7 @@ static class EditorWindow
 
                 if (ImGui.MenuItem("文档..."))
                 {
-                    #if DEBUG
-                    var docPath = Path.Combine("dist", "docs", "en", "index.html");
-                    #else
-                    var docPath = Path.Combine(Boot.AppDataPath, "docs", "en", "index.html");
-                    #endif
-
-                    if (File.Exists(docPath))
-                    {
-                        Platform.OpenURL(docPath);
-                    }
-                    else
-                    {
-                        ShowNotification("无法打开文档");
-                    }
+                    OpenManual();
                 }
 
                 if (ImGui.MenuItem("关于..."))
@@ -383,13 +377,20 @@ static class EditorWindow
         }
     }
 
+    private static void OpenLevelPrompt()
+    {
+        OpenLevelBrowser(FileBrowser.OpenMode.Read, static (paths) =>
+        {
+            if (paths.Length > 0) RainEd.Instance.LoadLevel(paths[0]);
+        });
+    }
+
     private static void HandleShortcuts()
     {
         if (RainEd.Instance.IsLevelLocked) return;
 
         var fileActive = RainEd.Instance.CurrentTab is not null;
         var prefs = RainEd.Instance.Preferences;
-        var renderer = RainEd.Instance.LevelView.Renderer;
 
         if (KeyShortcuts.Activated(KeyShortcut.New))
         {
@@ -398,10 +399,7 @@ static class EditorWindow
 
         if (KeyShortcuts.Activated(KeyShortcut.Open))
         {
-            OpenLevelBrowser(FileBrowser.OpenMode.Read, static (paths) =>
-            {
-                if (paths.Length > 0) RainEd.Instance.LoadLevel(paths[0]);
-            });
+            OpenLevelPrompt();
         }
 
         if (KeyShortcuts.Activated(KeyShortcut.Save) && fileActive)
@@ -452,7 +450,6 @@ static class EditorWindow
             {
                 if (ok)
                 {
-                    RainEd.Instance.AssetGraphics.ClearTextureCache();
                     drizzleRenderWindow = new DrizzleRenderWindow(false);
                 }
             }, false);
@@ -468,7 +465,7 @@ static class EditorWindow
 
         if (KeyShortcuts.Activated(KeyShortcut.ToggleViewGrid))
         {
-            renderer.ViewGrid = !renderer.ViewGrid;
+            prefs.ViewGrid = !prefs.ViewGrid;
         }
 
         if (KeyShortcuts.Activated(KeyShortcut.ToggleViewTiles))
@@ -483,7 +480,7 @@ static class EditorWindow
 
         if (KeyShortcuts.Activated(KeyShortcut.ToggleViewCameras))
         {
-            renderer.ViewCameras = !renderer.ViewCameras;
+            prefs.ViewCameras = !prefs.ViewCameras;
         }
 
         if (KeyShortcuts.Activated(KeyShortcut.ToggleViewGraphics))
@@ -523,18 +520,30 @@ static class EditorWindow
         }
     }
 
+    /// <summary>
+    /// Show miscellaneous windows that may be docked.
+    /// </summary>
     static void ShowMiscWindows()
     {
         ShortcutsWindow.ShowWindow();
+        PaletteWindow.ShowWindow();
+    }
+
+    /// <summary>
+    /// Only show miscellaneous windows that cannot be docked since
+    /// they are either pop-ups or can be viewable without a level
+    /// active.
+    /// </summary>
+    static void ShowMiscFloatingWindows()
+    {
         AboutWindow.ShowWindow();
         LevelLoadFailedWindow.ShowWindow();
         PreferencesWindow.ShowWindow();
-        PaletteWindow.ShowWindow();
-        LogsWindow.ShowWindow();
         EmergencySaveWindow.ShowWindow();
-        GuideViewerWindow.ShowWindow();
         NewLevelWindow.ShowWindow();
         MassRenderWindow.ShowWindow();
+        InitErrorsWindow.ShowWindow();
+        LogsWindow.ShowWindow();
     }
 
     /// <summary>
@@ -585,6 +594,31 @@ static class EditorWindow
                 bool tabChanged = _prevTab != RainEd.Instance.CurrentTab;
                 var anyTabActive = false;
 
+                // home tab
+                if (homeTab)
+                {
+                    var tabFlags = ImGuiTabItemFlags.None;
+
+                    if (switchToHomeTab)
+                    {
+                        tabFlags |= ImGuiTabItemFlags.SetSelected;
+                        _prevTab = null;
+                        switchToHomeTab = false;
+                    }
+                    
+                    if (ImGui.BeginTabItem("主页", ref homeTab, tabFlags))
+                    {
+                        if (!tabChanged)
+                        {
+                            RainEd.Instance.CurrentTab = null;
+                            _prevTab = null;
+                        }
+
+                        HomeTab();
+                        ImGui.EndTabItem();
+                    }
+                }
+
                 var tabIndex = 0;
                 foreach (var tab in RainEd.Instance.Tabs.ToArray())
                 {
@@ -616,6 +650,7 @@ static class EditorWindow
 
                         //ImGui.PopStyleVar();
                         RainEd.Instance.LevelView.Render();
+                        ShowMiscWindows();
 
                         //ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
                         ImGui.EndTabItem();
@@ -718,7 +753,7 @@ static class EditorWindow
             }
         }
 
-        ShowMiscWindows();
+        ShowMiscFloatingWindows();
 
         // prompt unsaved changes
         if (promptUnsavedChanges)
@@ -861,5 +896,101 @@ static class EditorWindow
         }
 
         return true;
+    }
+
+    public static void HomeTab()
+    {
+        var childSize = new Vector2(RainedLogo.Width, RainedLogo.Height - 100f + ImGui.GetFrameHeight() * 16f);
+        ImGui.SetCursorPos((ImGui.GetWindowSize() - childSize) / 2f);
+        ImGui.BeginChild("Contents", childSize);
+
+        var newVersion = RainEd.Instance.LatestVersionInfo is not null && RainEd.Instance.LatestVersionInfo.VersionName != RainEd.Version;
+
+        RainedLogo.Draw();
+
+        ImGui.SetCursorPosY(RainedLogo.Height - 100f);
+        var btnSize = new Vector2(-0.00001f, 0f);
+
+        if (ImGui.Button("新建关卡...", btnSize))
+            NewLevelWindow.OpenWindow();
+        
+        if (ImGui.Button("打开关卡...", btnSize))
+            OpenLevelPrompt();
+        
+        if (ImGui.Button("文档...", btnSize))
+            OpenManual();
+
+        // recent levels list
+        ImGui.Text("最近关卡");
+        var listBoxSize = ImGui.GetContentRegionAvail();
+        // if new version was found, make space for the text
+        if (newVersion)
+            listBoxSize.Y -= ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y + 1;
+        
+        if (ImGui.BeginListBox("##RecentLevels", listBoxSize))
+        {
+            RecentLevelsList();
+            ImGui.EndListBox();
+        }
+
+        // show new version
+        if (newVersion)
+        {
+            ImGui.Text("可下载新版本!");
+            ImGui.SameLine();
+            ImGuiExt.LinkText(RainEd.Instance.LatestVersionInfo!.VersionName, RainEd.Instance.LatestVersionInfo.GitHubReleaseUrl);
+        }
+
+        ImGui.EndChild();
+    }
+
+    private static void RecentLevelsList()
+    {
+        var recentFiles = RainEd.Instance.Preferences.RecentFiles;
+
+        if (recentFiles.Count == 0)
+        {
+            ImGui.MenuItem("(无最近文件)", false);
+        }
+        else
+        {
+            // traverse backwards
+            for (int i = recentFiles.Count - 1; i >= 0; i--)
+            {
+                var filePath = recentFiles[i];
+
+                if (ImGui.MenuItem(Path.GetFileName(filePath)))
+                {
+                    if (File.Exists(filePath))
+                    {
+                        RainEd.Instance.LoadLevel(filePath);
+                    }
+                    else
+                    {
+                        ShowNotification("无法访问文件");
+                        recentFiles.RemoveAt(i);
+                    }
+                }
+
+            }
+        }
+    }
+
+    private static void OpenManual()
+    {
+        #if DEBUG
+        var docPath = Path.Combine("dist", "docs", "en", "index.html");
+        #else
+        var docPath = Path.Combine(Boot.AppDataPath, "docs", "en", "index.html");
+        #endif
+
+        if (File.Exists(docPath))
+        {
+            Platform.OpenURL(docPath);
+        }
+        else
+        {
+            ShowNotification("Could not open documentation.");
+        }
     }
 }

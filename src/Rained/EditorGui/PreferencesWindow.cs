@@ -340,6 +340,20 @@ static class PreferencesWindow
                     ImGui.EndCombo();
                 }
 
+                var fontSize = prefs.FontSize;
+                if (ImGui.InputInt("Font size", ref fontSize))
+                    prefs.FontSize = fontSize;
+                
+                if (ImGui.IsItemDeactivatedAfterEdit())
+                    Fonts.FontReloadQueued = true;
+                
+                ImGui.SameLine();
+                ImGui.TextDisabled("(?)");
+                if (ImGui.BeginItemTooltip())
+                {
+                    ImGui.Text("The default value for this is 13.");
+                    ImGui.EndTooltip();
+                }
 
                 ImGui.PopItemWidth();
             }
@@ -736,14 +750,14 @@ static class PreferencesWindow
         // static lingo runtime
         {
             boolRef = prefs.StaticDrizzleLingoRuntime;
-            if (ImGui.Checkbox("Initialize the Zygote runtime on app startup", ref boolRef))
+            if (ImGui.Checkbox("Initialize Drizzle on app startup", ref boolRef))
                 prefs.StaticDrizzleLingoRuntime = boolRef;
             
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
                 """
-                This will run the Zygote runtime initialization
+                This will run the Drizzle runtime initialization
                 process once, when the app starts. This results
                 in a longer startup time and more idle RAM
                 usage, but will decrease the time it takes to

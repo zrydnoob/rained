@@ -80,7 +80,7 @@ struct PropColor
     public Color Color;
 }
 
-record PropInit
+record class PropInit
 {
     public readonly string Name;
     public readonly PropCategory Category;
@@ -511,6 +511,11 @@ class PropDatabase
     public readonly List<PropColor> PropColors; // custom colors
     private readonly Dictionary<string, PropInit> allProps;
 
+    /// <summary>
+    /// True if any errors were encountered while loading.
+    /// </summary>
+    public bool HasErrors { get; private set; } = false;
+
     private int catIndex = 0;
 
     public PropDatabase(TileDatabase tileDatabase)
@@ -532,18 +537,17 @@ class PropDatabase
     
     private void AddPropToIndex(int lineNo, PropInit prop)
     {
-        if (allProps.ContainsKey(prop.Name))
+        /*if (allProps.ContainsKey(prop.Name))
         {
-            if (lineNo == -2) // dumb idk
+            if (lineNo == -2) // dumb ik
             {
-                Log.UserLogger.Warning("Tiles: Already added prop {PropName}", prop.Name);
+                Log.UserLogger.Warning("Tile As Prop: Already added prop {PropName}", prop.Name);
             }
             else
             {
                 Log.UserLogger.Warning(ErrorString(lineNo, "Already added prop " + prop.Name));
             }
-        }
-
+        }*/
         allProps[prop.Name] = prop;
     }
 
@@ -561,8 +565,14 @@ class PropDatabase
     }
 
     // helper function to create error message with line inforamtion
-    private static string ErrorString(int lineNo, string msg)
-            => "Line " + (lineNo == -1 ? "[UNKNOWN]" : lineNo) + ": " + msg; 
+    static string ErrorString(int lineNo, string msg)
+    {
+        if (lineNo == -1)
+            return "[EMBEDDED]: " + msg;
+        else
+            return "Line " + lineNo + ": " + msg;
+    }
+
 
     private void InitProps(TileDatabase tileDatabase)
     {
@@ -599,8 +609,22 @@ class PropDatabase
                 Lingo.List? propData = null;
                 try // curse you Wryak
                 {
-                    propData = (Lingo.List) (lingoParser.Read(line) ?? throw new Exception(ErrorString(lineNo, "Malformed prop init")));
-                    var propInit = new PropInit(currentCategory, propData);
+                    var parsedLine = lingoParser.Read(line, out Lingo.ParseException? parseErr);
+                    if (parseErr is not null)
+                    {
+                        HasErrors = true;
+                        Log.UserLogger.Error(ErrorString(lineNo, parseErr.Message + " (line ignored)"));
+                        continue;
+                    }
+                    
+                    if (parsedLine is null)
+                    {
+                        HasErrors = true;
+                        Log.UserLogger.Error(ErrorString(lineNo, "Malformed tile init (line ignored)"));
+                        continue;
+                    }
+
+                    var propInit = new PropInit(currentCategory, (Lingo.List) parsedLine);
                     currentCategory.Props.Add(propInit);
                     AddPropToIndex(lineNo, propInit);
                 }
@@ -612,6 +636,8 @@ class PropDatabase
             }
         }
 
+        Log.UserLogger.Information("Reading tiles as props...");
+        
         // read tile database to create Tiles as Prop
         // the "Tiles as props" categories are not touched by the tile editor;
         // it only touches the TileCategories field
@@ -653,6 +679,26 @@ class PropDatabase
             if (tilePropCategory.Props.Count > 0)
             {
                 TileCategories.Add(tilePropCategory);
+            }
+        }
+
+        // purge empty categories
+        for (int i = Categories.Count - 1; i >= 0; i--)
+        {
+            if (Categories[i].Props.Count == 0)
+            {
+                Log.UserLogger.Warning("{Category} was empty", Categories[i].Name);
+                Categories.RemoveAt(i);
+            }
+        }
+
+        // purge empty tile categories
+        for (int i = TileCategories.Count - 1; i >= 0; i--)
+        {
+            if (TileCategories[i].Props.Count == 0)
+            {
+                Log.UserLogger.Warning("{Category} was empty", TileCategories[i].Name);
+                TileCategories.RemoveAt(i);
             }
         }
     }

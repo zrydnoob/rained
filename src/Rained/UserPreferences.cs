@@ -53,6 +53,9 @@ class UserPreferences
     public bool ViewTiles { get; set; }
     public bool ViewProps { get; set; }
     public bool ViewPreviews { get; set; }
+    public bool ViewTileGraphicPreview { get; set; } = true;
+    public bool ViewTileSpecPreview { get; set; } = true;
+    public bool ViewTileSpecsOnTooltip { get; set; } = true;
 
     public string GeometryViewMode { get; set; }
     public string PropSnap { get; set; }
@@ -257,6 +260,7 @@ class UserPreferences
 
     public string Theme { get; set; }
     public string Font { get; set; }
+    public int FontSize { get; set; } = 13;
     public float ContentScale { get; set; }
     public bool ImGuiMultiViewport { get; set; }
     public bool Vsync { get; set; } = false;

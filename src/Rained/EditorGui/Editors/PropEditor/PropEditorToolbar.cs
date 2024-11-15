@@ -23,7 +23,7 @@ partial class PropEditor : IEditorMode
     private int selectedTileIdx = 0;
     private SelectionMode selectionMode = SelectionMode.Props;
     private SelectionMode? forceSelection = null;
-    private PropInit selectedInit;
+    private PropInit? selectedInit;
     private RlManaged.RenderTexture2D previewTexture = null!;
     private PropInit? curPropPreview = null;
 
@@ -353,7 +353,7 @@ partial class PropEditor : IEditorMode
         {
             // push rope transform if simulation had just ended
             Log.Information("End rope simulation");
-            changeRecorder.PushTransform();
+            changeRecorder.PushChanges();
         }
     }
 
@@ -659,27 +659,27 @@ partial class PropEditor : IEditorMode
                 if (ImGui.Button("重置变换"))
                 {
                     changeRecorder.BeginTransform();
-                    foreach (var prop in selectedProps)
-                        prop.ResetTransform();
-                    changeRecorder.PushTransform();
+                        foreach (var prop in selectedProps)
+                            prop.ResetTransform();
+                    changeRecorder.PushChanges();
                 }
 
                 ImGui.SameLine();
                 if (ImGui.Button("翻转 X"))
                 {
                     changeRecorder.BeginTransform();
-                    foreach (var prop in selectedProps)
-                        prop.FlipX();
-                    changeRecorder.PushTransform();
+                        foreach (var prop in selectedProps)
+                            prop.FlipX();
+                    changeRecorder.PushChanges();
                 }
 
                 ImGui.SameLine();
                 if (ImGui.Button("翻转 Y"))
                 {
                     changeRecorder.BeginTransform();
-                    foreach (var prop in selectedProps)
-                        prop.FlipY();
-                    changeRecorder.PushTransform();
+                        foreach (var prop in selectedProps)
+                            prop.FlipY();
+                    changeRecorder.PushChanges();
                 }
 
                 ImGui.PushItemWidth(ImGui.GetTextLineHeightWithSpacing() * 10f);
@@ -701,7 +701,7 @@ partial class PropEditor : IEditorMode
                     }
 
                     if (hasCustomDepth)
-                        MultiselectSliderInt("自定义纵深", "CustomDepth", 1, 30, "%i", ImGuiSliderFlags.AlwaysClamp);
+                        MultiselectSliderInt("自定义纵深", "CustomDepth", 0, 30, "%i", ImGuiSliderFlags.AlwaysClamp);
                 }
 
                 // custom color, if available
@@ -842,8 +842,8 @@ partial class PropEditor : IEditorMode
 
                                 foreach (var prop in selectedProps)
                                     prop.Rope!.ResetModel();
-
-                                changeRecorder.PushTransform();
+                                
+                                changeRecorder.PushChanges();
                             }
 
                             ImGui.SameLine();
