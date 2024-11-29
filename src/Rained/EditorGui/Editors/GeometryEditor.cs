@@ -376,8 +376,8 @@ class GeometryEditor : IEditorMode
 
             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
 
-            ImGui.Text("层级");
-            ImGuiExt.ButtonFlags("##Layers", ["1", "2", "3"], layerMask);
+            ImGui.Text("Layers");
+            ImGuiExt.ButtonFlags("##Layers", ["1", "2", "3"], layerMask, ButtonGroupOptions.Vertical);
 
             // show mirror toggles
             ImGui.Text("镜像");
@@ -498,33 +498,11 @@ class GeometryEditor : IEditorMode
                     }
                 }
 
-                for (int l = Level.LayerCount - 1; l >= 0; l--)
+                levelRender.RenderLevel(new Rendering.LevelRenderConfig()
                 {
-                    var alpha = (l == shownLayer) ? 255 : 50;
-                    if (l == 0) foregroundAlpha = alpha;
-                    var color = LevelWindow.GeoColor(alpha);
-                    int offset = (l - shownLayer) * 2;
-
-                    Rlgl.PushMatrix();
-                    Rlgl.Translatef(offset, offset, 0f);
-                    levelRender.RenderGeometry(l, color);
-
-                    if (drawTiles)
-                    {
-                        // if alpha is 255, the product wil be 100 (like in every other edit mode)
-                        // and a smaller geo alpha will thus have a smaller tile alpha value
-                        levelRender.RenderTiles(l, (int)(alpha * (100.0f / 255.0f)));
-                    }
-
-                    if (drawProps)
-                    {
-                        levelRender.RenderProps(l, (int)(alpha * (100.0f / 255.0f)));
-                    }
-
-                    levelRender.RenderObjects(l, new Color(255, 255, 255, alpha));
-
-                    Rlgl.PopMatrix();
-                }
+                    ActiveLayer = shownLayer,
+                    DrawObjects = true
+                });
 
                 break;
         }
@@ -782,6 +760,23 @@ class GeometryEditor : IEditorMode
         lastMouseY = window.MouseCy;
 
         Raylib.EndScissorMode();
+
+        if (window.IsViewportHovered)
+            RenderCursor();
+    }
+
+    // render active layer squares near cursor
+    private void RenderCursor()
+    {
+        var drawList = ImGui.GetForegroundDrawList();
+        var mousePos = ImGui.GetMousePos() + new Vector2(8f * Boot.WindowScale, 0f);
+
+        for (int i = 0; i < 3; i++)
+        {
+            var pos = mousePos + new Vector2(i * 8f, 0f);
+            var col = new Vector4(LayerColors[i].R / 255f, LayerColors[i].G / 255f, LayerColors[i].B / 255f, layerMask[i] ? 1f : 0.2f);
+            drawList.AddRectFilled(pos, pos + Vector2.One * 6f * Boot.WindowScale, ImGui.ColorConvertFloat4ToU32(col));
+        }
     }
 
     private int GetMirroredPositions(int tx, int ty, Span<(int x, int y)> positions)

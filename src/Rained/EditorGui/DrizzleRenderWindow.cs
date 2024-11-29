@@ -195,8 +195,8 @@ class DrizzleRenderWindow : IDisposable
             }
 
             if (showTime)
-                ImGui.TextUnformatted(elapsedStopwatch.Elapsed.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
-
+                ImGui.TextUnformatted(elapsedStopwatch.Elapsed.ToString(@"hh\:mm\:ss", Boot.UserCulture));
+            
             ImGui.NewLine();
             ImGui.TextUnformatted(drizzleRenderer.DisplayString);
         }
@@ -334,7 +334,12 @@ class DrizzleRenderWindow : IDisposable
             return;
         }
 
-        Glib.PixelFormat desiredPixelFormat = img.Format == Drizzle.PixelFormat.L1 ? Glib.PixelFormat.Grayscale : Glib.PixelFormat.RGBA;
+        Glib.PixelFormat desiredPixelFormat =
+            img.Format is Drizzle.PixelFormat.L1 or Drizzle.PixelFormat.Palette8
+            ?
+            Glib.PixelFormat.Grayscale
+            :
+            Glib.PixelFormat.RGBA;
 
         if (tex == null || tex.GlibTexture.PixelFormat != desiredPixelFormat || img.Width != tex.Width || img.Height != tex.Height)
         {
@@ -349,25 +354,33 @@ class DrizzleRenderWindow : IDisposable
     {
         if (img.Pixels is not null)
         {
-            // convert 1-bit-per-pixel image to an 8-bit-per-pixel image
-            if (img.Format == Drizzle.PixelFormat.L1)
+            switch (img.Format)
             {
-                var srcPixels = img.Pixels!;
+                // convert 1-bit-per-pixel image to an 8-bit-per-pixel image
+                case Drizzle.PixelFormat.L1:
+                {
+                    var srcPixels = img.Pixels!;
 
-                int grayscalePixSize = img.Width * img.Height + 32; // add 32 bytes of padding, just in case
-                if (convertedBitmap is null || convertedBitmap.Length != img.Width * img.Height + grayscalePixSize)
-                    convertedBitmap = new byte[img.Width * img.Height + grayscalePixSize];
+                    int grayscalePixSize = img.Width * img.Height + 32; // add 32 bytes of padding, just in case
+                    if (convertedBitmap is null || convertedBitmap.Length != img.Width * img.Height + grayscalePixSize)
+                        convertedBitmap = new byte[img.Width * img.Height + grayscalePixSize];
+                    
+                    ConvertBitmap(srcPixels, convertedBitmap);
+                    gtex.UpdateFromImage(new ReadOnlySpan<byte>(convertedBitmap, 0, img.Width * img.Height));
+                    break;
+                }
 
-                ConvertBitmap(srcPixels, convertedBitmap);
-                gtex.UpdateFromImage(new ReadOnlySpan<byte>(convertedBitmap, 0, img.Width * img.Height));
-            }
-            else
-            {
-                // bgra -> rgba conversion is done in the shader                
-                //await Task.Run(() =>
-                //{
-                gtex.UpdateFromImage(new ReadOnlySpan<byte>(img.Pixels, 0, img.Width * img.Height * 4));
-                //});
+                // upload palette8 buffer directly
+                case Drizzle.PixelFormat.Palette8:
+                {
+                    gtex.UpdateFromImage(new ReadOnlySpan<byte>(img.Pixels, 0, img.Width * img.Height));
+                    break;
+                }
+
+                case Drizzle.PixelFormat.Bgra32:
+                    // bgra -> rgba conversion is done in the shader                
+                    gtex.UpdateFromImage(new ReadOnlySpan<byte>(img.Pixels, 0, img.Width * img.Height * 4));
+                    break;
             }
         }
     }
