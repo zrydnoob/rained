@@ -32,9 +32,9 @@ class LevelWindow
     private readonly UICanvasWidget canvasWidget;
     public bool IsViewportHovered { get => canvasWidget.IsHovered; }
 
-    private readonly List<IEditorMode> editorModes = new();
-    private int selectedMode = (int)EditModeEnum.Environment;
-    private int queuedEditMode = (int)EditModeEnum.None;
+    private readonly IEditorMode[] editorModes = new IEditorMode[7];
+    private int selectedMode = (int) EditModeEnum.Environment;
+    private int queuedEditMode = (int) EditModeEnum.None;
 
     public int EditMode
     {
@@ -73,7 +73,7 @@ class LevelWindow
             var renderer = RainEd.Instance.LevelView.Renderer;
             if (renderer.UsePalette)
             {
-                return renderer.GetPaletteColor(PaletteColor.Sky);
+                return renderer.Palette.GetPaletteColor(PaletteColor.Sky);
             }
             else
             {
@@ -88,7 +88,7 @@ class LevelWindow
         var renderer = RainEd.Instance.LevelView.Renderer;
         if (renderer.UsePalette)
         {
-            var col = renderer.GetPaletteColor(PaletteColor.Black);
+            var col = renderer.Palette.GetPaletteColor(PaletteColor.Black);
             return new Color(col.R, col.G, col.B, (byte)alpha);
         }
         else
@@ -106,7 +106,7 @@ class LevelWindow
         Color col;
         if (renderer.UsePalette)
         {
-            col = renderer.GetPaletteColor(PaletteColor.Black);
+            col = renderer.Palette.GetPaletteColor(PaletteColor.Black);
         }
         else
         {
@@ -132,24 +132,27 @@ class LevelWindow
         }
 
         Renderer = new LevelEditRender();
+        
         cellChangeRecorder = new ChangeHistory.CellChangeRecorder();
         RainEd.Instance.ChangeHistory.Cleared += () =>
         {
             cellChangeRecorder = new ChangeHistory.CellChangeRecorder();
         };
 
-        editorModes.Add(new EnvironmentEditor(this));
-        editorModes.Add(new GeometryEditor(this));
-        editorModes.Add(new TileEditor(this));
-        editorModes.Add(new CameraEditor(this));
-        editorModes.Add(new LightEditor(this));
-        editorModes.Add(new EffectsEditor(this));
-        editorModes.Add(new PropEditor(this));
+        editorModes[(int)EditModeEnum.Environment] = new EnvironmentEditor(this);
+        editorModes[(int)EditModeEnum.Geometry] = new GeometryEditor(this);
+        editorModes[(int)EditModeEnum.Tile] = new TileEditor(this);
+        editorModes[(int)EditModeEnum.Camera] = new CameraEditor(this);
+        editorModes[(int)EditModeEnum.Light] = new LightEditor(this);
+        editorModes[(int)EditModeEnum.Effect] = new EffectsEditor(this);
+        editorModes[(int)EditModeEnum.Prop] = new PropEditor(this);
 
         // load user preferences
-        Renderer.Palette = RainEd.Instance.Preferences.UsePalette ? RainEd.Instance.Preferences.PaletteIndex : -1;
-        Renderer.FadePalette = RainEd.Instance.Preferences.PaletteFadeIndex;
-        Renderer.PaletteMix = RainEd.Instance.Preferences.PaletteFade;
+        var prefs = RainEd.Instance.Preferences;
+        Renderer.UsePalette = prefs.UsePalette;
+        Renderer.Palette.Index = prefs.PaletteIndex;
+        Renderer.Palette.FadeIndex = prefs.PaletteFadeIndex;
+        Renderer.Palette.Mix = prefs.PaletteFade;
     }
 
     public void SavePreferences(UserPreferences prefs)
@@ -157,9 +160,9 @@ class LevelWindow
         // i suppose this is redundant, as the PaletteWindow automatically
         // updates the values in the prefs json
         prefs.UsePalette = Renderer.UsePalette;
-        prefs.PaletteFadeIndex = Renderer.FadePalette;
-        prefs.PaletteFade = Renderer.PaletteMix;
-
+        prefs.PaletteFadeIndex = Renderer.Palette.FadeIndex;
+        prefs.PaletteFade = Renderer.Palette.Mix;
+        
         foreach (var mode in editorModes)
         {
             mode.SavePreferences(prefs);
@@ -252,7 +255,7 @@ class LevelWindow
                 ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 8f);
                 if (ImGui.BeginCombo("##EditMode", editorModes[selectedMode].Name))
                 {
-                    for (int i = 0; i < editorModes.Count; i++)
+                    for (int i = 0; i < editorModes.Length; i++)
                     {
                         var isSelected = i == selectedMode;
                         if (ImGui.Selectable(editorModes[i].Name, isSelected))
@@ -523,5 +526,37 @@ class LevelWindow
             (int)(RainEd.Instance.Level.Width * Level.TileSize * ViewZoom),
             (int)(RainEd.Instance.Level.Height * Level.TileSize * ViewZoom)
         );
+    }
+
+    // seems a bit random to be placed here but i'm lazy
+    /// <summary>
+    /// Invalidate geometry for both the renderer and node list.
+    /// </summary>
+    /// <param name="x">The X position of the dirty cell.</param>
+    /// <param name="y">The Y position of the dirty cell.</param>
+    /// <param name="layer">The work layer of the dirty cell.</param>
+    public void InvalidateGeo(int x, int y, int layer)
+    {
+        Log.Debug("InvalidateGeo({X}, {Y}, {Layer})", x, y, layer);
+
+        Renderer.InvalidateGeo(x, y, layer);
+        if (layer == 0)
+            RainEd.Instance.CurrentTab!.NodeData.InvalidateCell(x, y);
+    }
+
+    // seems a bit random to be placed here but i'm lazy
+    /// <summary>
+    /// Invalidate geometry for both the renderer and node list.
+    /// </summary>
+    /// <param name="x">The X position of the dirty cell.</param>
+    /// <param name="y">The Y position of the dirty cell.</param>
+    /// <param name="layer">The work layer of the dirty cell.</param>
+    public void InvalidateGeo(int x, int y, int layer)
+    {
+        Log.Debug("InvalidateGeo({X}, {Y}, {Layer})", x, y, layer);
+
+        Renderer.InvalidateGeo(x, y, layer);
+        if (layer == 0)
+            RainEd.Instance.CurrentTab!.NodeData.InvalidateCell(x, y);
     }
 }

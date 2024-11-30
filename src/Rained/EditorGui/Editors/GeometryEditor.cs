@@ -431,6 +431,8 @@ class GeometryEditor : IEditorMode
             mirrorFlags ^= MirrorFlags.MirrorY;
     }
 
+    private static bool tempvar = false;
+
     public void DrawViewport(RlManaged.RenderTexture2D mainFrame, RlManaged.RenderTexture2D[] layerFrames)
     {
         window.BeginLevelScissorMode();
@@ -507,7 +509,11 @@ class GeometryEditor : IEditorMode
                 break;
         }
 
+        // TODO:
+        if (Raylib.IsKeyPressed(KeyboardKey.P)) tempvar = !tempvar;
         levelRender.RenderShortcuts(Color.White);
+        if (tempvar)
+            levelRender.RenderNodes(Color.White);
         levelRender.RenderGrid();
         levelRender.RenderBorder();
         levelRender.RenderCameraBorders();
@@ -831,7 +837,7 @@ class GeometryEditor : IEditorMode
                 else if (selectedTool is Tool.Air)
                     cell.Geo = GeoType.Solid;
 
-                window.Renderer.InvalidateGeo(x, y, l);
+                window.InvalidateGeo(x, y, l);
             }
         }
     }
@@ -954,10 +960,10 @@ class GeometryEditor : IEditorMode
                     {
                         int dstLayer = (layer + 1) % 3;
 
-                        ref var dstCell = ref level.Layers[dstLayer, tx, ty];
-                        dstCell.Geo = cell.Geo;
-                        dstCell.Objects = cell.Objects;
-                        window.Renderer.InvalidateGeo(tx, ty, dstLayer);
+                    ref var dstCell = ref level.Layers[dstLayer, tx, ty];
+                    dstCell.Geo = cell.Geo;
+                    dstCell.Objects = cell.Objects;
+                    window.InvalidateGeo(tx, ty, dstLayer);
 
                         break;
                     }
@@ -1047,7 +1053,7 @@ class GeometryEditor : IEditorMode
             }
 
             level.Layers[layer, tx, ty] = cell;
-            window.Renderer.InvalidateGeo(tx, ty, layer);
+            window.InvalidateGeo(tx, ty, layer);
         }
     }
 
@@ -1115,7 +1121,7 @@ class GeometryEditor : IEditorMode
                 oldBelowEmpty = belowEmpty;
 
                 level.Layers[layer, x, y].Geo = fillGeo;
-                renderer.InvalidateGeo(x, y, layer);
+                window.InvalidateGeo(x, y, layer);
                 x++;
             }
         }

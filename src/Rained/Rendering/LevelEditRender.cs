@@ -1,10 +1,9 @@
 using Raylib_cs;
-using System.Globalization;
 using System.Numerics;
-using System.Text.RegularExpressions;
 using Rained.EditorGui;
 using Rained.LevelData;
 using Rained.Assets;
+using ImGuiNET;
 namespace Rained.Rendering;
 using CameraBorderModeOption = UserPreferences.CameraBorderModeOption;
 
@@ -44,6 +43,7 @@ class LevelEditRender : IDisposable
     
     private readonly EditorGeometryRenderer geoRenderer;
     private readonly TileRenderer tileRenderer;
+    private readonly PropRenderer propRenderer;
 
     private Glib.Mesh? gridMajor = null;
     private Glib.Mesh? gridMinor = null;
@@ -53,60 +53,18 @@ class LevelEditRender : IDisposable
     private readonly RlManaged.Texture2D bigChainSegment;
 
     public bool UsePalette = false;
-    public int Palette = 0;
-    public int FadePalette = 1;
-    public float PaletteMix = 0f;
-
-    private readonly Dictionary<int, Palette> Palettes;
-    private readonly Palette dummyPalette = new();
-
-    public Glib.Texture PaletteTexture => paletteTexture;
-    private readonly Glib.Texture paletteTexture;
-    private readonly Glib.Image _paletteImgBuf; // for updating paletteTexture
+    public PaletteRenderer Palette;
 
     public LevelEditRender()
     {
         editor = RainEd.Instance;
 
         // load palettes
-        var palettes = new Dictionary<int, Palette>();
-        foreach (var filePath in Directory.EnumerateFiles(Path.Combine(Boot.AppDataPath, "assets", "palettes")))
-        {
-            int paletteNumber = 0;
-            bool validFilename = false;
-
-            var fileName = Path.GetFileName(filePath);
-            if (fileName[^4..] == ".png" && fileName[..7] == "palette")
-            {
-                validFilename = int.TryParse(fileName[7..^4], CultureInfo.InvariantCulture, out paletteNumber);
-            }
-
-            if (validFilename)
-            {
-                try
-                {
-                    palettes[paletteNumber] = new Palette(filePath);
-                }
-                catch (Exception e)
-                {
-                    Log.UserLogger.Error("Could not load palette {PaletteNumber}: {Exception}", paletteNumber, e);
-                }
-            }
-            else
-            {
-                Log.UserLogger.Warning("Invalid palette file name {FileName}, ignoring.", Path.GetFileName(filePath));
-            }
-        }
-        
-        Palettes = palettes;
-
-        // create palette texture which will be computed and sent to the palette shader
-        // (Glib.PixelFormat.RGB does not work for some reason)
-        paletteTexture = Glib.Texture.Create(30, 3, Glib.PixelFormat.RGBA);
-        _paletteImgBuf = Glib.Image.FromColor(30, 3, Glib.Color.Black, Glib.PixelFormat.RGBA);
+        Palette = new PaletteRenderer();
 
         geoRenderer = new EditorGeometryRenderer(this);
         tileRenderer = new TileRenderer(this);
+        propRenderer = new PropRenderer(this);
 
         // TODO: this is actually unused for now
         using var chainSegmentImg = RlManaged.Image.Load(Path.Combine(DrizzleCast.DirectoryPath, "Internal_144_bigChainSegment.png"));
@@ -162,14 +120,6 @@ class LevelEditRender : IDisposable
     }
     */
 
-    public Palette GetPalette(int index)
-    {
-        if (Palettes.TryGetValue(index, out Palette? p))
-            return p;
-        else
-            return dummyPalette;
-    }
-
     private bool IsInBorder(int x, int y)
     {
         return
@@ -198,76 +148,6 @@ class LevelEditRender : IDisposable
         geoRenderer.ReloadLevel();
         tileRenderer.ReloadLevel();
     }
-
-    #region Palettes
-    private static float Lerp(float x, float y, float a)
-    {
-        return (y - x) * a + x;
-    }
-
-    public Color GetSunColor(PaletteLightLevel lightLevel, int sublayer, int index)
-    {
-        var p = GetPalette(index).SunPalette;
-        return lightLevel switch
-        {
-            PaletteLightLevel.Lit => p[sublayer].Lit,
-            PaletteLightLevel.Neutral => p[sublayer].Neutral,
-            PaletteLightLevel.Shaded => p[sublayer].Shaded,
-            _ => new Color(0, 0, 0, 0)
-        };
-    }
-
-    public Color GetPaletteColor(PaletteColor colorName, int index)
-    {
-        var p = GetPalette(index);
-        return colorName switch
-        {
-            PaletteColor.Sky => p.SkyColor,
-            PaletteColor.Fog => p.FogColor,
-            PaletteColor.Black => p.BlackColor,
-            PaletteColor.ShortcutSymbol => p.ShortcutSymbolColor,
-            _ => throw new ArgumentOutOfRangeException(nameof(colorName))
-        };
-    }
-
-    public Color GetSunColorMix(PaletteLightLevel lightLevel, int sublayer, int index1, int index2, float mix)
-    {
-        var c1 = GetSunColor(lightLevel, sublayer, index1);
-        var c2 = GetSunColor(lightLevel, sublayer, index2);
-
-        return new Color(
-            (byte) Lerp(c1.R, c2.R, mix),
-            (byte) Lerp(c1.G, c2.G, mix),
-            (byte) Lerp(c1.B, c2.B, mix),
-            (byte) Lerp(c1.A, c2.A, mix)
-        );
-    }
-
-    public Color GetPaletteColorMix(PaletteColor colorName, int index1, int index2, float mix)
-    {
-        var c1 = GetPaletteColor(colorName, index1);
-        var c2 = GetPaletteColor(colorName, index2);
-
-        return new Color(
-            (byte) Lerp(c1.R, c2.R, mix),
-            (byte) Lerp(c1.G, c2.G, mix),
-            (byte) Lerp(c1.B, c2.B, mix),
-            (byte) Lerp(c1.A, c2.A, mix)
-        );
-    }
-
-    public Color GetSunColor(PaletteLightLevel lightLevel, int sublayer)
-    {
-        if (!UsePalette) return new Color(0, 0, 0, 0);
-        return GetSunColorMix(lightLevel, sublayer, Palette, FadePalette, PaletteMix);
-    }
-
-    public Color GetPaletteColor(PaletteColor colorName)
-    {
-        if (!UsePalette) return new Color(0, 0, 0, 0);
-        return GetPaletteColorMix(colorName, Palette, FadePalette, PaletteMix);
-    }
-    #endregion
 
     public void RenderGeometry(int layer, Color color)
     {
@@ -302,6 +182,55 @@ class LevelEditRender : IDisposable
                     }
                 }
             }
+        }
+    }
+    
+    static readonly Glib.Color[] NodeColors = [
+        // exit
+        Glib.Color.FromRGBA(200, 200, 200),
+
+        // den
+        Glib.Color.FromRGBA(255, 0, 255),
+
+        // region transportation
+        Glib.Color.FromRGBA(52, 50, 52),
+
+        // side exit
+        Glib.Color.FromRGBA(128, 216, 128),
+
+        // sky exit
+        Glib.Color.FromRGBA(52, 216, 255),
+
+        // sea exit
+        Glib.Color.FromRGBA(0, 0, 255),
+
+        // batfly hive
+        Glib.Color.FromRGBA(0, 255, 0),
+
+        // garbage worm
+        Glib.Color.FromRGBA(255, 128, 0)
+    ];
+
+    public void RenderNodes(Color color)
+    {
+        var rctx = RainEd.RenderContext!;
+        var idx = 0;
+
+        foreach (var (nodePos, nodeType) in RainEd.Instance.CurrentTab!.NodeData.Nodes)
+        {
+            var text = idx.ToString();
+            var pos = new Vector2(nodePos.X + 0.5f, nodePos.Y + 0.5f);
+
+            rctx.DrawColor = NodeColors[(int)nodeType];
+            var txtSize = TextRendering.CalcOutlinedTextSize(text);
+            var scale = 2f / ViewZoom;
+            TextRendering.DrawTextOutlined(
+                text: text,
+                offset: pos * Level.TileSize - txtSize / 2f * scale,
+                scale: new Vector2(scale, scale)
+            );
+
+            idx++;
         }
     }
 
@@ -541,264 +470,7 @@ class LevelEditRender : IDisposable
 
     public void RenderProps(int srcLayer, int alpha)
     {
-        int srcDepth = srcLayer * 10;
-
-        var rctx = RainEd.RenderContext;
-        rctx.CullMode = Glib.CullMode.None;
-
-        bool renderPalette;
-
-        // palette rendering mode
-        if (UsePalette)
-        {
-            renderPalette = true;
-            UpdatePaletteTexture();
-        }
-
-        // normal rendering mode
-        else
-        {
-            renderPalette = false;
-        }
-
-        Span<Vector2> transformQuads = stackalloc Vector2[4];
-        foreach (var prop in Level.Props)
-        {
-            // cull prop if it is outside of the view bounds
-            if (prop.Rope is null)
-            {
-                var aabb = prop.CalcAABB();
-                var aabbMin = aabb.Position;
-                var aabbMax = aabb.Position + aabb.Size;
-                if (aabbMax.X < ViewTopLeft.X || aabbMax.Y < ViewTopLeft.Y || aabbMin.X > ViewBottomRight.X || aabbMin.Y > ViewBottomRight.Y)
-                {
-                    continue;
-                }
-            }
-
-            if (prop.DepthOffset < srcDepth || prop.DepthOffset >= srcDepth + 10)
-                continue;
-            
-            var quad = prop.QuadPoints;
-            var propTexture = RainEd.Instance.AssetGraphics.GetPropTexture(prop.PropInit);
-            var displayTexture = propTexture ?? RainEd.Instance.PlaceholderTexture;
-            var variation = prop.Variation == -1 ? 0 : prop.Variation;
-            var depthOffset = Math.Max(0, prop.DepthOffset - srcDepth);
-        
-            // draw missing texture if needed
-            if (propTexture is null)
-            {
-                rctx.Shader = null;
-                var srcRect = new Rectangle(Vector2.Zero, 2.0f * Vector2.One);
-
-                using var batch = rctx.BeginBatchDraw(Glib.BatchDrawMode.Quads, displayTexture.GlibTexture);
-                        
-                // top-left
-                batch.TexCoord(srcRect.X / displayTexture.Width, srcRect.Y / displayTexture.Height);
-                batch.Vertex(quad[0] * Level.TileSize);
-
-                // bottom-left
-                batch.TexCoord(srcRect.X / displayTexture.Width, (srcRect.Y + srcRect.Height) / displayTexture.Height);
-                batch.Vertex(quad[3] * Level.TileSize);
-
-                // bottom-right
-                batch.TexCoord((srcRect.X + srcRect.Width) / displayTexture.Width, (srcRect.Y + srcRect.Height) / displayTexture.Height);
-                batch.Vertex(quad[2] * Level.TileSize);
-
-                // top-right
-                batch.TexCoord((srcRect.X + srcRect.Width) / displayTexture.Width, srcRect.Y / displayTexture.Height);
-                batch.Vertex(quad[1] * Level.TileSize);
-            }
-            else
-            {
-                var isStdProp = prop.PropInit.Type is PropType.Standard or PropType.VariedStandard;
-
-                if (renderPalette)
-                {
-                    if (isStdProp && prop.PropInit.ColorTreatment == PropColorTreatment.Standard)
-                    {
-                        rctx.Shader = Shaders.PaletteShader.GlibShader;
-                    }
-                    else if (isStdProp && prop.PropInit.ColorTreatment == PropColorTreatment.Bevel)
-                    {
-                        rctx.Shader = Shaders.BevelTreatmentShader.GlibShader;
-                    }
-                    else if (prop.PropInit.SoftPropRender is not null)
-                    {
-                        rctx.Shader = Shaders.SoftPropShader.GlibShader;
-
-                        var softProp = prop.PropInit.SoftPropRender.Value;
-
-                        // i don't really know how these options work...
-                        float highlightThreshold = 0.666f;
-                        float shadowThreshold = 0.333f;
-                        rctx.Shader.SetUniform("v4_softPropShadeInfo", new Vector4(
-                            softProp.ContourExponent,
-                            highlightThreshold,
-                            shadowThreshold,
-                            prop.CustomDepth
-                        ));
-                    }
-                    else
-                    {
-                        rctx.Shader = Shaders.PropShader.GlibShader;
-                    }
-                }
-                else
-                {
-                    rctx.Shader = Shaders.PropShader.GlibShader;
-                }
-
-                if (rctx.Shader != Shaders.PropShader.GlibShader)
-                {
-                    if (rctx.Shader.HasUniform("u_paletteTex"))
-                        rctx.Shader.SetUniform("u_paletteTex", paletteTexture);
-                    if (rctx.Shader.HasUniform("v4_textureSize"))
-                        rctx.Shader.SetUniform("v4_textureSize", new Vector4(displayTexture.Width, displayTexture.Height, 0f, 0f));
-                    
-                    if (rctx.Shader.HasUniform("v4_bevelData"))
-                    {
-                        rctx.Shader.SetUniform("v4_bevelData", new Vector4(prop.PropInit.Bevel, 0f, 0f, 0f));
-                    }
-                    
-                    if (rctx.Shader.HasUniform("v4_lightDirection"))
-                    {
-                        var correctedAngle = Level.LightAngle + MathF.PI / 2f;
-                        var lightDist = 1f - Level.LightDistance / 10f;
-                        var lightZ = lightDist * (3.0f - 0.5f) + 0.5f; // an approximation
-                        rctx.Shader.SetUniform("v4_lightDirection", new Vector4(MathF.Cos(correctedAngle), MathF.Sin(correctedAngle), lightZ, 0f));
-                    }
-                    
-                    if (rctx.Shader.HasUniform("v4_propRotation"))
-                    {
-                        var right = Vector2.Normalize(quad[1] - quad[0]);
-                        var up = Vector2.Normalize(quad[3] - quad[0]);
-                        rctx.Shader.SetUniform("v4_propRotation", new Vector4(right.X, right.Y, up.X, up.Y));
-                    }
-
-                    rctx.DrawBatch(); // force flush batch, as uniform changes aren't detected
-                }
-
-                // draw each sublayer of the prop
-                for (int depth = prop.PropInit.LayerCount - 1; depth >= 0; depth--)
-                {
-                    float startFade =
-                        (prop.PropInit.Type is PropType.SimpleDecal or PropType.VariedDecal)
-                        ? 0.364f : 0f;
-                    
-                    float whiteFade = Math.Clamp((1f - startFade) * ((depthOffset + depth / 2f) / 10f) + startFade, 0f, 1f);
-                    var srcRect = prop.PropInit.GetPreviewRectangle(variation, depth);
-
-                    if (renderPalette && rctx.Shader != Shaders.PropShader.GlibShader)
-                    {
-                        // R channel represents sublayer
-                        // A channel is alpha, as usual
-                        float sublayer = (float)depth / prop.PropInit.LayerCount * prop.PropInit.Depth + prop.DepthOffset;
-                        rctx.DrawColor = new Glib.Color(Math.Clamp(sublayer / 29f, 0f, 1f), 0f, 0f, 1f);
-                    }
-                    else
-                    {
-                        rctx.DrawColor = new Glib.Color(alpha / 255f, whiteFade, 0f, 0f);
-                    }
-                    
-                    using (var batch = rctx.BeginBatchDraw(Glib.BatchDrawMode.Quads, displayTexture.GlibTexture))
-                    {
-                        transformQuads[0] = quad[0] * Level.TileSize;
-                        transformQuads[1] = quad[1] * Level.TileSize;
-                        transformQuads[2] = quad[2] * Level.TileSize;
-                        transformQuads[3] = quad[3] * Level.TileSize;
-
-                        if (prop.IsAffine)
-                        {
-                            // top-left
-                            batch.TexCoord(srcRect.X / displayTexture.Width, srcRect.Y / displayTexture.Height);
-                            batch.Vertex(transformQuads[0]);
-
-                            // bottom-left
-                            batch.TexCoord(srcRect.X / displayTexture.Width, (srcRect.Y + srcRect.Height) / displayTexture.Height);
-                            batch.Vertex(transformQuads[3]);
-
-                            // bottom-right
-                            batch.TexCoord((srcRect.X + srcRect.Width) / displayTexture.Width, (srcRect.Y + srcRect.Height) / displayTexture.Height);
-                            batch.Vertex(transformQuads[2]);
-
-                            // top right
-                            batch.TexCoord((srcRect.X + srcRect.Width) / displayTexture.Width, srcRect.Y / displayTexture.Height);
-                            batch.Vertex(transformQuads[1]);
-                        }
-                        else
-                        {
-                            DrawDeformedMesh(batch, transformQuads, new Rectangle(
-                                srcRect.X / displayTexture.Width,
-                                srcRect.Y / displayTexture.Height,
-                                srcRect.Width / displayTexture.Width,
-                                srcRect.Height / displayTexture.Height)
-                            );
-                        };
-                    }
-                }
-            }
-
-            rctx.Shader = null;
-            rctx.CullMode = Glib.CullMode.None;
-
-            // render segments of rope-type props
-            if (prop.Rope is not null)
-            {
-                var rope = prop.Rope.Model;
-
-                if (rope is not null)
-                {
-                    for (int i = 0; i < rope.SegmentCount; i++)
-                    {
-                        var newPos = rope.GetSmoothSegmentPos(i);
-                        var oldPos = rope.GetSmoothLastSegmentPos(i);
-                        var lerpPos = (newPos - oldPos) * prop.Rope.SimulationTimeRemainder + oldPos;
-
-                        Raylib.DrawCircleV(lerpPos * Level.TileSize, 2f, prop.PropInit.Rope!.PreviewColor);
-                    }
-                }
-            }
-        }
-        
-        rctx.Shader = null;
-    }
-
-    private static void DrawDeformedMesh(Glib.BatchDrawHandle batch, ReadOnlySpan<Vector2> quad, Rectangle uvRect)
-    {
-        const float uStep = 1.0f / 6.0f;
-        const float vStep = 1.0f / 6.0f;
-        float nextU;
-        float nextV;
-
-        for (float u = 0f; u < 1f; u += uStep)
-        {
-            nextU = Math.Min(u + uStep, 1f);
-
-            Vector2 uPos0 = Vector2.Lerp(quad[0], quad[1], u);
-            Vector2 uPos1 = Vector2.Lerp(quad[3], quad[2], u);
-            Vector2 nextUPos0 = Vector2.Lerp(quad[0], quad[1], nextU);
-            Vector2 nextUPos1 = Vector2.Lerp(quad[3], quad[2], nextU);
-
-            for (float v = 0f; v < 1f; v += vStep)
-            {
-                nextV = Math.Min(v + vStep, 1f);
-
-                Vector2 vPos0 = Vector2.Lerp(uPos0, uPos1, v);
-                Vector2 vPos1 = Vector2.Lerp(uPos0, uPos1, nextV);
-                Vector2 vPos2 = Vector2.Lerp(nextUPos0, nextUPos1, nextV);
-                Vector2 vPos3 = Vector2.Lerp(nextUPos0, nextUPos1, v);
-
-                batch.TexCoord(uvRect.Position + uvRect.Size * new Vector2(u, v));
-                batch.Vertex(vPos0);
-                batch.TexCoord(uvRect.Position + uvRect.Size * new Vector2(u, nextV));
-                batch.Vertex(vPos1);
-                batch.TexCoord(uvRect.Position + uvRect.Size * new Vector2(nextU, nextV));
-                batch.Vertex(vPos2);
-                batch.TexCoord(uvRect.Position + uvRect.Size * new Vector2(nextU, v));
-                batch.Vertex(vPos3);
-            }
-        }
+        propRenderer.RenderLayer(srcLayer, alpha);
     }
 
     public void RenderGrid()
@@ -959,7 +631,7 @@ class LevelEditRender : IDisposable
             );
         }
     }
-
+    
     private void FillWater()
     {
         var level = RainEd.Instance.Level;
@@ -992,7 +664,7 @@ class LevelEditRender : IDisposable
         {
             var alpha = l == config.ActiveLayer ? 255 : 50;
             var color = LevelWindow.GeoColor(config.Fade, alpha);
-            int offset = (l - config.ActiveLayer) * 2;
+            int offset = (l - config.ActiveLayer) * config.LayerOffset;
 
             Rlgl.PushMatrix();
             Rlgl.Translatef(offset, offset, 0f);
@@ -1020,43 +692,108 @@ class LevelEditRender : IDisposable
     }
 
     /// <summary>
-    /// Update the texture used to send palette information to the palette shader.
+    /// Render level into multiple framebuffers, and then composite it into the main one.
     /// </summary>
-    public void UpdatePaletteTexture()
+    /// <param name="config"></param>
+    /// <param name="mainFrame"></param>
+    /// <param name="layerFrames"></param>
+    public void RenderLevelComposite(RlManaged.RenderTexture2D mainFrame, RlManaged.RenderTexture2D[] layerFrames, LevelRenderConfig config)
     {
-        for (int i = 0; i < 30; i++)
+        var level = RainEd.Instance.Level;
+        var window = RainEd.Instance.LevelView;
+
+        // draw level background
+        Raylib.DrawRectangle(0, 0, level.Width * Level.TileSize, level.Height * Level.TileSize, LevelWindow.BackgroundColor);
+        
+        // draw the layers
+        var drawTiles = config.DrawTiles || RainEd.Instance.Preferences.ViewTiles;
+        var drawProps = config.DrawProps || RainEd.Instance.Preferences.ViewProps;
+        var propAlpha = config.DrawProps ? 255 : 100;
+
+        for (int l = Level.LayerCount-1; l >= 0; l--)
         {
-            var litColorRGB = GetSunColor(PaletteLightLevel.Lit, i);
-            var neutralColorRGB = GetSunColor(PaletteLightLevel.Neutral, i);
-            var shadedColorRGB = GetSunColor(PaletteLightLevel.Shaded, i);
+            // draw layer into framebuffer
+            int offset = (l - config.ActiveLayer) * config.LayerOffset;
+            Raylib.BeginTextureMode(layerFrames[l]);
 
-            var litColor = Glib.Color.FromRGBA(litColorRGB.R, litColorRGB.G, litColorRGB.B);
-            var neutralColor = Glib.Color.FromRGBA(neutralColorRGB.R, neutralColorRGB.G, neutralColorRGB.B);
-            var shadedColor = Glib.Color.FromRGBA(shadedColorRGB.R, shadedColorRGB.G, shadedColorRGB.B);
+            Raylib.EndScissorMode();
+            Raylib.ClearBackground(new Color(0, 0, 0, 0));
+            window.BeginLevelScissorMode();
 
-            _paletteImgBuf.SetPixel(i, 0, litColor);
-            _paletteImgBuf.SetPixel(i, 1, neutralColor);
-            _paletteImgBuf.SetPixel(i, 2, shadedColor);
+            Rlgl.PushMatrix();
+                Rlgl.Translatef(offset, offset, 0f);
+                RenderGeometry(l, LevelWindow.GeoColor(config.Fade, 255));
+
+                // if drawTiles was explicitly set, they are drawn opaque.
+                // but if it was not set, and is being drawn because of the view setting,
+                // they are partially transparent.
+                if (drawTiles)
+                    RenderTiles(l, config.DrawTiles ? 255 : 100);
+
+                // same goes for props.
+                if (drawProps && !config.DrawPropsInFront)
+                    RenderProps(l, propAlpha);
+                
+                if (config.DrawObjects)
+                    RenderObjects(l, new Color(255, 255, 255, 255));
+                
+            Rlgl.PopMatrix();
         }
 
-        paletteTexture.UpdateFromImage(_paletteImgBuf);
-    }
+        // draw alpha-blended result into main frame
+        Raylib.BeginTextureMode(mainFrame);
+        for (int l = Level.LayerCount-1; l >= 0; l--)
+        {
+            Rlgl.PushMatrix();
+            Rlgl.LoadIdentity();
 
-    /// <summary>
-    /// Use the palette shader for the upcoming draw operations.
-    /// <br/><br/>
-    /// Make sure the palette was recently updated using UpdatePaletteTexture before use.
-    /// </summary>
-    public void BeginPaletteShaderMode()
-    {
-        var shader = Shaders.PaletteShader;
-        Raylib.BeginShaderMode(shader);
-        shader.GlibShader.SetUniform("u_paletteTex", paletteTexture);
-    }
+            var alpha = l == config.ActiveLayer ? 255 : 50;
+            RlExt.DrawRenderTexture(layerFrames[l], 0, 0, new Color(255, 255, 255, alpha));
 
+            // draw water behind first layer if set
+            if (config.FillWater && l == 1 && level.HasWater && !level.IsWaterInFront)
+                FillWater();
+            
+            Rlgl.PopMatrix();
+        }
+
+        // draw props in front of geo
+        if (drawProps && config.DrawPropsInFront)
+        {
+            for (int l = Level.LayerCount-1; l >= 0; l--)
+            {
+                int offset = (l - config.ActiveLayer) * config.LayerOffset;
+
+                // draw props into layer's framebuffer
+                Raylib.BeginTextureMode(layerFrames[l]);
+                Raylib.ClearBackground(Color.Blank);
+
+                Rlgl.PushMatrix();
+                Rlgl.Translatef(offset, offset, 0);
+                RenderProps(l, propAlpha);
+                Rlgl.PopMatrix();
+            }
+
+            for (int l = Level.LayerCount-1; l >= 0; l--)
+            {
+                // draw alpha-blended results into main frame
+                Raylib.BeginTextureMode(mainFrame);
+                Rlgl.PushMatrix();
+                    Rlgl.LoadIdentity();
+
+                    var alpha = l == config.ActiveLayer ? 255 : 50;
+                    RlExt.DrawRenderTexture(layerFrames[l], 0, 0, new Color(255, 255, 255, alpha));
+                Rlgl.PopMatrix();
+            }
+        }
+
+        // draw water
+        if (config.FillWater && level.HasWater && level.IsWaterInFront)
+            FillWater();
+    }
+    
     public void Dispose()
     {
-        paletteTexture.Dispose();
-        _paletteImgBuf.Dispose();
+        Palette.Dispose();
     }
 }

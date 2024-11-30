@@ -5,6 +5,7 @@ using Rained.Autotiles;
 using Rained.EditorGui;
 using Rained.Assets;
 using Rained.LevelData;
+using Rained.Rendering;
 
 namespace Rained;
 
@@ -172,8 +173,9 @@ sealed class RainEd
             PlaceholderTexture = RlManaged.Texture2D.LoadFromImage(img);
         }
 
-        // load shaders
+        // load other graphics resources
         Shaders.LoadShaders();
+        TextRendering.GenerateOutlineFont();
 
         // run the update checker
         var versionCheckTask = Task.Run(UpdateChecker.FetchLatestVersion);
@@ -719,7 +721,10 @@ sealed class RainEd
 
         if (CurrentTab != null)
             UpdateRopeSimulation();
-
+        
+        // update node data
+        CurrentTab?.NodeData.Update();
+        
         EditorWindow.Render();
 
         if (ImGui.IsKeyPressed(ImGuiKey.F1))
