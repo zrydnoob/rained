@@ -376,7 +376,7 @@ class GeometryEditor : IEditorMode
 
             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
 
-            ImGui.Text("Layers");
+            ImGui.Text("层级");
             ImGuiExt.ButtonFlags("##Layers", ["1", "2", "3"], layerMask, ButtonGroupOptions.Vertical);
 
             // show mirror toggles
