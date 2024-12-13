@@ -603,6 +603,7 @@ static class PreferencesWindow
         ShortcutButton(KeyShortcut.ToggleViewGraphics);
         ShortcutButton(KeyShortcut.ToggleViewProps);
         ShortcutButton(KeyShortcut.ToggleViewCameras);
+        ShortcutButton(KeyShortcut.ToggleViewNodeIndices);
 
         ImGui.SeparatorText("Geometry");
         ShortcutButton(KeyShortcut.ToggleLayer1);

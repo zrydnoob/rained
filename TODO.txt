@@ -21,12 +21,8 @@ Bugs:
 - using keyboards shortcuts while rendering does weird things
   fix: disable shortcuts while rendering
 
-- using close all didn't register no file selected at one point?
-  after testing render save prompt bug fix...
-
 v2.2.0:
 - radial menu for view toggle
-- show entrance numbers (ctrl+e)
 - toggle for showing shortcuts in tile editor
 
 v2.2.x:
@@ -44,7 +40,6 @@ v2.3.0 (or later):
 - material previews
 - translation system
 - autotiles
-  - add rained.getApiVersion()  (different version than rained.getVersion())
   - option to join only inner tiles
   - ability to recognize more than one tile as a direction type
   - cross beams autotile
@@ -57,6 +52,7 @@ v2.4.0 (or v3.0.0, depending on the frequency of major updates):
 
 Other features:
 - prop editor lasso select ()
+- effects save/load presets/prefabs
 - light map stretch
 - asset manager
   - can rearrange the order of stuff in asset manager

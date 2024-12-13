@@ -431,8 +431,6 @@ class GeometryEditor : IEditorMode
             mirrorFlags ^= MirrorFlags.MirrorY;
     }
 
-    private static bool tempvar = false;
-
     public void DrawViewport(RlManaged.RenderTexture2D mainFrame, RlManaged.RenderTexture2D[] layerFrames)
     {
         window.BeginLevelScissorMode();
@@ -509,10 +507,8 @@ class GeometryEditor : IEditorMode
                 break;
         }
 
-        // TODO:
-        if (Raylib.IsKeyPressed(KeyboardKey.P)) tempvar = !tempvar;
         levelRender.RenderShortcuts(Color.White);
-        if (tempvar)
+        if (RainEd.Instance.Preferences.ViewNodeIndices)
             levelRender.RenderNodes(Color.White);
         levelRender.RenderGrid();
         levelRender.RenderBorder();

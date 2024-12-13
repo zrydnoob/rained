@@ -279,11 +279,36 @@ static class EditorWindow
                     renderer = RainEd.Instance.LevelView.Renderer;
                 }
 
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGrid, "显示网格", prefs.ViewGrid);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewTiles, "显示贴图", prefs.ViewTiles);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewProps, "显示道具", prefs.ViewProps);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewCameras, "显示相机边框", prefs.ViewCameras);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGraphics, "显示贴图预览", prefs.ViewPreviews);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGrid, "Grid", prefs.ViewGrid);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewTiles, "Tiles", prefs.ViewTiles);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewProps, "Props", prefs.ViewProps);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewCameras, "Camera Borders", prefs.ViewCameras);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGraphics, "Tile Graphics", prefs.ViewPreviews);
+
+                if (ImGui.BeginMenu("节点索引"))
+                {
+                    KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewNodeIndices, "显示", prefs.ViewNodeIndices);
+                    ImGui.Separator();
+
+                    Span<string> flagNames = [
+                        "Room Exits",
+                        "Creature Dens",
+                        "Region Transports",
+                        "Side Exits",
+                        "Sky Exits",
+                        "Sea Exits",
+                        "Hives",
+                        "Garbage Holes",
+                    ];
+
+                    for (int i = 0; i < flagNames.Length; i++)
+                    {
+                        ref var flag = ref prefs.NodeViewFilter.Flags[i];
+                        ImGui.MenuItem(flagNames[i], null, ref flag);
+                    }
+
+                    ImGui.EndMenu();
+                }
 
                 if (ImGui.MenuItem("显示被遮挡的杆", null, prefs.ViewObscuredBeams))
                 {
@@ -486,6 +511,11 @@ static class EditorWindow
         if (KeyShortcuts.Activated(KeyShortcut.ToggleViewGraphics))
         {
             prefs.ViewPreviews = !prefs.ViewPreviews;
+        }
+
+        if (KeyShortcuts.Activated(KeyShortcut.ToggleViewNodeIndices))
+        {
+            prefs.ViewNodeIndices = !prefs.ViewNodeIndices;
         }
     }
 
