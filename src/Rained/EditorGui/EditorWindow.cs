@@ -279,11 +279,11 @@ static class EditorWindow
                     renderer = RainEd.Instance.LevelView.Renderer;
                 }
 
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGrid, "Grid", prefs.ViewGrid);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewTiles, "Tiles", prefs.ViewTiles);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewProps, "Props", prefs.ViewProps);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewCameras, "Camera Borders", prefs.ViewCameras);
-                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGraphics, "Tile Graphics", prefs.ViewPreviews);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGrid, "网格", prefs.ViewGrid);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewTiles, "贴图", prefs.ViewTiles);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewProps, "道具", prefs.ViewProps);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewCameras, "相机边界", prefs.ViewCameras);
+                KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleViewGraphics, "平铺贴图", prefs.ViewPreviews);
 
                 if (ImGui.BeginMenu("节点索引"))
                 {
@@ -291,8 +291,8 @@ static class EditorWindow
                     ImGui.Separator();
 
                     Span<string> flagNames = [
-                        "Room Exits",
-                        "Creature Dens",
+                        "房间出口",
+                        "生物巢穴",
                         "Region Transports",
                         "Side Exits",
                         "Sky Exits",
