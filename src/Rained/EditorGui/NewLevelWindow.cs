@@ -7,7 +7,7 @@ using Raylib_cs;
 
 static class NewLevelWindow
 {
-    public const string WindowName = "New Level";
+    public const string WindowName = "新关卡";
     public static bool IsWindowOpen = false;
 
     private static int levelWidth;
@@ -72,15 +72,15 @@ static class NewLevelWindow
             {
                 ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 8.0f);
 
-                ImGui.SeparatorText("Level Size");
+                ImGui.SeparatorText("关卡大小");
                 {
                     // tile size
-                    if (ImGui.InputInt("Width", ref levelWidth))
+                    if (ImGui.InputInt("宽度", ref levelWidth))
                         levelScreenW = (levelWidth - 20) / 52f;
                     
                     levelWidth = Math.Max(levelWidth, 1); // minimum value is 1
 
-                    if (ImGui.InputInt("Height", ref levelHeight))
+                    if (ImGui.InputInt("高度", ref levelHeight))
                         levelScreenH = (levelHeight - 3) / 40f;
                     
                     levelHeight = Math.Max(levelHeight, 1); // minimum value is 1
@@ -88,13 +88,13 @@ static class NewLevelWindow
                     // screen size, using the formula from the modding wiki
                     if (!RainEd.Instance.Preferences.HideScreenSize)
                     {
-                        if (ImGui.InputFloat("Screen Width", ref levelScreenW, 0.5f, 0.125f))
+                        if (ImGui.InputFloat("屏幕宽度", ref levelScreenW, 0.5f, 0.125f))
                         {
                             levelWidth = (int)(levelScreenW * 52f + 20f);
                         }
                         levelScreenW = Math.Max(levelScreenW, 0);
 
-                        if (ImGui.InputFloat("Screen Height", ref levelScreenH, 0.5f, 0.125f))
+                        if (ImGui.InputFloat("屏幕高度", ref levelScreenH, 0.5f, 0.125f))
                         {
                             levelHeight = (int)(levelScreenH * 40f + 3f);
                         }
@@ -102,12 +102,12 @@ static class NewLevelWindow
                     }
                 }
 
-                ImGui.SeparatorText("Border Tiles");
+                ImGui.SeparatorText("边界");
                 {
-                    ImGui.InputInt("Border Tiles Left", ref levelBufL);
-                    ImGui.InputInt("Border Tiles Top", ref levelBufT);
-                    ImGui.InputInt("Border Tiles Right", ref levelBufR);
-                    ImGui.InputInt("Border Tiles Bottom", ref levelBufB);
+                    ImGui.InputInt("左侧边界", ref levelBufL);
+                    ImGui.InputInt("顶部边界", ref levelBufT);
+                    ImGui.InputInt("右侧边界", ref levelBufR);
+                    ImGui.InputInt("下部边界", ref levelBufB);
 
                     levelBufL = Math.Max(levelBufL, 0);
                     levelBufR = Math.Max(levelBufR, 0);
@@ -115,17 +115,17 @@ static class NewLevelWindow
                     levelBufB = Math.Max(levelBufB, 0);
                 }
 
-                ImGui.SeparatorText("Fill Layers");
+                ImGui.SeparatorText("填充层级");
                 {
-                    ImGuiExt.ButtonFlags("Layers", ["1", "2", "3"], fillLayer);
+                    ImGuiExt.ButtonFlags("层级", ["1", "2", "3"], fillLayer);
                     //ImGui.Checkbox("Fill Layer 1", ref fillLayer[0]);
                     //ImGui.Checkbox("Fill Layer 2", ref fillLayer[1]);
                     //ImGui.Checkbox("Fill Layer 3", ref fillLayer[2]);
                 }
 
-                ImGui.SeparatorText("Options");
+                ImGui.SeparatorText("选项");
                 {
-                    ImGui.Checkbox("Auto-place Cameras", ref autoCameras);
+                    ImGui.Checkbox("自动平铺摄像机", ref autoCameras);
                 }
 
                 ImGui.PopItemWidth();

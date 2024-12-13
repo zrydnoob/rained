@@ -7,7 +7,7 @@ namespace Rained.EditorGui;
 
 static class PreferencesWindow
 {
-    private const string WindowName = "Preferences";
+    private const string WindowName = "偏好";
     private static bool isWindowOpen = false;
     public static bool IsWindowOpen { get => isWindowOpen; }
 
@@ -20,7 +20,7 @@ static class PreferencesWindow
         Drizzle = 4
     }
 
-    private readonly static string[] NavTabs = ["General", "Shortcuts", "Theme", "Assets", "Drizzle"];
+    private readonly static string[] NavTabs = ["全局", "快捷键", "主题", "资产", "Drizzle"];
     private readonly static string[] RendererNames = ["Direct3D 11", "Direct3D 12", "OpenGL", "Vulkan"];
     private static NavTabEnum selectedNavTab = NavTabEnum.General;
 
@@ -188,7 +188,7 @@ static class PreferencesWindow
 
         var prefs = RainEd.Instance.Preferences;
         
-        ImGui.SeparatorText("Level Colors");
+        ImGui.SeparatorText("关卡颜色");
         {
             if (entered)
             {
@@ -207,10 +207,10 @@ static class PreferencesWindow
             {
                 layerColor1 = new HexColor("#000000").ToVector3();
             }
-            ImGui.SetItemTooltip("Reset");
+            ImGui.SetItemTooltip("重设");
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Layer Color 1");
+            ImGui.Text("层级1颜色");
 
             ImGui.ColorEdit3("##Layer Color 2", ref layerColor2);
 
@@ -219,10 +219,10 @@ static class PreferencesWindow
             {
                 layerColor2 = new HexColor("#59ff59").ToVector3();
             }
-            ImGui.SetItemTooltip("Reset");
+            ImGui.SetItemTooltip("重设");
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Layer Color 2");
+            ImGui.Text("层级2颜色");
 
             ImGui.ColorEdit3("##Layer Color 3", ref layerColor3);
 
@@ -231,10 +231,10 @@ static class PreferencesWindow
             {
                 layerColor3 = new HexColor("#ff1e1e").ToVector3();
             }
-            ImGui.SetItemTooltip("Reset");
+            ImGui.SetItemTooltip("重设");
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Layer Color 3");
+            ImGui.Text("层级3颜色");
 
             ImGui.ColorEdit3("##Background Color", ref bgColor);
 
@@ -243,10 +243,10 @@ static class PreferencesWindow
             {
                 bgColor = new HexColor(127, 127, 127).ToVector3();
             }
-            ImGui.SetItemTooltip("Reset");
+            ImGui.SetItemTooltip("重设");
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Background Color");
+            ImGui.Text("背景颜色");
 
             // L1 TILE SPECS
             ImGui.ColorEdit3("##Tile Specs L1", ref tileSpec1Color);
@@ -255,7 +255,7 @@ static class PreferencesWindow
             {
                 tileSpec1Color = new HexColor("#99FF5B").ToVector3();
             }
-            ImGui.SetItemTooltip("Reset");
+            ImGui.SetItemTooltip("重设");
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
             ImGui.Text("Tile Specs L1");
@@ -267,7 +267,7 @@ static class PreferencesWindow
             {
                 tileSpec2Color = new HexColor("#61A338").ToVector3();
             }
-            ImGui.SetItemTooltip("Reset");
+            ImGui.SetItemTooltip("重设");
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
             ImGui.Text("Tile Specs L2");
@@ -281,7 +281,7 @@ static class PreferencesWindow
             prefs.TileSpec2 = Vec3ToHexColor(tileSpec2Color);
         }
 
-        ImGui.SeparatorText("Display");
+        ImGui.SeparatorText("显示");
         {
             if (entered)
             {
@@ -306,14 +306,13 @@ static class PreferencesWindow
             }
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Content Scale");
+            ImGui.Text("内容缩放");
 
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
                 """
-                The default value for this is determined
-                by your monitor's DPI.
+                通过你的显示器的DPI为此确定了默认值
                 """
             );
 
@@ -322,7 +321,7 @@ static class PreferencesWindow
                 ImGui.PushItemWidth(ImGui.GetFontSize() * 12f);
 
                 var curFont = Fonts.GetCurrentFont();
-                if (ImGui.BeginCombo("Font", curFont ?? ""))
+                if (ImGui.BeginCombo("字体", curFont ?? ""))
                 {
                     foreach (var fontName in Fonts.AvailableFonts)
                     {
@@ -341,7 +340,7 @@ static class PreferencesWindow
                 }
 
                 var fontSize = prefs.FontSize;
-                if (ImGui.InputInt("Font size", ref fontSize))
+                if (ImGui.InputInt("字体大小", ref fontSize))
                     prefs.FontSize = fontSize;
                 
                 if (ImGui.IsItemDeactivatedAfterEdit())
@@ -351,7 +350,7 @@ static class PreferencesWindow
                 ImGui.TextDisabled("(?)");
                 if (ImGui.BeginItemTooltip())
                 {
-                    ImGui.Text("The default value for this is 13.");
+                    ImGui.Text("此项默认值为13");
                     ImGui.EndTooltip();
                 }
 
@@ -385,15 +384,15 @@ static class PreferencesWindow
         ImGui.SeparatorText("Interface");
         {
             bool showCameraNumbers = prefs.ShowCameraNumbers;
-            if (ImGui.Checkbox("Show camera numbers", ref showCameraNumbers))
+            if (ImGui.Checkbox("显示摄像机数量", ref showCameraNumbers))
                 prefs.ShowCameraNumbers = showCameraNumbers;
             
             bool materialSelectorPreviews = prefs.MaterialSelectorPreview;
-            if (ImGui.Checkbox("Show previews in the material selector", ref materialSelectorPreviews))
+            if (ImGui.Checkbox("在材质选择器中显示预览", ref materialSelectorPreviews))
                 prefs.MaterialSelectorPreview = materialSelectorPreviews;
             
             bool doubleClickToCreateProp = prefs.DoubleClickToCreateProp;
-            if (ImGui.Checkbox("Double-click to create props", ref doubleClickToCreateProp))
+            if (ImGui.Checkbox("双击创建道具", ref doubleClickToCreateProp))
                 prefs.DoubleClickToCreateProp = doubleClickToCreateProp;
             
             ImGui.SameLine();
@@ -402,21 +401,18 @@ static class PreferencesWindow
             {
                 ImGui.TextUnformatted(
                     """
-                    Enabling this brings back the old prop
-                    selection/creation controls, where double-
-                    clicking the left mouse button placed down
-                    a prop instead of a single right click.
+                    启用此选项会恢复旧的道具选择/创建控件，双击鼠标左键放置道具，而不是单击鼠标右键。
                     """
                 );
                 ImGui.EndTooltip();
             }
             
             bool hideScreenSize = prefs.HideScreenSize;
-            if (ImGui.Checkbox("Hide screen size parameters in the resize window", ref hideScreenSize))
+            if (ImGui.Checkbox("在调整大小窗口中隐藏屏幕大小参数", ref hideScreenSize))
                 prefs.HideScreenSize = hideScreenSize;
             
             bool removeCangleLimit = prefs.RemoveCameraAngleLimit;
-            if (ImGui.Checkbox("Unlock camera angles", ref removeCangleLimit))
+            if (ImGui.Checkbox("解锁相机角度限制", ref removeCangleLimit))
                 prefs.RemoveCameraAngleLimit = removeCangleLimit;
 
             ImGui.SameLine();
@@ -424,7 +420,7 @@ static class PreferencesWindow
             if (ImGui.BeginItemTooltip())
             {
                 ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
-                ImGui.TextWrapped("Normally, there is a limit to how large you can make the strength of a camera angle, unless you hold SHIFT. With this enabled, the limit will be removed without the need to hold SHIFT, and doing so will instead impose the limit.");
+                ImGui.TextWrapped("通常情况下，除非按住SHIFT键，否则相机角度的强度是有限的。启用此选项后，无需按住SHIFT键即可移除限制，这样做反而会施加限制。");
                 ImGui.PopTextWrapPos();
 
                 ImGui.End();
