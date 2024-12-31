@@ -6,6 +6,7 @@ using Rained.EditorGui;
 using Rained.Assets;
 using Rained.LevelData;
 using Rained.Rendering;
+using System.Reflection;
 
 namespace Rained;
 
@@ -22,9 +23,25 @@ public class RainEdStartupException : Exception
 /// </summary>
 sealed class RainEd
 {
-    public const string Version = "wfb-v2.2.1";
-
+    public static string Version;
     public static RainEd Instance = null!;
+
+    static RainEd()
+    {
+        var asmVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        if (asmVersion is null)
+        {
+            Version = "v0.0.0";
+        }
+        else
+        {
+            Version = $"v{asmVersion.Major}.{asmVersion.Minor}.{asmVersion.Build}";
+        }
+
+        #if !FULL_RELEASE
+        Version += "-dev";
+        #endif
+    }
 
     public bool Running = true; // if false, Boot.cs will close the window
 
@@ -66,6 +83,10 @@ sealed class RainEd
     // this is used to set window IsEventDriven to true
     // when the user hasn't interacted with the window in a while
     private float remainingActiveTime = 2f;
+
+    // this is used to make sure window doesn't sleep when
+    // any key is held down
+    private int keysPressed = 0;
     
     private double lastRopeUpdateTime = 0f;
     private float simTimeLeftOver = 0f;
@@ -171,6 +192,7 @@ sealed class RainEd
             img.DrawPixel(0, 0, new Color(255, 0, 255, 255));
             img.DrawPixel(1, 1, new Color(255, 0, 255, 255));
             PlaceholderTexture = RlManaged.Texture2D.LoadFromImage(img);
+            PlaceholderTexture.GlibTexture.WrapModeUV = Glib.TextureWrapMode.Repeat;
         }
 
         // load other graphics resources
@@ -313,10 +335,16 @@ sealed class RainEd
         lastRopeUpdateTime = Raylib.GetTime();
 
         Boot.Window.KeyDown += (Glib.Key _, int _) =>
+        {
             NeedScreenRefresh();
+            keysPressed++;
+        };
 
         Boot.Window.KeyUp += (Glib.Key _, int _) =>
+        {
             NeedScreenRefresh();
+            keysPressed--;
+        };
 
         Boot.Window.MouseDown += (Glib.MouseButton _) =>
             NeedScreenRefresh();
@@ -326,6 +354,17 @@ sealed class RainEd
 
         Boot.Window.MouseMove += (float x, float y) =>
             NeedScreenRefresh();
+        
+        Boot.Window.MouseScroll += (float dx, float dy) =>
+            NeedScreenRefresh();
+        
+        Boot.Window.SilkWindow.FocusChanged += (bool focused) =>
+        {
+            if (focused)
+            {
+                NeedScreenRefresh();
+            }
+        };
     }
 
     /// <summary>
@@ -729,10 +768,11 @@ sealed class RainEd
 
         if (ImGui.IsKeyPressed(ImGuiKey.F1))
             DebugWindow.IsWindowOpen = !DebugWindow.IsWindowOpen;
-
-        // don't sleep rained if mouse is held down
+        
+        // don't sleep rained if mouse or key is held down
         // for example, the user may be holding down a +/- imgui input, and i'm not quite sure how to detect that.
-        if (ImGui.IsMouseDown(ImGuiMouseButton.Left) || ImGui.IsMouseDown(ImGuiMouseButton.Right) || ImGui.IsMouseDown(ImGuiMouseButton.Middle))
+        if (ImGui.IsMouseDown(ImGuiMouseButton.Left) || ImGui.IsMouseDown(ImGuiMouseButton.Right) || ImGui.IsMouseDown(ImGuiMouseButton.Middle) ||
+            keysPressed > 0)
         {
             NeedScreenRefresh();
         }
@@ -742,7 +782,7 @@ sealed class RainEd
             throw new Exception("Test Exception");
 #endif
         DebugWindow.ShowWindow();
-
+        
         if (remainingActiveTime > 0f)
         {
             remainingActiveTime -= dt;
@@ -750,6 +790,7 @@ sealed class RainEd
         else
         {
             Boot.Window.IsEventDriven = true;
+            Log.Debug("enter event driven");
         }
     }
 

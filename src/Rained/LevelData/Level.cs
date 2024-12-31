@@ -118,8 +118,20 @@ class Camera
     public float[] CornerOffsets = new float[4];
     public float[] CornerAngles = new float[4];
 
-    public readonly static Vector2 WidescreenSize = new(70f, 40f);
-    public readonly static Vector2 StandardSize = new(52.5f, 40f);
+    /// <summary>
+    /// Size of the in-game 16:9 view area.
+    /// </summary>
+    public readonly static Vector2 WidescreenSize = new(68.3f, 38.4f);
+
+    /// <summary>
+    /// Size of the in-game 4:3 ("fullscreen" aspect ratio) view area.
+    /// </summary>
+    public readonly static Vector2 StandardSize = new(51.2f, 38.4f);
+
+    /// <summary>
+    /// Full size of the render output.
+    /// </summary>
+    public readonly static Vector2 Size = new(70f, 40f);
 
     public Camera(Vector2 position)
     {
@@ -144,9 +156,9 @@ class Camera
         int y = (cornerIndex & 2) >> 1;
         
         return offset ?
-            Position + new Vector2(WidescreenSize.X * x, WidescreenSize.Y * y) + GetCornerOffset(cornerIndex)
+            Position + new Vector2(Size.X * x, Size.Y * y) + GetCornerOffset(cornerIndex)
         :
-            Position + new Vector2(WidescreenSize.X * x, WidescreenSize.Y * y);
+            Position + new Vector2(Size.X * x, Size.Y * y);
     }
 }
 
@@ -162,7 +174,7 @@ class Effect
     public readonly EffectInit Data;
     public LayerMode Layer = LayerMode.All;
     public bool Is3D = false;
-    public int PlantColor = 1; // 0 = Color1, 1 = Color2, 2 = Dead
+    public int PlantColor; // 0 = Color1, 1 = Color2, 2 = Dead
     public bool AffectGradientsAndDecals = false;
     public int Seed;
 
@@ -183,6 +195,9 @@ class Effect
         
         if (init.useLayers)
             Layer = init.defaultLayer;
+        
+        if (init.usePlantColors)
+            PlantColor = init.defaultPlantColor;
 
         CustomValues = new int[init.customConfigs.Count];
 
@@ -392,6 +407,13 @@ partial class Level : IDisposable
         return Layers[layer, x, y];
     }
 
+    public LevelCell GetBorderClamped(int layer, int x, int y)
+    {
+        x = Math.Clamp(x, BufferTilesLeft, Width - BufferTilesRight - 1);
+        y = Math.Clamp(y, BufferTilesTop, Height - BufferTilesBot - 1);
+        return Layers[layer, x, y];
+    }
+
     // i added this function recently, so older code won't be using this
     // utility function (until i rewrite them to do so)
     public Assets.Tile? GetTile(LevelCell cell)
@@ -432,9 +454,10 @@ partial class Level : IDisposable
 
         return new CellPosition(-1, -1, -1);
     }
-    private class PropDepthSorter : IComparer<Prop>
+
+    public void SortPropsByDepth()
     {
-        int IComparer<Prop>.Compare(Prop? a, Prop? b)
+        Props.Sort(static (Prop a, Prop b) =>
         {
             if (a!.DepthOffset == b!.DepthOffset)
             {
@@ -447,12 +470,7 @@ partial class Level : IDisposable
             {
                 return b!.DepthOffset.CompareTo(a!.DepthOffset);
             }
-        }
-    }
-
-    public void SortPropsByDepth()
-    {
-        Props.Sort(new PropDepthSorter());
+        });
     }
     
     public Vector2 Resize(int newWidth, int newHeight, int anchorX = -1, int anchorY = -1)
@@ -515,6 +533,27 @@ partial class Level : IDisposable
                     }
                 }
             }
+        }
+
+        // modify chain data
+        List<(CellPosition src, Vector2i dst)> newChainData = [];
+        foreach (((int srcL, int srcX, int srcY), Vector2i dstPos) in ChainData)
+        {
+            var newX = srcX + dstOriginX;
+            var newY = srcY + dstOriginY;
+
+            if (IsInBounds(newX, newY))
+            {
+                newChainData.Add((
+                    src: new CellPosition(newX, newY, srcL),
+                    dst: new Vector2i(dstPos.X + dstOriginX, dstPos.Y + dstOriginY)
+                ));
+            }
+        }
+        ChainData.Clear();
+        foreach ((CellPosition src, Vector2i dst) in newChainData)
+        {
+            ChainData.Add((src.Layer, src.X, src.Y), dst);
         }
 
         // resize effect matrices
@@ -623,5 +662,12 @@ partial class Level : IDisposable
     public bool TryGetChainData(int layer, int x, int y, out Vector2i chainEndPos)
     {
         return ChainData.TryGetValue((layer, x, y), out chainEndPos);
+    }
+
+    public bool IsInBorder(int x, int y)
+    {
+        return
+            x >= BufferTilesLeft && y >= BufferTilesTop &&
+            x < Width - BufferTilesRight && y < Height - BufferTilesBot;
     }
 }

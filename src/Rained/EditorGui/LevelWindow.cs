@@ -110,7 +110,7 @@ class LevelWindow
         }
         else
         {
-            col = RainEd.Instance.Preferences.LayerColor1.ToRGBA(255);
+            col = RainEd.Instance.Preferences.LayerColor1.ToRaylibColor(255);
         }
 
         return new Color(
@@ -218,6 +218,7 @@ class LevelWindow
     public void Render()
     {
         var dt = Raylib.GetFrameTime();
+        var prefs = RainEd.Instance.Preferences;
 
         if (queuedEditMode >= 0)
         {
@@ -249,31 +250,36 @@ class LevelWindow
             if (ImGui.Begin("关卡"))
             {
                 // edit mode
-                ImGui.AlignTextToFramePadding();
-                ImGui.Text("编辑模式");
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 8f);
-                if (ImGui.BeginCombo("##EditMode", editorModes[selectedMode].Name))
+                if (!prefs.HideEditorSwitch)
                 {
-                    for (int i = 0; i < editorModes.Length; i++)
+                    ImGui.AlignTextToFramePadding();
+                    ImGui.Text("编辑模式");
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 8f);
+                    if (ImGui.BeginCombo("##EditMode", editorModes[selectedMode].Name))
                     {
-                        var isSelected = i == selectedMode;
-                        if (ImGui.Selectable(editorModes[i].Name, isSelected))
+                        for (int i = 0; i < editorModes.Length; i++)
                         {
-                            newEditMode = i;
+                            var isSelected = i == selectedMode;
+                            if (ImGui.Selectable(editorModes[i].Name, isSelected))
+                            {
+                                newEditMode = i;
+                            }
+
+                            if (isSelected)
+                                ImGui.SetItemDefaultFocus();
                         }
 
-                        if (isSelected)
-                            ImGui.SetItemDefaultFocus();
+                        ImGui.EndCombo();
                     }
 
-                    ImGui.EndCombo();
+                    ImGui.SameLine();
                 }
 
-                ImGui.SameLine();
                 ImGui.TextUnformatted(StatusText);
                 StatusText = string.Empty;
 
+                if (!prefs.MinimalStatusBar)
                 {
                     var zoomText = $"缩放: {Math.Floor(ViewZoom * 100f)}%";
                     var mouseText = $"鼠标: ({MouseCx}, {MouseCy})";
@@ -537,8 +543,6 @@ class LevelWindow
     /// <param name="layer">The work layer of the dirty cell.</param>
     public void InvalidateGeo(int x, int y, int layer)
     {
-        Log.Debug("InvalidateGeo({X}, {Y}, {Layer})", x, y, layer);
-
         Renderer.InvalidateGeo(x, y, layer);
         if (layer == 0)
             RainEd.Instance.CurrentTab!.NodeData.InvalidateCell(x, y);

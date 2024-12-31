@@ -48,6 +48,7 @@ static class Raylib
     private static Vector2? lastMousePos = null;
     private static Vector2 mouseDelta = Vector2.Zero;
     private static bool windowShouldClose = false;
+    private static bool eventDrivenExit = false;
 
     public static Glib.Color ToGlibColor(Color color)
     {
@@ -464,7 +465,17 @@ static class Raylib
 
     public static void BeginDrawing()
     {
-        frameTime = window.Time - lastFrame;
+        if (eventDrivenExit)
+        {
+            eventDrivenExit = false;
+            Log.Debug("exit event driven");
+        }
+        else
+        {
+            frameTime = window.Time - lastFrame;
+            Debug.Assert(frameTime > 0.0);
+        }
+
         lastFrame = window.Time;
         frameStopwatch.Restart();
 
@@ -475,7 +486,13 @@ static class Raylib
         }
 
         windowShouldClose = false;
+
+        var oldEvDriven = Boot.Window.IsEventDriven;
         window.PollEvents();
+        if (oldEvDriven && !Boot.Window.IsEventDriven)
+        {
+            eventDrivenExit = true;
+        }
 
         if (lastMousePos is null)
         {
@@ -679,7 +696,7 @@ static class Raylib
         }
         catch (Exception e)
         {
-            Rained.Log.UserLogger.Error("Error while loading image {ImageName}:\n{Exception}", fileName, e);
+            Rained.Log.Error("Error while loading image {ImageName}:\n{Exception}", fileName, e);
             obj.image = null;
         }
 
@@ -745,7 +762,7 @@ static class Raylib
             catch (Exception e)
             {
                 if (Rained.RainEd.Instance is not null)
-                    Log.UserLogger.Error("Error exporting image: {Exception}", e.ToString());
+                    Log.Error("Error exporting image: {Exception}", e.ToString());
                 
                 return false;
             }
@@ -896,7 +913,7 @@ static class Raylib
         }
         catch (Exception e)
         {
-            Log.UserLogger.Error("Error while loading texture {ImageName}:\n{Exception}", fileName, e);
+            Log.Error("Error while loading texture {ImageName}:\n{Exception}", fileName, e);
             return new Texture2D()
             {
                 ID = null

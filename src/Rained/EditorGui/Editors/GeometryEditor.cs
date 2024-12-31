@@ -293,6 +293,8 @@ class GeometryEditor : IEditorMode
         }
     }
 
+    int buttonsPerRow = 4;
+
     public void DrawToolbar()
     {
         Vector4 textColor = ImGui.GetStyle().Colors[(int)ImGuiCol.Text];
@@ -328,11 +330,23 @@ class GeometryEditor : IEditorMode
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 0);
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0));
 
-            for (int i = 0; i < (int)Tool.ToolCount; i++)
+            {
+                float buttonSize = 24f * Boot.PixelIconScale + 4f;
+                buttonsPerRow = (int) (ImGui.GetContentRegionAvail().X / buttonSize);
+                if (buttonsPerRow < 1) buttonsPerRow = 1;
+            }
+
+            {
+                float buttonSize = 24f * Boot.PixelIconScale + 4f;
+                buttonsPerRow = (int) (ImGui.GetContentRegionAvail().X / buttonSize);
+                if (buttonsPerRow < 1) buttonsPerRow = 1;
+            }
+
+            for (int i = 0; i < (int) Tool.ToolCount; i++)
             {
                 Tool toolEnum = (Tool)i;
 
-                if (i % 4 > 0) ImGui.SameLine();
+                if (i % buttonsPerRow > 0) ImGui.SameLine();
 
                 string toolName = ToolNames[toolEnum];
                 Vector2 texOffset = ToolTextureOffsets[toolEnum];
@@ -389,21 +403,24 @@ class GeometryEditor : IEditorMode
 
             ImGui.PopItemWidth();
 
-            // show fill rect hint
-            if (isToolRectActive)
+            // update status bar
+            if (!RainEd.Instance.Preferences.MinimalStatusBar)
             {
-                GetRectBounds(out var rectMinX, out var rectMinY, out var rectMaxX, out var rectMaxY);
-                var rectW = rectMaxX - rectMinX + 1;
-                var rectH = rectMaxY - rectMinY + 1;
-                window.WriteStatus($"({rectW}, {rectH})");
-            }
-            else
-            {
-                if (ToolCanRectPlace(selectedTool))
-                    window.WriteStatus("Shift+拖拽以填充选区");
-
-                if (ToolCanFloodFill(selectedTool))
-                    window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+点击以洪水填充");
+                if (isToolRectActive)
+                {
+                    GetRectBounds(out var rectMinX, out var rectMinY, out var rectMaxX, out var rectMaxY);
+                    var rectW = rectMaxX - rectMinX + 1;
+                    var rectH = rectMaxY - rectMinY + 1;
+                    window.WriteStatus($"({rectW}, {rectH})");
+                }
+                else
+                {
+                    if (ToolCanRectPlace(selectedTool))
+                        window.WriteStatus("Shift+拖拽以填充选区");
+                    
+                    if (ToolCanFloodFill(selectedTool))
+                        window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+点击以洪水填充");
+                }
             }
         }
         ImGui.End();
@@ -608,10 +625,10 @@ class GeometryEditor : IEditorMode
         // WASD navigation
         if (!ImGui.GetIO().WantCaptureKeyboard && !ImGui.GetIO().WantTextInput)
         {
-            int toolRow = (int)selectedTool / 4;
-            int toolCol = (int)selectedTool % 4;
-            int toolCount = (int)Tool.ToolCount;
-
+            int toolRow = (int) selectedTool / buttonsPerRow;
+            int toolCol = (int) selectedTool % buttonsPerRow;
+            int toolCount = (int) Tool.ToolCount;
+            
             if (KeyShortcuts.Activated(KeyShortcut.NavRight))
             {
                 if ((int)selectedTool == (toolCount - 1))
@@ -619,10 +636,9 @@ class GeometryEditor : IEditorMode
                     toolCol = 0;
                     toolRow = 0;
                 }
-                else if (++toolCol > 4)
+                else if (++toolCol >= buttonsPerRow)
                 {
                     toolCol = 0;
-                    toolRow++;
                 }
             }
 
@@ -631,8 +647,7 @@ class GeometryEditor : IEditorMode
                 toolCol--;
                 if (toolCol < 0)
                 {
-                    toolCol = 3;
-                    toolRow--;
+                    toolCol = buttonsPerRow - 1;
                 }
             }
 
@@ -645,7 +660,7 @@ class GeometryEditor : IEditorMode
             {
                 // if on the last row, wrap back to first row
                 // else, just go to next row
-                if (toolRow == (toolCount - 1) / 4)
+                if (toolRow == (toolCount-1) / buttonsPerRow)
                     toolRow = 0;
                 else
                     toolRow++;
@@ -653,10 +668,10 @@ class GeometryEditor : IEditorMode
 
             if (toolRow < 0)
             {
-                toolRow = (toolCount - 1) / 4;
+                toolRow = (toolCount-1) / buttonsPerRow;
             }
 
-            selectedTool = (Tool)Math.Clamp(toolRow * 4 + toolCol, 0, toolCount - 1);
+            selectedTool = (Tool) Math.Clamp(toolRow*buttonsPerRow + toolCol, 0, toolCount-1);
         }
 
         bool isMouseDown = EditorWindow.IsMouseDown(ImGuiMouseButton.Left) || EditorWindow.IsMouseDown(ImGuiMouseButton.Right);
@@ -763,7 +778,7 @@ class GeometryEditor : IEditorMode
 
         Raylib.EndScissorMode();
 
-        if (window.IsViewportHovered)
+        if (window.IsViewportHovered && RainEd.Instance.Preferences.GeometryMaskMouseDecor)
             RenderCursor();
     }
 

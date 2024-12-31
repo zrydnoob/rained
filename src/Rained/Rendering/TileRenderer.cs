@@ -16,7 +16,6 @@ class TileRenderer
 
     private readonly LevelEditRender renderInfo;
     private readonly HashSet<CellPosition> dirtyHeads = [];
-    private readonly HashSet<int> wasRendered = [];
     private readonly List<TileRender> tileRenders = [];
 
     public TileRenderer(LevelEditRender renderInfo)
@@ -162,9 +161,7 @@ class TileRenderer
                             init.Width * Level.TileSize,
                             init.Height * Level.TileSize
                         );
-                        Raylib.BeginShaderMode(Shaders.UvRepeatShader);
                         Raylib.DrawTexturePro(RainEd.Instance.PlaceholderTexture, srcRec, dstRec, Vector2.Zero, 0f, Color.White);
-                        Raylib.EndShaderMode();
                         continue;
                     }
                     
@@ -404,9 +401,9 @@ class TileRenderer
                     {
                         curShader = null;
                         Raylib.EndShaderMode();
+                        RainEd.RenderContext.Flags = Glib.RenderFlags.None;
                     }
 
-                    Raylib.EndShaderMode();
                     var srcRec = new Rectangle(0f, 0f, 2f, 2f);
                     Raylib.DrawTexturePro(RainEd.Instance.PlaceholderTexture, srcRec, dstRec, Vector2.Zero, 0f, Color.White);
                 }
@@ -415,6 +412,7 @@ class TileRenderer
                     if (curShader != shader)
                     {
                         curShader = shader;
+                        RainEd.RenderContext.Flags = Glib.RenderFlags.DepthTest;
 
                         if (shader == Shaders.PaletteShader)
                             renderInfo.Palette.BeginPaletteShaderMode();
@@ -435,8 +433,10 @@ class TileRenderer
                         // if rendering palette, R channel represents sublayer
                         // A channel is alpha, as usual
                         var col = renderPalette ? new Color(0, 0, 0, (int)drawColor.A) : drawColor;
-
-                        Raylib.DrawTexturePro(tex, srcRec, dstRec, Vector2.Zero, 0f, renderPalette ? Color.Black : drawColor);
+                        LevelEditRender.DrawTextureSublayer(
+                            tex, srcRec, dstRec, layer*10 + init.LayerDepths[0],
+                            Glib.Color.FromRGBA(col.R, col.G, col.B, col.A)
+                        );
                     }
 
                     // draw the tile sublayers from back to front
@@ -448,25 +448,24 @@ class TileRenderer
 
                             // if rendering palette, R channel represents sublayer
                             // A channel is alpha, as usual
-                            Color col = drawColor;
-                            float lf = (float)l / init.LayerCount;
+                            Glib.Color col = Glib.Color.FromRGBA(drawColor.R, drawColor.G, drawColor.B, drawColor.A);
 
                             if (renderPalette)
                             {
-                                var paletteIndex = lf * (init.HasSecondLayer ? 2f : 1f) / 3f;
-                                col = new Color((int)MathF.Round(Math.Clamp(paletteIndex, 0f, 1f) * 255f), 0, 0, drawColor.A);
+                                var paletteIndex = init.LayerDepths[l] / 30f;
+                                col = new Glib.Color(Math.Clamp(paletteIndex, 0f, 1f), 0f, 0f, col.A);
                             }
                             else
                             {
                                 // fade to white as the layer is further away
                                 // from the front
-                                float a = lf;
-                                col.R = (byte)(col.R * (1f - a) + (col.R * 0.5) * a);
-                                col.G = (byte)(col.G * (1f - a) + (col.G * 0.5) * a);
-                                col.B = (byte)(col.B * (1f - a) + (col.B * 0.5) * a);
+                                float a = (float)init.LayerDepths[l] / init.LayerDepth;
+                                col.R = col.R * (1f - a) + (col.R * 0.5f) * a;
+                                col.G = col.G * (1f - a) + (col.G * 0.5f) * a;
+                                col.B = col.B * (1f - a) + (col.B * 0.5f) * a;
                             }
 
-                            Raylib.DrawTexturePro(tex, srcRec, dstRec, Vector2.Zero, 0f, col);
+                            LevelEditRender.DrawTextureSublayer(tex, srcRec, dstRec, layer*10 + init.LayerDepths[l], col);
                         }
 
                     }
@@ -477,6 +476,7 @@ class TileRenderer
         if (curShader != null)
         {
             Raylib.EndShaderMode();
+            RainEd.RenderContext.Flags = Glib.RenderFlags.None;
         }
 
         // highlight tile heads
@@ -520,5 +520,142 @@ class TileRenderer
             height * sublayer + tile.ImageYOffset,
             width, height
         );
+    }
+
+    public static void DrawGeometryOutline(int tileInt, int x, int y, float lineWidth, float tileSize, Color color)
+    {
+        if (tileInt == 0)
+        {
+            // air is represented by a cross (OMG ASCEND WITH GORB???)
+            // an empty cell (-1) would mean any tile is accepted
+            Raylib.DrawLineV(
+                startPos: new Vector2(x * tileSize + 5, y * tileSize + 5),
+                endPos: new Vector2((x+1) * tileSize - 5, (y+1) * tileSize - 5),
+                color
+            );
+
+            Raylib.DrawLineV(
+                startPos: new Vector2((x+1) * tileSize - 5, y * tileSize + 5),
+                endPos: new Vector2(x * tileSize + 5, (y+1) * tileSize - 5),
+                color
+            );
+        }
+        else if (tileInt > 0)
+        {
+            var cellType = (GeoType) tileInt;
+            switch (cellType)
+            {
+                case GeoType.Solid:
+                    RlExt.DrawRectangleLinesRec(
+                        new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize),
+                        color
+                    );
+                    break;
+                
+                case GeoType.Platform:
+                    RlExt.DrawRectangleLinesRec(
+                        new Rectangle(x * tileSize, y * tileSize, tileSize, 10),
+                        color
+                    );
+                    break;
+                
+                case GeoType.Glass:
+                    RlExt.DrawRectangleLinesRec(
+                        new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize),
+                        color
+                    );
+                    break;
+
+                case GeoType.ShortcutEntrance:
+                    RlExt.DrawRectangleLinesRec(
+                        new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize),
+                        Color.Red
+                    );
+                    break;
+
+                case GeoType.SlopeLeftDown:
+                    Raylib.DrawTriangleLines(
+                        new Vector2(x+1, y+1) * tileSize,
+                        new Vector2(x+1, y) * tileSize,
+                        new Vector2(x, y) * tileSize,
+                        color
+                    );
+                    break;
+
+                case GeoType.SlopeLeftUp:
+                    Raylib.DrawTriangleLines(
+                        new Vector2(x, y+1) * tileSize,
+                        new Vector2(x+1, y+1) * tileSize,
+                        new Vector2(x+1, y) * tileSize,
+                        color
+                    );
+                    break;
+
+                case GeoType.SlopeRightDown:
+                    Raylib.DrawTriangleLines(
+                        new Vector2(x+1, y) * tileSize,
+                        new Vector2(x, y) * tileSize,
+                        new Vector2(x, y+1) * tileSize,
+                        color
+                    );
+                    break;
+
+                case GeoType.SlopeRightUp:
+                    Raylib.DrawTriangleLines(
+                        new Vector2(x+1, y+1) * tileSize,
+                        new Vector2(x, y) * tileSize,
+                        new Vector2(x, y+1) * tileSize,
+                        color
+                    );
+                    break;
+            }
+        }
+    }
+
+    public static void DrawTileSpecs(Tile selectedTile, int tileOriginX, int tileOriginY,
+        float tileSize = Level.TileSize,
+        byte alpha = 255
+    )
+    {
+        var lineWidth = 1f / RainEd.Instance.LevelView.ViewZoom;
+        var prefs = RainEd.Instance.Preferences;
+
+        if (selectedTile.HasSecondLayer)
+        {
+            var col = prefs.TileSpec2.ToRaylibColor();
+            col.A = (byte)(col.A * (alpha / 255f));
+
+            for (int x = 0; x < selectedTile.Width; x++)
+            {
+                for (int y = 0; y < selectedTile.Height; y++)
+                {
+                    Rlgl.PushMatrix();
+                    Rlgl.Translatef(tileOriginX * tileSize + 2, tileOriginY * tileSize + 2, 0);
+
+                    sbyte tileInt = selectedTile.Requirements2[x,y];
+                    DrawGeometryOutline(tileInt, x, y, lineWidth, tileSize, col);
+                    Rlgl.PopMatrix();
+                }
+            }
+        }
+
+        // first layer
+        {
+            var col = prefs.TileSpec1.ToRaylibColor();
+            col.A = (byte)(col.A * (alpha / 255f));
+
+            for (int x = 0; x < selectedTile.Width; x++)
+            {
+                for (int y = 0; y < selectedTile.Height; y++)
+                {
+                    Rlgl.PushMatrix();
+                    Rlgl.Translatef(tileOriginX * tileSize, tileOriginY * tileSize, 0);
+
+                    sbyte tileInt = selectedTile.Requirements[x,y];
+                    DrawGeometryOutline(tileInt, x, y, lineWidth, tileSize, col);
+                    Rlgl.PopMatrix();
+                }
+            }
+        }
     }
 }

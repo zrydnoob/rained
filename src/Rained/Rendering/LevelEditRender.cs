@@ -120,13 +120,6 @@ class LevelEditRender : IDisposable
     }
     */
 
-    private bool IsInBorder(int x, int y)
-    {
-        return
-            x >= Level.BufferTilesLeft && y >= Level.BufferTilesTop &&
-            x < Level.Width - Level.BufferTilesRight && y < Level.Height - Level.BufferTilesBot;
-    }
-
     // mark entire layer as dirty
     public void InvalidateGeo(int layer)
     {
@@ -411,7 +404,7 @@ class LevelEditRender : IDisposable
                             editor.LevelGraphicsTexture,
                             new Rectangle(offset.X * 20, offset.Y * 20, 20, 20),
                             new Vector2(x, y) * Level.TileSize,
-                            IsInBorder(x, y) ? color : new Color(255, 0, 0, 255)
+                            Level.IsInBorder(x, y) ? color : new Color(255, 0, 0, 255)
                         );
                     }
                 }
@@ -573,14 +566,14 @@ class LevelEditRender : IDisposable
 
         foreach (var camera in Level.Cameras)
         {
-            var camCenter = camera.Position + Camera.WidescreenSize / 2f;
+            var camCenter = camera.Position + Camera.Size / 2f;
 
-            // draw full rect ouline
+            // draw 16:9 ouline
             if (showWidescreen)
             {
                 Raylib.DrawRectangleLinesEx(
                     new Rectangle(
-                        camera.Position * Level.TileSize,
+                        (camCenter - Camera.WidescreenSize / 2f) * Level.TileSize,
                         Camera.WidescreenSize * Level.TileSize
                     ),
                     2f / ViewZoom,
@@ -591,11 +584,10 @@ class LevelEditRender : IDisposable
             // 4:3 outline
             if (showStandard)
             {
-                var standardResOutlineSize = Camera.StandardSize * ((Camera.WidescreenSize.X - 2) / Camera.WidescreenSize.X);
                 Raylib.DrawRectangleLinesEx(
                     new Rectangle(
-                        (camCenter - standardResOutlineSize / 2) * Level.TileSize,
-                        standardResOutlineSize * Level.TileSize
+                        (camCenter - Camera.StandardSize / 2f) * Level.TileSize,
+                        Camera.StandardSize * Level.TileSize
                     ),
                     (both ? 1f : 2f) / ViewZoom,
                     new Color(0, 255, 0, 255)
@@ -719,9 +711,9 @@ class LevelEditRender : IDisposable
             int offset = (l - config.ActiveLayer) * config.LayerOffset;
             Raylib.BeginTextureMode(layerFrames[l]);
 
-            Raylib.EndScissorMode();
+            if (config.Scissor) Raylib.EndScissorMode();
             Raylib.ClearBackground(new Color(0, 0, 0, 0));
-            window.BeginLevelScissorMode();
+            if (config.Scissor) window.BeginLevelScissorMode();
 
             Rlgl.PushMatrix();
                 Rlgl.Translatef(offset, offset, 0f);
@@ -793,6 +785,34 @@ class LevelEditRender : IDisposable
         // draw water
         if (config.FillWater && level.HasWater && level.IsWaterInFront)
             FillWater();
+    }
+
+    public static float GetSublayerZCoord(int sublayer)
+        => Math.Clamp(1f - (sublayer / 29f), 0f, 1f) * 0.9f + 0.1f;
+
+    public static void DrawTextureSublayer(RlManaged.Texture2D rtex, Rectangle rSrcRec, Rectangle rDstRec, int sublayer, Glib.Color tint)
+    {
+        var tex = rtex.GlibTexture!;
+        var srcRect = new Glib.Rectangle(rSrcRec.Position, rSrcRec.Size);
+        var dstRect = new Glib.Rectangle(rDstRec.Position, rDstRec.Size);
+        var texW = tex.Width;
+        var texH = tex.Height;
+        float z = GetSublayerZCoord(sublayer);
+
+        using var draw = RainEd.RenderContext.BeginBatchDraw(Glib.BatchDrawMode.Quads, tex);
+
+        draw.Color(tint);
+        draw.TexCoord(srcRect.Left / texW, srcRect.Top / texH);
+        draw.Vertex(dstRect.Left, dstRect.Top, z);
+
+        draw.TexCoord(srcRect.Left / texW, srcRect.Bottom / texH);
+        draw.Vertex(dstRect.Left, dstRect.Bottom, z);
+
+        draw.TexCoord(srcRect.Right / texW, srcRect.Bottom / texH);
+        draw.Vertex(dstRect.Right, dstRect.Bottom, z);
+
+        draw.TexCoord(srcRect.Right / texW, srcRect.Top / texH);
+        draw.Vertex(dstRect.Right, dstRect.Top, z);
     }
     
     public void Dispose()
