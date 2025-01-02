@@ -59,14 +59,7 @@ class AppSetup
     {
         assetDataPath = null;
 
-        if (Boot.WindowScale == 1.0f)
-        {
             Fonts.SetFont("AlibabaPuHuiTi");
-        }
-        else
-        {
-            Fonts.SetFont("AlibabaPuHuiTi");
-        }
 
         while (true)
         {

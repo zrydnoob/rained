@@ -422,7 +422,7 @@ class UserPreferences
         OptimizedTilePreviews = true;
 
         ContentScale = Boot.Window is null ? 1.0f : Boot.WindowScale;
-        Font = (ContentScale == 1.0f) ? "ProggyClean" : "ProggyVector-Regular";
+        Font = "AlibabaPuHuiTi";
         Theme = "Dark";
         if (Boot.Window is not null)
         {
