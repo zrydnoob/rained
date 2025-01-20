@@ -849,7 +849,7 @@ partial class PropEditor : IEditorMode
                             ImGui.SameLine();
                             ImGui.Button("模拟");
 
-                            if (ImGui.IsItemActive() || KeyShortcuts.Active(KeyShortcut.RopeSimulation))
+                            if (ImGui.IsItemActive() || KeyShortcuts.Active(KeyShortcut.RopeSimulation) && transformMode is null)
                             {
                                 isRopeSimulationActive = true;
 

@@ -591,6 +591,7 @@ static class PreferencesWindow
         ShortcutButton(KeyShortcut.Cut);
         ShortcutButton(KeyShortcut.Copy);
         ShortcutButton(KeyShortcut.Paste);
+        ShortcutButton(KeyShortcut.Select);
         ImGui.Separator();
         ShortcutButton(KeyShortcut.New);
         ShortcutButton(KeyShortcut.Open);
@@ -642,6 +643,10 @@ static class PreferencesWindow
         ShortcutButton(KeyShortcut.ToggleMirrorX);
         ShortcutButton(KeyShortcut.ToggleMirrorY);
         ShortcutButton(KeyShortcut.FloodFill);
+        ImGui.Separator();
+        ShortcutButton(KeyShortcut.ToolWall);
+        ShortcutButton(KeyShortcut.ToolShortcutEntrance);
+        ShortcutButton(KeyShortcut.ToolShortcutDot);
 
         ImGui.SeparatorText("Tiles");
         ShortcutButton(KeyShortcut.SetMaterial);

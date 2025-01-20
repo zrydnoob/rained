@@ -7,6 +7,7 @@ namespace Rained.EditorGui.Editors;
 class GeometryEditor : IEditorMode
 {
     public string Name { get => "几何"; }
+    public bool SupportsCellSelection => true;
 
     private readonly LevelWindow window;
 
@@ -223,6 +224,17 @@ class GeometryEditor : IEditorMode
         mirrorOriginY = RainEd.Instance.Level.Height;
     }
 
+    private int ClosestActiveLayer()
+    {
+        for (int i = 0; i < Level.LayerCount; i++)
+        {
+            if (layerMask[i])
+                return i;
+        }
+
+        return 0;
+    }
+
     public void SavePreferences(UserPreferences prefs)
     {
         switch (layerViewMode)
@@ -381,9 +393,25 @@ class GeometryEditor : IEditorMode
                 ImGui.PopID();
                 ImGui.PopStyleColor();
             }
-            
+
             ImGui.PopStyleVar(3);
             ImGui.PopStyleColor();
+
+            // tool kbd shortcuts
+            if (KeyShortcuts.Activated(KeyShortcut.ToolWall))
+            {
+                selectedTool = Tool.Wall;
+            }
+
+            if (KeyShortcuts.Activated(KeyShortcut.ToolShortcutDot))
+            {
+                selectedTool = Tool.Shortcut;
+            }
+
+            if (KeyShortcuts.Activated(KeyShortcut.ToolShortcutEntrance))
+            {
+                selectedTool = Tool.ShortcutEntrance;
+            }
 
             // show work layers
             ImGui.Separator();
@@ -404,7 +432,7 @@ class GeometryEditor : IEditorMode
             ImGui.PopItemWidth();
 
             // update status bar
-            if (!RainEd.Instance.Preferences.MinimalStatusBar)
+            if (!RainEd.Instance.Preferences.MinimalStatusBar && CellSelection.Instance is null)
             {
                 if (isToolRectActive)
                 {
@@ -674,11 +702,36 @@ class GeometryEditor : IEditorMode
             selectedTool = (Tool) Math.Clamp(toolRow*buttonsPerRow + toolCol, 0, toolCount-1);
         }
 
+        // begin selection
+        if (KeyShortcuts.Activated(KeyShortcut.Select))
+        {
+            CellSelection.Instance ??= new CellSelection();
+            CellSelection.Instance.PasteMode = false;
+        }
+        
+        // paste
+        // (copy is handled by CellSelection)
+        if (KeyShortcuts.Activated(KeyShortcut.Paste))
+        {
+            var cellSelectionState = CellSelection.Instance;
+            CellSelection.BeginPaste(ref cellSelectionState);
+            CellSelection.Instance = cellSelectionState;
+        }
+
         bool isMouseDown = EditorWindow.IsMouseDown(ImGuiMouseButton.Left) || EditorWindow.IsMouseDown(ImGuiMouseButton.Right);
         if (ignoreClick)
             isMouseDown = false;
 
-        if (window.IsViewportHovered && mirrorDrag == 0)
+        if (CellSelection.Instance is not null)
+        {
+            CellSelection.Instance.AffectTiles = false;
+            CellSelection.Instance.Update(ClosestActiveLayer());
+            if (!CellSelection.Instance.Active)
+            {
+                CellSelection.Instance = null;
+            }
+        }
+        else if (window.IsViewportHovered && mirrorDrag == 0)
         {
             // cursor rect mode
             if (isToolRectActive)
@@ -752,7 +805,7 @@ class GeometryEditor : IEditorMode
                                 }
                                 else
                                 {
-                                    Util.Bresenham(lastMouseX, lastMouseY, window.MouseCx, window.MouseCy, (int x, int y) =>
+                                    Rasterization.Bresenham(lastMouseX, lastMouseY, window.MouseCx, window.MouseCy, (int x, int y) =>
                                     {
                                         ActivateTool(selectedTool, x, y, EditorWindow.IsMouseClicked(ImGuiMouseButton.Left));
                                     });
@@ -780,6 +833,11 @@ class GeometryEditor : IEditorMode
 
         if (window.IsViewportHovered && RainEd.Instance.Preferences.GeometryMaskMouseDecor)
             RenderCursor();
+    }
+
+    public void DrawStatusBar()
+    {
+        CellSelection.Instance?.DrawStatusBar();
     }
 
     // render active layer squares near cursor
@@ -1087,55 +1145,21 @@ class GeometryEditor : IEditorMode
 
         if (fillGeo == geoMedium) return;
 
-        // use a recursive scanline fill algorithm
-        // with a manually-managed stack
-        Stack<(int, int)> fillStack = [];
-        fillStack.Push((srcX, srcY));
-
-        while (fillStack.Count > 0)
-        {
-            if (fillStack.Count > 100000)
+        bool success = Rasterization.FloodFill(
+            srcX, srcY, level.Width, level.Height,
+            isSimilar: (int x, int y) =>
             {
-                Log.UserLogger.Error("Flood fill stack overflow!");
-                EditorWindow.ShowNotification("Stack overflow!");
-                break;
-            }
-
-            (int x, int y) = fillStack.Pop();
-
-            // go to left bounds of this scanline
-            while (level.IsInBounds(x, y) && level.Layers[layer, x, y].Geo == geoMedium)
-                x--;
-
-            x++;
-
-            bool oldAboveEmpty = false;
-            bool oldBelowEmpty = false;
-
-            // go to right bounds of the scanline, spawning new scanlines above or below if detected
-            while (level.IsInBounds(x, y) && level.Layers[layer, x, y].Geo == geoMedium)
+                return level.Layers[layer, x, y].Geo == geoMedium;
+            },
+            plot: (int x, int y) =>
             {
-                bool aboveEmpty = level.IsInBounds(x, y - 1) && level.Layers[layer, x, y - 1].Geo == geoMedium;
-                bool belowEmpty = level.IsInBounds(x, y + 1) && level.Layers[layer, x, y + 1].Geo == geoMedium;
-
-                if (aboveEmpty != oldAboveEmpty && aboveEmpty)
-                {
-                    fillStack.Push((x, y - 1));
-                }
-
-                if (belowEmpty != oldBelowEmpty && belowEmpty)
-                {
-                    fillStack.Push((x, y + 1));
-                }
-
-                oldAboveEmpty = aboveEmpty;
-                oldBelowEmpty = belowEmpty;
-
                 level.Layers[layer, x, y].Geo = fillGeo;
                 window.InvalidateGeo(x, y, layer);
-                x++;
             }
-        }
+        );
+
+        if (!success)
+            EditorWindow.ShowNotification("Flood fill too large!");
     }
 
     private void ApplyToolRect(bool place)

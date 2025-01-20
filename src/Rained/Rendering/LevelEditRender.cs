@@ -44,6 +44,7 @@ class LevelEditRender : IDisposable
     private readonly EditorGeometryRenderer geoRenderer;
     private readonly TileRenderer tileRenderer;
     private readonly PropRenderer propRenderer;
+    public EditorGeometryRenderer GeometryRenderer => geoRenderer;
 
     private Glib.Mesh? gridMajor = null;
     private Glib.Mesh? gridMinor = null;
@@ -54,6 +55,14 @@ class LevelEditRender : IDisposable
 
     public bool UsePalette = false;
     public PaletteRenderer Palette;
+
+    public int OverlayX;
+    public int OverlayY;
+    public int OverlayWidth { get; private set; }
+    public int OverlayHeight { get; private set; }
+    public bool OverlayAffectTiles;
+    public (bool mask, LevelCell cell)[,,]? OverlayGeometry { get; private set; } = null;
+    public bool IsOverlayActive => OverlayGeometry is not null;
 
     public LevelEditRender()
     {
@@ -158,7 +167,7 @@ class LevelEditRender : IDisposable
         {
             for (int y = Math.Max(0, viewT); y < Math.Min(Level.Height, viewB); y++)
             {
-                ref var cell = ref Level.Layers[layer, x, y];
+                ref var cell = ref GetCellWithOverlay(x, y, layer);
 
                 // draw object graphics
                 for (int i = 1; i < 32; i++)
@@ -350,7 +359,7 @@ class LevelEditRender : IDisposable
         {
             for (int y = Math.Max(0, viewT); y < Math.Min(Level.Height, viewB); y++)
             {
-                ref var cell = ref Level.Layers[0, x, y];
+                ref var cell = ref GetCellWithOverlay(x, y, 0);
 
                 // shortcut entrance changes appearance
                 // based on neighbor Shortcuts
@@ -433,7 +442,7 @@ class LevelEditRender : IDisposable
         {
             for (int y = Math.Max(0, viewT); y < Math.Min(Level.Height, viewB); y++)
             {
-                ref var cell = ref Level.Layers[layer, x, y];
+                ref var cell = ref GetCellWithOverlay(x, y, layer);
 
                 if (!cell.HasTile() && cell.Material != 0 && cell.Geo != GeoType.Air)
                 {
@@ -813,6 +822,57 @@ class LevelEditRender : IDisposable
 
         draw.TexCoord(srcRect.Right / texW, srcRect.Top / texH);
         draw.Vertex(dstRect.Right, dstRect.Top, z);
+    }
+
+    public void SetOverlay(int width, int height, (bool mask, LevelCell cell)[,,] geometry)
+    {
+        if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width), "Width must be greater than 0.");
+        if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than 0.");
+        if (geometry.GetLength(0) != Level.LayerCount || geometry.GetLength(1) != width || geometry.GetLength(2) != height)
+            throw new ArgumentException("Invalid dimensions for geometry array.", nameof(geometry));
+        
+        ArgumentNullException.ThrowIfNull(geometry);
+
+        OverlayWidth = width;
+        OverlayHeight = height;
+        OverlayGeometry = geometry;
+    }
+
+    public void ClearOverlay()
+    {
+        OverlayGeometry = null;
+        OverlayWidth = 0;
+        OverlayHeight = 0;
+    }
+
+    public bool IsWithinOverlay(int x, int y, int layer)
+    {
+        if (!IsOverlayActive) return false;
+
+        if (x >= OverlayX && y >= OverlayY && x < OverlayX + OverlayWidth && y < OverlayY + OverlayHeight)
+        {
+            return OverlayGeometry![layer, x - OverlayX, y - OverlayY].mask;
+        }
+
+        return false;
+    }
+
+    public ref LevelCell GetCellWithOverlay(int x, int y, int layer)
+    {
+        if (IsOverlayActive && x >= OverlayX && y >= OverlayY && x < OverlayX + OverlayWidth && y < OverlayY + OverlayHeight)
+        {
+            ref var c = ref OverlayGeometry![layer, x - OverlayX, y - OverlayY];
+            if (c.mask) return ref c.cell;
+        }
+
+        var level = RainEd.Instance.Level;
+        return ref level.Layers[layer, x, y];
+    }
+
+    public ref LevelCell GetCell(int x, int y, int layer, bool respectOverlay)
+    {
+        if (respectOverlay) return ref GetCellWithOverlay(x, y, layer);
+        return ref RainEd.Instance.Level.Layers[layer, x, y];
     }
     
     public void Dispose()

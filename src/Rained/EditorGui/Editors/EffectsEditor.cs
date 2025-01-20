@@ -8,6 +8,8 @@ namespace Rained.EditorGui.Editors;
 class EffectsEditor : IEditorMode
 {
     public string Name { get => "特效"; }
+    public bool SupportsCellSelection => false;
+    
     private readonly LevelWindow window;
 
     private int selectedGroup = 0;

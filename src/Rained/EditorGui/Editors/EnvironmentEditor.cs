@@ -6,6 +6,8 @@ namespace Rained.EditorGui.Editors;
 class EnvironmentEditor : IEditorMode
 {
     public string Name { get => "环境"; }
+    public bool SupportsCellSelection => false;
+    
     private readonly LevelWindow window;
 
     private ChangeHistory.EnvironmentChangeRecorder changeRecorder;

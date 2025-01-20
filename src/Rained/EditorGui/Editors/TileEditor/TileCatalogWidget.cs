@@ -5,9 +5,16 @@ using Rained.Assets;
 using ImGuiNET;
 using Rained.Rendering;
 
-class TileCatalogWidget(TileEditMode editMode) : TileEditorCatalog
+interface ITileSelectionState
 {
-    private readonly TileEditMode editMode = editMode;
+    public int SelectedTileGroup { get; set; }
+    public Tile? SelectedTile { get; }
+    public void SelectTile(Tile tile);
+}
+
+class TileCatalogWidget(ITileSelectionState selectionState) : TileEditorCatalog
+{
+    private readonly ITileSelectionState state = selectionState;
     private RlManaged.RenderTexture2D? _hoverPreview = null;
     private readonly List<int> tileSearchResults = [];
 
@@ -55,8 +62,8 @@ class TileCatalogWidget(TileEditMode editMode) : TileEditorCatalog
             var group = tileDb.Categories[i];
             var cursor = ImGui.GetCursorScreenPos();
 
-            if (ImGui.Selectable("  " + group.Name, editMode.SelectedTileGroup == i) || tileSearchResults.Count == 1)
-                editMode.SelectedTileGroup = i;
+            if (ImGui.Selectable("  " + group.Name, state.SelectedTileGroup == i) || tileSearchResults.Count == 1)
+                state.SelectedTileGroup = i;
             
             drawList.AddRectFilled(
                 p_min: cursor,
@@ -70,7 +77,7 @@ class TileCatalogWidget(TileEditMode editMode) : TileEditorCatalog
     {
         var tileDb = RainEd.Instance.TileDatabase;
 
-        var tileList = tileDb.Categories[editMode.SelectedTileGroup].Tiles;
+        var tileList = tileDb.Categories[state.SelectedTileGroup].Tiles;
 
         for (int i = 0; i < tileList.Count; i++)
         {
@@ -80,16 +87,39 @@ class TileCatalogWidget(TileEditMode editMode) : TileEditorCatalog
             if (!tile.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase))
                 continue;
             
-            if (ImGui.Selectable(tile.Name, tile == editMode.SelectedTile))
+            if (ImGui.Selectable(tile.Name, tile == state.SelectedTile))
             {
-                editMode.SelectedTile = tile;
+                state.SelectTile(tile);
             }
 
             if (ImGui.IsItemHovered())
             {
+                var fgCol = Color.White;
+                var bgCol4 = ImGui.GetStyle().Colors[(int)ImGuiCol.PopupBg];
+                var bgCol = new Color(
+                    (byte)(bgCol4.X * 255f),
+                    (byte)(bgCol4.Y * 255f),
+                    (byte)(bgCol4.Z * 255f),
+                    (byte)(bgCol4.W * 255f)
+                );
+
+                var contrastRatio = ContrastRatio(fgCol, bgCol);
+                var invertContrast = contrastRatio < 3f;
+
+                if (invertContrast) {
+                    ImGui.PushStyleColor(ImGuiCol.PopupBg, new Vector4(
+                        1f - bgCol4.X,
+                        1f - bgCol4.Y,
+                        1f - bgCol4.Z,
+                        bgCol4.W
+                    ));
+                }
+
                 ImGui.BeginTooltip();
                 RenderTilePreview(tile);
                 ImGui.EndTooltip();
+
+                if (invertContrast) ImGui.PopStyleColor();
             }
         }
     }
@@ -263,5 +293,33 @@ class TileCatalogWidget(TileEditMode editMode) : TileEditorCatalog
         // fallback case
         renderPlaceholder:
         ImGuiExt.ImageSize(RainEd.Instance.PlaceholderTexture, 16, 16);
+    }
+
+    // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+    private static float RelativeLuminance(Color color)
+    {
+        static float CalcComponentValue(float v)
+        {
+            if (v <= 0.03928f)
+                return v / 12.92f;
+            else
+                return MathF.Pow((v + 0.055f) / 1.055f, 2.4f);
+        }
+
+        return
+            CalcComponentValue(color.R / 255f) * 0.2126f +
+            CalcComponentValue(color.G / 255f) * 0.7152f +
+            CalcComponentValue(color.B / 255f) * 0.0722f;
+    }
+
+    // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+    private static float ContrastRatio(Color colorA, Color colorB)
+    {
+        var lumA = RelativeLuminance(colorA);
+        var lumB = RelativeLuminance(colorB);
+
+        var lMax = Math.Max(lumA, lumB);
+        var lMin = Math.Min(lumA, lumB);
+        return (lMax + 0.05f) / (lMin + 0.05f); 
     }
 }

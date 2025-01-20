@@ -8,6 +8,8 @@ namespace Rained.EditorGui.Editors;
 class LightEditor : IEditorMode
 {
     public string Name { get => "灯光"; }
+    public bool SupportsCellSelection => false;
+    
     private readonly LevelWindow window;
 
     private Vector2 brushSize = new(50f, 70f);

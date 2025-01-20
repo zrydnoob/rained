@@ -8,6 +8,8 @@ namespace Rained.EditorGui.Editors;
 partial class PropEditor : IEditorMode
 {
     public string Name { get => "道具"; }
+    public bool SupportsCellSelection => false;
+    
     private readonly LevelWindow window;
 
     private readonly List<Prop> selectedProps = new();
@@ -420,7 +422,7 @@ partial class PropEditor : IEditorMode
         }
 
         // prop transform gizmos
-        if (selectedProps.Count > 0)
+        if (selectedProps.Count > 0 && !isRopeSimulationActive)
         {
             bool canWarp = transformMode is WarpTransformMode ||
                 (isWarpMode && selectedProps.Count == 1);
@@ -643,7 +645,7 @@ partial class PropEditor : IEditorMode
         }
 
         // in prop transform mode
-        if (!isModeMouseDown)
+        if (!isModeMouseDown && !isRopeSimulationActive)
         {
             // in default mode
             PropSelectUpdate();

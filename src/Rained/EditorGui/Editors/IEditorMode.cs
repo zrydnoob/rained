@@ -3,6 +3,7 @@ namespace Rained.EditorGui.Editors;
 interface IEditorMode
 {
     string Name { get; }
+    bool SupportsCellSelection { get; }
 
     void Load() {}
     void Unload() {}
@@ -17,6 +18,7 @@ interface IEditorMode
 
     void DrawToolbar();
     void DrawViewport(RlManaged.RenderTexture2D mainFrame, RlManaged.RenderTexture2D[] layerFrames);
+    void DrawStatusBar() {}
 }
 
 enum EditModeEnum

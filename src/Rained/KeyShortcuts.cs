@@ -22,6 +22,7 @@ enum KeyShortcut : int
 
     New, Open, Save, SaveAs, CloseFile, CloseAllFiles,
     Cut, Copy, Paste, Undo, Redo,
+    Select,
 
     Render, ExportGeometry,
 
@@ -31,6 +32,7 @@ enum KeyShortcut : int
     ToggleLayer1, ToggleLayer2, ToggleLayer3,
     ToggleMirrorX, ToggleMirrorY,
     FloodFill,
+    ToolWall, ToolShortcutEntrance, ToolShortcutDot,
 
     // Tile Editor
     Eyedropper, SetMaterial,
@@ -363,6 +365,7 @@ static class KeyShortcuts
         Register("Cut", KeyShortcut.Cut, ImGuiKey.X, ImGuiModFlags.Ctrl);
         Register("Copy", KeyShortcut.Copy, ImGuiKey.C, ImGuiModFlags.Ctrl);
         Register("Paste", KeyShortcut.Paste, ImGuiKey.V, ImGuiModFlags.Ctrl);
+        Register("Select", KeyShortcut.Select, ImGuiKey.E, ImGuiModFlags.Ctrl);
         Register("Undo", KeyShortcut.Undo, ImGuiKey.Z, ImGuiModFlags.Ctrl, true);
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -374,14 +377,19 @@ static class KeyShortcuts
         
         Register("Cycle Layer", KeyShortcut.SwitchLayer, ImGuiKey.Tab, ImGuiModFlags.None);
         Register("Switch Tab", KeyShortcut.SwitchTab, ImGuiKey.Tab, ImGuiModFlags.Shift);
+        Register("Increase Brush Size", KeyShortcut.IncreaseBrushSize, ImGuiKey.O, ImGuiModFlags.None, true);
+        Register("Decrease Brush Size", KeyShortcut.DecreaseBrushSize, ImGuiKey.I, ImGuiModFlags.None, true);
+
+        // Geometry
         Register("Toggle Layer 1", KeyShortcut.ToggleLayer1, ImGuiKey.E, ImGuiModFlags.None);
         Register("Toggle Layer 2", KeyShortcut.ToggleLayer2, ImGuiKey.R, ImGuiModFlags.None);
         Register("Toggle Layer 3", KeyShortcut.ToggleLayer3, ImGuiKey.T, ImGuiModFlags.None);
-        Register("Increase Brush Size", KeyShortcut.IncreaseBrushSize, ImGuiKey.O, ImGuiModFlags.None, true);
-        Register("Decrease Brush Size", KeyShortcut.DecreaseBrushSize, ImGuiKey.I, ImGuiModFlags.None, true);
         Register("Toggle Mirror X", KeyShortcut.ToggleMirrorX, ImGuiKey.F, ImGuiModFlags.None, false);
         Register("Toggle Mirror Y", KeyShortcut.ToggleMirrorY, ImGuiKey.G, ImGuiModFlags.None, false);
         Register("Flood Fill Modifier", KeyShortcut.FloodFill, ImGuiKey.Q, ImGuiModFlags.None, false);
+        Register("Wall Tool", KeyShortcut.ToolWall, ImGuiKey.Z, ImGuiModFlags.None, false);
+        Register("Shortcut Entrance Tool", KeyShortcut.ToolShortcutEntrance, ImGuiKey.X, ImGuiModFlags.None);
+        Register("Shortcut Dot Tool", KeyShortcut.ToolShortcutDot, ImGuiKey.C, ImGuiModFlags.None);
 
         // Tile Editor
         Register("Eyedropper", KeyShortcut.Eyedropper, ImGuiKey.Q, ImGuiModFlags.None, true);

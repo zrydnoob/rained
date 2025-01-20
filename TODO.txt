@@ -9,6 +9,14 @@ DRIZZLE UPDATE:
 - custom effects system
 - port new inits (if any) from startUp.txt or whatever
 
+Selection:
+- selection undo/redo
+- layer masking
+- drag for tile select
+- bounds checking?
+- add buttons to edit menu
+- add select/copy/paste shortcuts to shortcut window
+
 Bugs:
 - undoing while chain holder attach makes a crash .. ???
 - reported issue of lag building up over time... speeds up when opened a room with a lot of props
@@ -20,37 +28,38 @@ Bugs:
 - using keyboards shortcuts while rendering does weird things
   fix: disable shortcuts while rendering
 
-v2.2.0:
-- radial menu for view toggle
+v2.3.0:
+  * geo/tile copy+paste (i am currently working on this),
+  - tile & effect prefabs
+  - favorite tiles&props
+  - material previews
+  - render single camera
+  - prop editor lasso select ()
+  - translation system
+  - effects previews
+  - show prop preview over mouse
+  - autotiles
+    - option to join only inner tiles
+    - ability to recognize more than one tile as a direction type
+    - cross beams autotile
+      - ability to constrain autotile shape into a square
+
+Do Soon:
 - toggle for showing shortcuts in tile editor
 
-v2.2.x:
-- FIX BLENDING OF PROPS IN TILE EDITOR !!!!!!
-- effects previews
-- optional download from solar's repo
+Do Later:
+- popup menu for view toggle
+- optional download from seroen's repo
+- FIX BLENDING OF PROPS IN TILE EDITOR !!!!!! (wait it's broken?)
 
-v2.3.0 (or later):
-- material previews (since ludo added it in her build I feel especially pressued to finally add it in)
-- render single camera
+Do Sometime:
 - asset manager crap
-- favorite tiles&props
-- please finally add the geo editing stuff
-  - ctrl+C to initiate copy mode... simplifies ui
-- tile prefabs (prefabs tab in tile selector)
-- translation system
-- autotiles
-  - option to join only inner tiles
-  - ability to recognize more than one tile as a direction type
-  - cross beams autotile
-    - ability to constrain autotile shape into a square
 - method of generating approximated geometry from prop
-- show prop preview over mouse
 
 v2.4.0 (or v3.0.0, depending on the frequency of major updates):
 - Fully FeatuerdWorld editor
 
 Other features:
-- prop editor lasso select ()
 - effects save/load presets/prefabs
 - light map stretch
 - asset manager

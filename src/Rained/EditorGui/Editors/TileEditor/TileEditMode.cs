@@ -6,7 +6,7 @@ using Rained.Assets;
 using ImGuiNET;
 using Rained.Rendering;
 
-class TileEditMode : TileEditorMode
+class TileEditMode : TileEditorMode, ITileSelectionState
 {
     public override string TabName => "Tiles";
     
@@ -14,9 +14,14 @@ class TileEditMode : TileEditorMode
     private Tile selectedTile = RainEd.Instance.TileDatabase.Categories[0].Tiles[0];
 
     public int SelectedTileGroup { get => selectedTileGroup; set => selectedTileGroup = value; }
-    public Tile SelectedTile { get => selectedTile; set => selectedTile = value; }
+    public Tile? SelectedTile { get => selectedTile; }
+    public void SelectTile(Tile tile)
+    {
+        selectedTile = tile;
+    }
 
     private bool placeTiles = false;
+    private bool placeTilesJustStarted = false;
 
     // this is used to fix force placement when
     // holding down lmb
@@ -223,7 +228,8 @@ class TileEditMode : TileEditorMode
 
             else // start tile place mode
             {
-                placeTiles = LeftMouseDown;
+                if (placeTiles = LeftMouseDown)
+                    placeTilesJustStarted = true;
             }
         }
 
@@ -308,10 +314,10 @@ class TileEditMode : TileEditorMode
                         }
                     }
                 }
-                else if (EditorWindow.IsMouseClicked(ImGuiMouseButton.Left))
+                else if (placeTilesJustStarted)
                 {
                     string errStr = validationStatus switch {
-                        TilePlacementStatus.OutOfBounds => "Tile is out of bounds",
+                        TilePlacementStatus.OutOfBounds => "Tile root is out of bounds",
                         TilePlacementStatus.Overlap => "Tile is overlapping another",
                         TilePlacementStatus.Geometry => "Tile geometry requirements not met",
                         _ => "Unknown tile placement error"
@@ -319,6 +325,8 @@ class TileEditMode : TileEditorMode
 
                     EditorWindow.ShowNotification(errStr);
                 }
+
+                placeTilesJustStarted = false;
             }
 
             // remove material under mouse cursor
