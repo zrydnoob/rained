@@ -22,7 +22,7 @@ abstract class TileEditorCatalog
         var widgetWidth = WidgetSize?.X ?? ImGui.GetContentRegionAvail().X;
 
         ImGui.SetNextItemWidth(widgetWidth);
-        if (ImGui.InputTextWithHint("##Search", "Search...", ref searchQuery, 128, searchInputFlags))
+        if (ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, searchInputFlags))
         {
             ProcessSearch();
         }

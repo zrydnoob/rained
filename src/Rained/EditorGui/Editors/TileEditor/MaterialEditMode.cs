@@ -76,7 +76,7 @@ class MaterialCatalogWidget(MaterialEditMode editor) : TileEditorCatalog
                 continue;
             
             var cursor = ImGui.GetCursorScreenPos();
-            if (ImGui.Selectable("  " + mat.Name, mat.ID == editor.SelectedMaterial))
+            if (ImGui.Selectable("       " + mat.Name, mat.ID == editor.SelectedMaterial))
             {
                 editor.SelectedMaterial = mat.ID;
             }
@@ -110,7 +110,7 @@ class MaterialCatalogWidget(MaterialEditMode editor) : TileEditorCatalog
 
 class MaterialEditMode : TileEditorMode
 {
-    public override string TabName => "Materials";
+    public override string TabName => "材料";
     
     private int selectedMaterial = 1;
     private int selectedMatGroup = 0;

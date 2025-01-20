@@ -87,36 +87,36 @@ class StandardPathAutotile : Autotile, ITileSelectionState
     {
         ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 10f);
         
-        TileButton(ref TileTable.LeftDown, "Left-Down", TileType.Turn);
-        TileButton(ref TileTable.LeftUp, "Left-Up", TileType.Turn);
-        TileButton(ref TileTable.RightDown, "Right-Down", TileType.Turn);
-        TileButton(ref TileTable.RightUp, "Right-Up", TileType.Turn);
-        TileButton(ref TileTable.Vertical, "Vertical", TileType.Vertical);
-        TileButton(ref TileTable.Horizontal, "Horizontal", TileType.Horizontal);
+        TileButton(ref TileTable.LeftDown, "左-下", TileType.Turn);
+        TileButton(ref TileTable.LeftUp, "左-上", TileType.Turn);
+        TileButton(ref TileTable.RightDown, "右-下", TileType.Turn);
+        TileButton(ref TileTable.RightUp, "右-上", TileType.Turn);
+        TileButton(ref TileTable.Vertical, "垂直", TileType.Vertical);
+        TileButton(ref TileTable.Horizontal, "水平", TileType.Horizontal);
         
-        if (ImGui.Checkbox("Allow Junctions", ref TileTable.AllowJunctions))
+        if (ImGui.Checkbox("允许自动连接", ref TileTable.AllowJunctions))
             CheckTiles();
         
-        if (ImGui.Checkbox("Place Caps", ref TileTable.PlaceCaps))
+        if (ImGui.Checkbox("放置顶盖", ref TileTable.PlaceCaps))
             CheckTiles();
 
         if (TileTable.AllowJunctions)
         {
             ImGui.Separator();
-            TileButton(ref TileTable.TRight, "T-Junction Right", TileType.Turn);
-            TileButton(ref TileTable.TUp, "T-Junction Up", TileType.Turn);
-            TileButton(ref TileTable.TLeft, "T-Junction Left", TileType.Turn);
-            TileButton(ref TileTable.TDown, "T-Junction Down", TileType.Turn);
-            TileButton(ref TileTable.XJunct, "Four-way Junction", TileType.Turn);
+            TileButton(ref TileTable.TRight, "T-接头 右", TileType.Turn);
+            TileButton(ref TileTable.TUp, "T-接头 上", TileType.Turn);
+            TileButton(ref TileTable.TLeft, "T-接头 左", TileType.Turn);
+            TileButton(ref TileTable.TDown, "T-接头 下", TileType.Turn);
+            TileButton(ref TileTable.XJunct, "四通接头", TileType.Turn);
         }
 
         if (TileTable.PlaceCaps)
         {
             ImGui.Separator();
-            TileButton(ref TileTable.CapRight, "Cap Right", TileType.Turn);
-            TileButton(ref TileTable.CapUp, "Cap Up", TileType.Turn);
-            TileButton(ref TileTable.CapLeft, "Cap Left", TileType.Turn);
-            TileButton(ref TileTable.CapDown, "Cap Down", TileType.Turn);
+            TileButton(ref TileTable.CapRight, "右顶盖", TileType.Turn);
+            TileButton(ref TileTable.CapUp, "上顶盖", TileType.Turn);
+            TileButton(ref TileTable.CapLeft, "左顶盖", TileType.Turn);
+            TileButton(ref TileTable.CapDown, "下顶盖", TileType.Turn);
         }
 
         /*
@@ -144,17 +144,17 @@ class StandardPathAutotile : Autotile, ITileSelectionState
         ImGui.PopItemWidth();
 
         ImGui.SeparatorText("Options");
-        if (ImGui.Button("Delete"))
+        if (ImGui.Button("删除"))
         {
-            ImGui.OpenPopup("Delete?");
+            ImGui.OpenPopup("删除?");
         }
         ImGui.SameLine();
 
         // show deletion confirmation prompt
         ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
-        if (ImGuiExt.BeginPopupModal("Delete?", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
+        if (ImGuiExt.BeginPopupModal("删除?", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
-            ImGui.TextUnformatted($"Are you sure you want to delete '{Name}'?");
+            ImGui.TextUnformatted($"你确定你想要删除 '{Name}'?");
             
             ImGui.Separator();
             if (StandardPopupButtons.Show(PopupButtonList.YesNo, out int btn))
@@ -170,7 +170,7 @@ class StandardPathAutotile : Autotile, ITileSelectionState
             ImGui.EndPopup();
         }
 
-        if (ImGui.Button("Rename"))
+        if (ImGui.Button("重命名"))
         {
             RainEd.Instance.Autotiles.OpenRenamePopup(this);
         }

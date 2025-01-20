@@ -62,7 +62,7 @@ class TileCatalogWidget(ITileSelectionState selectionState) : TileEditorCatalog
             var group = tileDb.Categories[i];
             var cursor = ImGui.GetCursorScreenPos();
 
-            if (ImGui.Selectable("  " + group.Name, state.SelectedTileGroup == i) || tileSearchResults.Count == 1)
+            if (ImGui.Selectable("       " + group.Name, state.SelectedTileGroup == i) || tileSearchResults.Count == 1)
                 state.SelectedTileGroup = i;
             
             drawList.AddRectFilled(

@@ -572,7 +572,7 @@ static class AssetManagerGUI
         // show tile database
         if (ImGui.BeginTabBar("AssetType"))
         {
-            if (ImGui.BeginTabItem("Tiles"))
+            if (ImGui.BeginTabItem("瓦片"))
             {
                 // set group index to 0 when tab changed
                 if (curAssetTab != AssetType.Tile)
@@ -591,7 +591,7 @@ static class AssetManagerGUI
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem("Props"))
+            if (ImGui.BeginTabItem("道具"))
             {
                 // set group index to 0 when tab changed
                 if (curAssetTab != AssetType.Prop)
@@ -612,7 +612,7 @@ static class AssetManagerGUI
 
             if (assetManager.MaterialsInit is not null)
             {
-                if (ImGui.BeginTabItem("Materials"))
+                if (ImGui.BeginTabItem("材料"))
                 {
                     // set group index to 0 when tab changed
                     if (curAssetTab != AssetType.Material)

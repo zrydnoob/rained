@@ -5,7 +5,7 @@ using System.Numerics;
 
 class AutotileEditMode : TileEditorMode
 {
-    public override string TabName => "Autotiles";
+    public override string TabName => "自动图块";
     
     private Autotile? selectedAutotile = null;
     private IAutotileInputBuilder? activePathBuilder = null;
@@ -95,10 +95,10 @@ class AutotileEditMode : TileEditorMode
 
         // create autotile button
         ImGui.BeginGroup();
-        if (ImGui.Button("Create Autotile", new Vector2(boxWidth, 0f)))
+        if (ImGui.Button("创建自动图块", new Vector2(boxWidth, 0f)))
         {
             RainEd.Instance.Autotiles.OpenCreatePopup();
-            ImGui.OpenPopup("Create Autotile");
+            ImGui.OpenPopup("创建自动图块");
             ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
         }
 
