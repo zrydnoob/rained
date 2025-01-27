@@ -47,7 +47,10 @@ static partial class ShortcutsWindow
             ("[ToggleLayer2]", "切换层2"),
             ("[ToggleLayer3]", "切换层3"),
             ("[ToggleMirrorX]", "切换镜像X"),
-            ("[ToggleMirrorY]", "切换镜像Y")
+            ("[ToggleMirrorY]", "切换镜像Y"),
+            ("[Select]", "开始选择"),
+            ("[Copy]", "复制"),
+            ("[Paste]", "粘贴"),
         ],
 
         // Tile
@@ -69,6 +72,9 @@ static partial class ShortcutsWindow
             ("[TileForcePlacement]+鼠标左键", "强制平铺放置"),
             ("[TileForceGeometry]+鼠标左键", "强制平铺瓦片"),
             ("[TileForceGeometry]+鼠标右键", "删除贴图及瓦片"),
+            ("[Select]", "开始选择"),
+            ("[Copy]", "复制"),
+            ("[Paste]", "粘贴"),
         ],
 
         // Camera

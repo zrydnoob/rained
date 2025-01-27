@@ -180,7 +180,7 @@ static class EditorWindow
 
                 if (ImGui.BeginMenu("最近打开"))
                 {
-                    RecentLevelsList();
+                    RecentLevelsList(10);
                     ImGui.EndMenu();
                 }
 
@@ -974,7 +974,7 @@ static class EditorWindow
         ImGui.EndChild();
     }
 
-    private static void RecentLevelsList()
+    private static void RecentLevelsList(int count = int.MaxValue)
     {
         var recentFiles = RainEd.Instance.Preferences.RecentFiles;
 
@@ -984,9 +984,12 @@ static class EditorWindow
         }
         else
         {
-            // traverse backwards
-            for (int i = recentFiles.Count - 1; i >= 0; i--)
+            // display 10 entries
+            for (int n = 0; n < count; n++)
             {
+                var i = recentFiles.Count - (n+1);
+                if (i < 0) break;
+
                 var filePath = recentFiles[i];
 
                 if (ImGui.MenuItem(Path.GetFileName(filePath)))

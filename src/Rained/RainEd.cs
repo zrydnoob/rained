@@ -606,7 +606,7 @@ sealed class RainEd
         list.Remove(filePath);
         list.Add(filePath);
 
-        while (list.Count > 10)
+        while ((uint)list.Count > Preferences.MaxRecentFiles)
         {
             list.RemoveAt(0);
         }

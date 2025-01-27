@@ -1,10 +1,11 @@
+namespace Rained.EditorGui.Editors;
 using ImGuiNET;
 using Rained.Assets;
 using Rained.Rendering;
 using Raylib_cs;
 using System.Numerics;
+using CellSelection = CellEditing.CellSelection;
 
-namespace Rained.EditorGui.Editors;
 
 partial class TileEditor : IEditorMode
 {
@@ -17,13 +18,17 @@ partial class TileEditor : IEditorMode
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.IncreaseBrushSize, "Increase Brush Size");
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.DecreaseBrushSize, "Decrease Brush Size");
         KeyShortcuts.ImGuiMenuItem(KeyShortcut.SetMaterial, "将所选材料设为默认值");
+
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Select, "选择");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Copy, "复制", false, CellSelection.Instance is not null);
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Paste, "粘贴", false);
     }
 
     private void RenderTileLayers(Tile tile)
     {
         var tileTexture = RainEd.Instance.AssetGraphics.GetTileTexture(tile.Name)
             ?? throw new Exception("Could not load tile graphics");
-        
+
         var totalTileWidth = tile.Width + tile.BfTiles * 2;
         var totalTileHeight = tile.Height + tile.BfTiles * 2;
 
@@ -83,7 +88,7 @@ partial class TileEditor : IEditorMode
 
             var totalTileWidth = tile.Width + tile.BfTiles * 2;
             var totalTileHeight = tile.Height + tile.BfTiles * 2;
-            
+
             var previewWidth = totalTileWidth * 20;
             var previewHeight = totalTileHeight * 20;
             if (prefs.ViewTileSpecsOnTooltip)
@@ -91,7 +96,7 @@ partial class TileEditor : IEditorMode
                 previewHeight += totalTileHeight * 20;
                 previewHeight += 3; // spacing inbetween graphics and geometry
             }
-            
+
             previewWidth += 2;
             previewHeight += 2;
 
@@ -116,7 +121,7 @@ partial class TileEditor : IEditorMode
             // show tile outer border
             Raylib.DrawRectangleLines(0, 0, totalTileWidth * 20, totalTileHeight * 20,
                 new Color(255, 255, 255, 150));
-            
+
             // then, draw tile specs
             if (prefs.ViewTileSpecsOnTooltip)
             {
@@ -129,7 +134,7 @@ partial class TileEditor : IEditorMode
 
             Rlgl.PopMatrix();
             Raylib.EndTextureMode();
-            
+
             ImGuiExt.ImageRenderTextureScaled(_hoverPreview, new Vector2(Boot.PixelIconScale, Boot.PixelIconScale));
         }
         else
@@ -137,19 +142,19 @@ partial class TileEditor : IEditorMode
             var previewTexFound = RainEd.Instance.AssetGraphics.GetTilePreviewTexture(tile, out var previewTexture, out var previewRect);
             if (!previewTexFound || previewTexture is null || previewRect is null)
                 goto renderPlaceholder;
-                
+
             var previewWidth = previewRect.Value.Width + 2;
             float previewHeight;
 
             if (prefs.ViewTileSpecsOnTooltip)
             {
                 previewHeight = previewRect.Value.Height * 2 + 5;
-            }            
+            }
             else
             {
                 previewHeight = previewRect.Value.Height + 2;
             }
-            
+
             if (_hoverPreview == null || _hoverPreview.Texture.Width != previewWidth || _hoverPreview.Texture.Height != previewHeight)
             {
                 _hoverPreview?.Dispose();
@@ -163,7 +168,7 @@ partial class TileEditor : IEditorMode
             Raylib.ClearBackground(Color.Blank);
             Rlgl.PushMatrix();
             Rlgl.Translatef(1f, 1f, 0f);
-            
+
             // draw preview texture
             Raylib.DrawTextureRec(previewTexture, previewRect.Value, Vector2.Zero, tile.Category.Color);
 
@@ -185,8 +190,8 @@ partial class TileEditor : IEditorMode
 
         return;
 
-        // fallback case
-        renderPlaceholder:
+    // fallback case
+    renderPlaceholder:
         ImGuiExt.ImageSize(RainEd.Instance.PlaceholderTexture, 16, 16);
     }
 
@@ -213,7 +218,7 @@ partial class TileEditor : IEditorMode
             var matEdit = editModes[currentMode] as MaterialEditMode;
             if (matEdit is null)
                 ImGui.BeginDisabled();
-            
+
             if ((ImGui.Button("设置所选材料为默认值") || KeyShortcuts.Activated(KeyShortcut.SetMaterial)) && matEdit is not null)
             {
                 var oldMat = RainEd.Instance.Level.DefaultMaterial;
@@ -247,7 +252,7 @@ partial class TileEditor : IEditorMode
                     // apply force selection
                     if (forceSelection == i)
                         flags |= ImGuiTabItemFlags.SetSelected;
-                    
+
                     if (ImGuiExt.BeginTabItem(editMode.TabName, flags))
                     {
                         if (currentMode != i)
@@ -265,8 +270,9 @@ partial class TileEditor : IEditorMode
                 forceSelection = -1;
                 ImGui.EndTabBar();
             }
-        } ImGui.End();
-        
+        }
+        ImGui.End();
+
         bool tileGfxPreview = prefs.ViewTileGraphicPreview;
         bool tileSpecPreview = prefs.ViewTileSpecPreview;
 
@@ -317,7 +323,7 @@ partial class TileEditor : IEditorMode
                         Raylib.EndTextureMode();
 
                         // render framebuffer into imgui
-                        ImGui.SetCursorPos((ImGui.GetWindowSize() + new Vector2(-fbWidth*scale, -fbHeight*scale + ImGui.GetFrameHeight())) / 2f);
+                        ImGui.SetCursorPos((ImGui.GetWindowSize() + new Vector2(-fbWidth * scale, -fbHeight * scale + ImGui.GetFrameHeight())) / 2f);
                         ImGuiExt.ImageRenderTextureScaled(_tileGfxRender, Vector2.One * scale);
                     }
                 }
@@ -335,7 +341,7 @@ partial class TileEditor : IEditorMode
                         var fbWidth = selectedTile.Width * 20 + 8;
                         var fbHeight = selectedTile.Height * 20 + 8;
                         var scale = GetFitScale(fbWidth, fbHeight);
-                        
+
                         if (_tileSpecRender is null ||
                             _tileSpecRender.Texture.Width != fbWidth * scale ||
                             _tileSpecRender.Texture.Height != fbHeight * scale)
@@ -356,7 +362,7 @@ partial class TileEditor : IEditorMode
                         Raylib.EndTextureMode();
 
                         // render framebuffer into imgui
-                        ImGui.SetCursorPos((ImGui.GetWindowSize() + new Vector2(-fbWidth*scale, -fbHeight*scale + ImGui.GetFrameHeight())) / 2f);
+                        ImGui.SetCursorPos((ImGui.GetWindowSize() + new Vector2(-fbWidth * scale, -fbHeight * scale + ImGui.GetFrameHeight())) / 2f);
                         ImGuiExt.ImageRenderTexture(_tileSpecRender);
                     }
                 }
