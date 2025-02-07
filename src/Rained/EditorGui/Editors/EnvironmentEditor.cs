@@ -50,7 +50,7 @@ class EnvironmentEditor : IEditorMode
 
         if (ImGui.Begin("环境", ImGuiWindowFlags.NoFocusOnAppearing))
         {
-            ImGui.Text("瓦片随机种子");
+            ImGui.Text("图块随机种子");
             ImGui.SetNextItemWidth(-0.001f);
 
             ImGui.SliderInt("##seed", ref level.TileSeed, 0, 400, "%i", ImGuiSliderFlags.AlwaysClamp);

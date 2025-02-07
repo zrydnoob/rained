@@ -159,7 +159,7 @@ class LevelResizeWindow
                 ImGui.PopStyleVar();
             }
 
-            ImGui.SeparatorText("边框瓦片");
+            ImGui.SeparatorText("边框图块");
             {
                 ImGui.InputInt("左方", ref newBufL);
                 ImGui.InputInt("上方", ref newBufT);

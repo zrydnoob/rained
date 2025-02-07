@@ -331,117 +331,117 @@ static class KeyShortcuts
 
     public static void InitShortcuts()
     {
-        Register("Right Mouse Substitute", KeyShortcut.RightMouse, ImGuiKey.None, ImGuiModFlags.None,
+        Register("鼠标右键替代按键", KeyShortcut.RightMouse, ImGuiKey.None, ImGuiModFlags.None,
             allowedMods: ImGuiModFlags.Ctrl | ImGuiModFlags.Shift | ImGuiModFlags.Alt | ImGuiModFlags.Super
         );
 
-        Register("Environment Editor", KeyShortcut.EnvironmentEditor, ImGuiKey._1, ImGuiModFlags.None);
-        Register("Geometry Editor", KeyShortcut.GeometryEditor, ImGuiKey._2, ImGuiModFlags.None);
-        Register("Tile Editor", KeyShortcut.TileEditor, ImGuiKey._3, ImGuiModFlags.None);
-        Register("Camera Editor", KeyShortcut.CameraEditor, ImGuiKey._4, ImGuiModFlags.None);
-        Register("Light Editor", KeyShortcut.LightEditor, ImGuiKey._5, ImGuiModFlags.None);
-        Register("Effects Editor", KeyShortcut.EffectsEditor, ImGuiKey._6, ImGuiModFlags.None);
-        Register("Prop Editor", KeyShortcut.PropEditor, ImGuiKey._7, ImGuiModFlags.None);
+        Register("环境编辑器", KeyShortcut.EnvironmentEditor, ImGuiKey._1, ImGuiModFlags.None);
+        Register("几何编辑器", KeyShortcut.GeometryEditor, ImGuiKey._2, ImGuiModFlags.None);
+        Register("瓦片编辑器", KeyShortcut.TileEditor, ImGuiKey._3, ImGuiModFlags.None);
+        Register("相机编辑器", KeyShortcut.CameraEditor, ImGuiKey._4, ImGuiModFlags.None);
+        Register("灯光编辑器", KeyShortcut.LightEditor, ImGuiKey._5, ImGuiModFlags.None);
+        Register("效果编辑器", KeyShortcut.EffectsEditor, ImGuiKey._6, ImGuiModFlags.None);
+        Register("道具编辑器", KeyShortcut.PropEditor, ImGuiKey._7, ImGuiModFlags.None);
 
-        Register("Navigate Up", KeyShortcut.NavUp, ImGuiKey.W, ImGuiModFlags.None, true);
-        Register("Navigate Left", KeyShortcut.NavLeft, ImGuiKey.A, ImGuiModFlags.None, true);
-        Register("Navigate Down", KeyShortcut.NavDown, ImGuiKey.S, ImGuiModFlags.None, true);
-        Register("Navigate Right", KeyShortcut.NavRight, ImGuiKey.D, ImGuiModFlags.None, true);
-        Register("Zoom View In", KeyShortcut.ViewZoomIn, ImGuiKey.Equal, ImGuiModFlags.None, true);
-        Register("Zoom View Out", KeyShortcut.ViewZoomOut, ImGuiKey.Minus, ImGuiModFlags.None, true);
+        Register("向上导航", KeyShortcut.NavUp, ImGuiKey.W, ImGuiModFlags.None, true);
+        Register("向左导航", KeyShortcut.NavLeft, ImGuiKey.A, ImGuiModFlags.None, true);
+        Register("向下导航", KeyShortcut.NavDown, ImGuiKey.S, ImGuiModFlags.None, true);
+        Register("向右导航", KeyShortcut.NavRight, ImGuiKey.D, ImGuiModFlags.None, true);
+        Register("放大视图", KeyShortcut.ViewZoomIn, ImGuiKey.Equal, ImGuiModFlags.None, true);
+        Register("缩小视图", KeyShortcut.ViewZoomOut, ImGuiKey.Minus, ImGuiModFlags.None, true);
 
-        Register("New Object", KeyShortcut.NewObject, ImGuiKey.C, ImGuiModFlags.None, true);
-        Register("Remove", KeyShortcut.RemoveObject, ImGuiKey.X, ImGuiModFlags.None, true);
-        Register("Duplicate", KeyShortcut.Duplicate, ImGuiKey.D, ImGuiModFlags.Ctrl, true);
+        Register("创建对象", KeyShortcut.NewObject, ImGuiKey.C, ImGuiModFlags.None, true);
+        Register("移除", KeyShortcut.RemoveObject, ImGuiKey.X, ImGuiModFlags.None, true);
+        Register("创建副本", KeyShortcut.Duplicate, ImGuiKey.D, ImGuiModFlags.Ctrl, true);
 
-        Register("New File", KeyShortcut.New, ImGuiKey.N, ImGuiModFlags.Ctrl);
-        Register("Open File", KeyShortcut.Open, ImGuiKey.O, ImGuiModFlags.Ctrl);
-        Register("Save File", KeyShortcut.Save, ImGuiKey.S, ImGuiModFlags.Ctrl);
-        Register("Save File As", KeyShortcut.SaveAs, ImGuiKey.S, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift);
-        Register("Close", KeyShortcut.CloseFile, ImGuiKey.W, ImGuiModFlags.Ctrl);
-        Register("Close All", KeyShortcut.CloseAllFiles, ImGuiKey.W, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift);
+        Register("新建文件", KeyShortcut.New, ImGuiKey.N, ImGuiModFlags.Ctrl);
+        Register("打开文件", KeyShortcut.Open, ImGuiKey.O, ImGuiModFlags.Ctrl);
+        Register("保存文件", KeyShortcut.Save, ImGuiKey.S, ImGuiModFlags.Ctrl);
+        Register("另存为", KeyShortcut.SaveAs, ImGuiKey.S, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift);
+        Register("关闭文件", KeyShortcut.CloseFile, ImGuiKey.W, ImGuiModFlags.Ctrl);
+        Register("关闭所有文件", KeyShortcut.CloseAllFiles, ImGuiKey.W, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift);
 
-        Register("Render", KeyShortcut.Render, ImGuiKey.R, ImGuiModFlags.Ctrl);
-        Register("Export Geometry", KeyShortcut.ExportGeometry, ImGuiKey.R, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift);
+        Register("渲染", KeyShortcut.Render, ImGuiKey.R, ImGuiModFlags.Ctrl);
+        Register("渲染几何", KeyShortcut.ExportGeometry, ImGuiKey.R, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift);
 
-        Register("Cut", KeyShortcut.Cut, ImGuiKey.X, ImGuiModFlags.Ctrl);
-        Register("Copy", KeyShortcut.Copy, ImGuiKey.C, ImGuiModFlags.Ctrl);
-        Register("Paste", KeyShortcut.Paste, ImGuiKey.V, ImGuiModFlags.Ctrl);
-        Register("Select", KeyShortcut.Select, ImGuiKey.E, ImGuiModFlags.Ctrl);
-        Register("Undo", KeyShortcut.Undo, ImGuiKey.Z, ImGuiModFlags.Ctrl, true);
+        Register("剪切", KeyShortcut.Cut, ImGuiKey.X, ImGuiModFlags.Ctrl);
+        Register("复制", KeyShortcut.Copy, ImGuiKey.C, ImGuiModFlags.Ctrl);
+        Register("粘贴", KeyShortcut.Paste, ImGuiKey.V, ImGuiModFlags.Ctrl);
+        Register("选择", KeyShortcut.Select, ImGuiKey.E, ImGuiModFlags.Ctrl);
+        Register("撤销", KeyShortcut.Undo, ImGuiKey.Z, ImGuiModFlags.Ctrl, true);
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            Register("Redo", KeyShortcut.Redo, ImGuiKey.Y, ImGuiModFlags.Ctrl, true);
+            Register("重做", KeyShortcut.Redo, ImGuiKey.Y, ImGuiModFlags.Ctrl, true);
         else
-            Register("Redo", KeyShortcut.Redo, ImGuiKey.Z, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift, true);
+            Register("重做", KeyShortcut.Redo, ImGuiKey.Z, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift, true);
 
-        Register("Mode Select", KeyShortcut.SelectEditor, ImGuiKey.GraveAccent, ImGuiModFlags.None);
+        Register("编辑器选择", KeyShortcut.SelectEditor, ImGuiKey.GraveAccent, ImGuiModFlags.None);
         
-        Register("Cycle Layer", KeyShortcut.SwitchLayer, ImGuiKey.Tab, ImGuiModFlags.None);
-        Register("Switch Tab", KeyShortcut.SwitchTab, ImGuiKey.Tab, ImGuiModFlags.Shift);
-        Register("Increase Brush Size", KeyShortcut.IncreaseBrushSize, ImGuiKey.O, ImGuiModFlags.None, true);
-        Register("Decrease Brush Size", KeyShortcut.DecreaseBrushSize, ImGuiKey.I, ImGuiModFlags.None, true);
+        Register("循环调整层级", KeyShortcut.SwitchLayer, ImGuiKey.Tab, ImGuiModFlags.None);
+        Register("Tab 切换", KeyShortcut.SwitchTab, ImGuiKey.Tab, ImGuiModFlags.Shift);
+        Register("增加画笔大小", KeyShortcut.IncreaseBrushSize, ImGuiKey.O, ImGuiModFlags.None, true);
+        Register("减小画笔大小", KeyShortcut.DecreaseBrushSize, ImGuiKey.I, ImGuiModFlags.None, true);
 
         // Geometry
-        Register("Toggle Layer 1", KeyShortcut.ToggleLayer1, ImGuiKey.E, ImGuiModFlags.None);
-        Register("Toggle Layer 2", KeyShortcut.ToggleLayer2, ImGuiKey.R, ImGuiModFlags.None);
-        Register("Toggle Layer 3", KeyShortcut.ToggleLayer3, ImGuiKey.T, ImGuiModFlags.None);
-        Register("Toggle Mirror X", KeyShortcut.ToggleMirrorX, ImGuiKey.F, ImGuiModFlags.None, false);
-        Register("Toggle Mirror Y", KeyShortcut.ToggleMirrorY, ImGuiKey.G, ImGuiModFlags.None, false);
-        Register("Flood Fill Modifier", KeyShortcut.FloodFill, ImGuiKey.Q, ImGuiModFlags.None, false);
-        Register("Wall Tool", KeyShortcut.ToolWall, ImGuiKey.Z, ImGuiModFlags.None, false);
-        Register("Shortcut Entrance Tool", KeyShortcut.ToolShortcutEntrance, ImGuiKey.X, ImGuiModFlags.None);
-        Register("Shortcut Dot Tool", KeyShortcut.ToolShortcutDot, ImGuiKey.C, ImGuiModFlags.None);
+        Register("切换层级 1", KeyShortcut.ToggleLayer1, ImGuiKey.E, ImGuiModFlags.None);
+        Register("切换层级 2", KeyShortcut.ToggleLayer2, ImGuiKey.R, ImGuiModFlags.None);
+        Register("切换层级 3", KeyShortcut.ToggleLayer3, ImGuiKey.T, ImGuiModFlags.None);
+        Register("切换 X 对称", KeyShortcut.ToggleMirrorX, ImGuiKey.F, ImGuiModFlags.None, false);
+        Register("切换 Y 对称", KeyShortcut.ToggleMirrorY, ImGuiKey.G, ImGuiModFlags.None, false);
+        Register("洪水填充", KeyShortcut.FloodFill, ImGuiKey.Q, ImGuiModFlags.None, false);
+        Register("墙壁绘制工具", KeyShortcut.ToolWall, ImGuiKey.Z, ImGuiModFlags.None, false);
+        Register("管道入口绘制工具", KeyShortcut.ToolShortcutEntrance, ImGuiKey.X, ImGuiModFlags.None);
+        Register("管道路径原点绘制工具", KeyShortcut.ToolShortcutDot, ImGuiKey.C, ImGuiModFlags.None);
 
         // Tile Editor
-        Register("Eyedropper", KeyShortcut.Eyedropper, ImGuiKey.Q, ImGuiModFlags.None, true);
-        Register("Set Material to Default", KeyShortcut.SetMaterial, ImGuiKey.E, ImGuiModFlags.None, true);
-        Register("Force Geometry Modifier", KeyShortcut.TileForceGeometry, ImGuiKey.G, ImGuiModFlags.None,
+        Register("吸管工具", KeyShortcut.Eyedropper, ImGuiKey.Q, ImGuiModFlags.None, true);
+        Register("将材料设为默认值", KeyShortcut.SetMaterial, ImGuiKey.E, ImGuiModFlags.None, true);
+        Register("强制几何", KeyShortcut.TileForceGeometry, ImGuiKey.G, ImGuiModFlags.None,
             allowedMods: ImGuiModFlags.Shift
         );
-        Register("Force Placement Modifier", KeyShortcut.TileForcePlacement, ImGuiKey.F, ImGuiModFlags.None,
+        Register("强制放置", KeyShortcut.TileForcePlacement, ImGuiKey.F, ImGuiModFlags.None,
             allowedMods: ImGuiModFlags.Shift
         );
-        Register("Disallow Overwrite Modifier", KeyShortcut.TileIgnoreDifferent, ImGuiKey.R, ImGuiModFlags.None,
+        Register("忽略材料", KeyShortcut.TileIgnoreDifferent, ImGuiKey.R, ImGuiModFlags.None,
             allowedMods: ImGuiModFlags.Shift
         );
 
         // Light Editor
-        Register("Reset Brush Transform", KeyShortcut.ResetBrushTransform, ImGuiKey.R, ImGuiModFlags.None);
-        Register("Move Light Inward", KeyShortcut.ZoomLightIn, ImGuiKey.W, ImGuiModFlags.Shift);
-        Register("Move Light Outward", KeyShortcut.ZoomLightOut, ImGuiKey.S, ImGuiModFlags.Shift);
-        Register("Rotate Light CW", KeyShortcut.RotateLightCW, ImGuiKey.D, ImGuiModFlags.Shift);
-        Register("Rotate Light CCW", KeyShortcut.RotateLightCCW, ImGuiKey.A, ImGuiModFlags.Shift);
-        Register("Mouse Scale Brush", KeyShortcut.ScaleLightBrush, ImGuiKey.Q, ImGuiModFlags.None);
-        Register("Mouse Rotate Brush", KeyShortcut.RotateLightBrush, ImGuiKey.E, ImGuiModFlags.None);
+        Register("重置笔刷变换", KeyShortcut.ResetBrushTransform, ImGuiKey.R, ImGuiModFlags.None);
+        Register("向内移动光线", KeyShortcut.ZoomLightIn, ImGuiKey.W, ImGuiModFlags.Shift);
+        Register("向外移动光线", KeyShortcut.ZoomLightOut, ImGuiKey.S, ImGuiModFlags.Shift);
+        Register("顺时针旋转光线", KeyShortcut.RotateLightCW, ImGuiKey.D, ImGuiModFlags.Shift);
+        Register("逆时针旋转光线", KeyShortcut.RotateLightCCW, ImGuiKey.A, ImGuiModFlags.Shift);
+        Register("缩放笔刷", KeyShortcut.ScaleLightBrush, ImGuiKey.Q, ImGuiModFlags.None);
+        Register("旋转笔刷", KeyShortcut.RotateLightBrush, ImGuiKey.E, ImGuiModFlags.None);
 
-        Register("Rotate Brush CW", KeyShortcut.RotateBrushCW, ImGuiKey.E, ImGuiModFlags.None);
-        Register("Rotate Brush CCW", KeyShortcut.RotateBrushCCW, ImGuiKey.Q, ImGuiModFlags.None);
-        Register("Previous Brush", KeyShortcut.PreviousBrush, ImGuiKey.Z, ImGuiModFlags.None,
+        Register("顺时针旋转笔刷", KeyShortcut.RotateBrushCW, ImGuiKey.E, ImGuiModFlags.None);
+        Register("逆时针旋转笔刷", KeyShortcut.RotateBrushCCW, ImGuiKey.Q, ImGuiModFlags.None);
+        Register("上一个笔刷", KeyShortcut.PreviousBrush, ImGuiKey.Z, ImGuiModFlags.None,
             allowRepeat: true
         );
-        Register("Next Brush", KeyShortcut.NextBrush, ImGuiKey.X, ImGuiModFlags.None,
+        Register("下一个笔刷", KeyShortcut.NextBrush, ImGuiKey.X, ImGuiModFlags.None,
             allowRepeat: true
         );
 
         // Camera Editor
-        Register("Camera Snap X", KeyShortcut.CameraSnapX, ImGuiKey.Q, ImGuiModFlags.None);
-        Register("Camera Snap Y", KeyShortcut.CameraSnapY, ImGuiKey.E, ImGuiModFlags.None);
+        Register("相机 X 轴捕捉", KeyShortcut.CameraSnapX, ImGuiKey.Q, ImGuiModFlags.None);
+        Register("相机 Y 轴捕捉", KeyShortcut.CameraSnapY, ImGuiKey.E, ImGuiModFlags.None);
 
         // Prop Editor
-        Register("Toggle Vertex Mode", KeyShortcut.ToggleVertexMode, ImGuiKey.F, ImGuiModFlags.None);
-        Register("Rope Simulation", KeyShortcut.RopeSimulation, ImGuiKey.Space, ImGuiModFlags.None);
-        Register("Reset Rope Simulation", KeyShortcut.ResetSimulation, ImGuiKey.None, ImGuiModFlags.None);
+        Register("切换到顶点模式", KeyShortcut.ToggleVertexMode, ImGuiKey.F, ImGuiModFlags.None);
+        Register("模拟选定的绳索道具", KeyShortcut.RopeSimulation, ImGuiKey.Space, ImGuiModFlags.None);
+        Register("重置绳索模拟", KeyShortcut.ResetSimulation, ImGuiKey.None, ImGuiModFlags.None);
         
-        Register("Rotate Prop CW", KeyShortcut.RotatePropCW, ImGuiKey.E, ImGuiModFlags.None);
-        Register("Rotate Prop CCW", KeyShortcut.RotatePropCCW, ImGuiKey.Q, ImGuiModFlags.None);
+        Register("顺时针旋转道具", KeyShortcut.RotatePropCW, ImGuiKey.E, ImGuiModFlags.None);
+        Register("逆时针旋转道具", KeyShortcut.RotatePropCCW, ImGuiKey.Q, ImGuiModFlags.None);
 
         // View options
-        Register("View Grid", KeyShortcut.ToggleViewGrid, ImGuiKey.G, ImGuiModFlags.Ctrl);
-        Register("View Tiles", KeyShortcut.ToggleViewTiles, ImGuiKey.T, ImGuiModFlags.Ctrl);
-        Register("View Props", KeyShortcut.ToggleViewProps, ImGuiKey.P, ImGuiModFlags.Ctrl);
-        Register("View Camera Borders", KeyShortcut.ToggleViewCameras, ImGuiKey.M, ImGuiModFlags.Ctrl);
-        Register("View Tile Graphics", KeyShortcut.ToggleViewGraphics, ImGuiKey.T, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift);
-        Register("View Node Indices", KeyShortcut.ToggleViewNodeIndices, ImGuiKey.None, ImGuiModFlags.None);
+        Register("网格视图", KeyShortcut.ToggleViewGrid, ImGuiKey.G, ImGuiModFlags.Ctrl);
+        Register("瓦片视图", KeyShortcut.ToggleViewTiles, ImGuiKey.T, ImGuiModFlags.Ctrl);
+        Register("道具视图", KeyShortcut.ToggleViewProps, ImGuiKey.P, ImGuiModFlags.Ctrl);
+        Register("相机边界视图", KeyShortcut.ToggleViewCameras, ImGuiKey.M, ImGuiModFlags.Ctrl);
+        Register("平铺贴图视图", KeyShortcut.ToggleViewGraphics, ImGuiKey.T, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift);
+        Register("节点索引视图", KeyShortcut.ToggleViewNodeIndices, ImGuiKey.None, ImGuiModFlags.None);
     }
 }

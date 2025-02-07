@@ -7,7 +7,7 @@ using Rained.Drizzle;
 
 class MassRenderProcessWindow
 {
-    public const string WindowName = "Mass Render###MassRenderProc";
+    public const string WindowName = "批量渲染###MassRenderProc";
     private readonly Task renderTask;
     private readonly CancellationTokenSource cancelSource;
 
@@ -55,7 +55,7 @@ class MassRenderProcessWindow
             RainEd.Instance.NeedScreenRefresh();
 
             ImGui.BeginDisabled(cancel);
-            if (ImGui.Button("Cancel"))
+            if (ImGui.Button("取消"))
             {
                 cancel = true;
                 cancelSource.Cancel();
@@ -64,7 +64,7 @@ class MassRenderProcessWindow
 
             ImGui.BeginDisabled(!renderTask.IsCompleted);
             ImGui.SameLine();
-            if (ImGui.Button("Close"))
+            if (ImGui.Button("关闭"))
             {
                 ImGui.CloseCurrentPopup();
                 IsDone = true;
@@ -72,7 +72,7 @@ class MassRenderProcessWindow
             ImGui.EndDisabled();
 
             ImGui.SameLine();
-            if (ImGui.Button("Open Render Folder"))
+            if (ImGui.Button("打开成品文件夹"))
             {
                 RainEd.Instance.ShowPathInSystemBrowser(Path.Combine(RainEd.Instance.AssetDataPath, "Levels"), false);
             }
@@ -86,38 +86,38 @@ class MassRenderProcessWindow
             // status text
             if (renderTask is null || renderTask.IsFaulted)
             {
-                ImGui.Text("An error occured!\nCheck the log file for more info.");
+                ImGui.Text("有错误发生\n请检查日志文件以获得更多信息。");
                 if (elapsedStopwatch.IsRunning) elapsedStopwatch.Stop();
             }
             else if (renderTask.IsCanceled)
             {
-                ImGui.Text("Render was cancelled.");
+                ImGui.Text("渲染被取消。");
 
                 if (elapsedStopwatch.IsRunning)
                     elapsedStopwatch.Stop();
             }
             else if (cancel)
             {
-                ImGui.Text("Cancelling...");
+                ImGui.Text("正在取消...");
 
                 if (elapsedStopwatch.IsRunning)
                     elapsedStopwatch.Stop();
             }
             else if (!renderBegan)
             {
-                ImGui.Text("Initializing Drizzle...");
+                ImGui.Text("正在初始化 Drizzle...");
             }
             else if (renderedLevels < totalLevels)
             {
                 if (!elapsedStopwatch.IsRunning)
                     elapsedStopwatch.Start();
                 
-                ImGui.TextUnformatted($"{totalLevels - renderedLevels} levels remaining...");
+                ImGui.TextUnformatted($"剩余 {totalLevels - renderedLevels} 关卡...");
                 showTime = true;
             }
             else
             {
-                ImGui.TextUnformatted("Render completed!");
+                ImGui.TextUnformatted("渲染完成");
 
                 if (elapsedStopwatch.IsRunning)
                     elapsedStopwatch.Stop();

@@ -7,7 +7,7 @@ static partial class ShortcutsWindow
 {
     public static bool IsWindowOpen = false;
 
-    private readonly static string[] NavTabs = new string[] { "常规", "环境编辑", "几何编辑", "瓦片贴图编辑", "相机编辑", "灯光编辑", "特效编辑", "道具编辑" };
+    private readonly static string[] NavTabs = new string[] { "常规", "环境编辑", "几何编辑", "图块贴图编辑", "相机编辑", "灯光编辑", "特效编辑", "道具编辑" };
 
     private readonly static (string, string)[][] TabData = new (string, string)[][]
     {
@@ -23,7 +23,7 @@ static partial class ShortcutsWindow
             ("[ExportGeometry]", "渲染为关卡.txt"),
             ("1", "编辑环境"),
             ("2", "编辑几何"),
-            ("3", "编辑瓦片贴图"),
+            ("3", "编辑图块贴图"),
             ("4", "编辑相机"),
             ("5", "编辑灯光"),
             ("6", "编辑特效"),
@@ -37,7 +37,7 @@ static partial class ShortcutsWindow
 
         // Geometry
         [
-            ("[NavUp][NavLeft][NavDown][NavRight]", "选择瓦片"),
+            ("[NavUp][NavLeft][NavDown][NavRight]", "选择图块"),
             ("鼠标左键", "放置/删除"),
             ("鼠标右键", "删除对象"),
             ("Shift+鼠标左键", "填充选区"),
@@ -58,7 +58,7 @@ static partial class ShortcutsWindow
             ("[SwitchLayer]", "切换层级"),
             ("[SwitchTab]", "切换选择器选项卡"),
             ("[NavUp]/[NavDown]", "浏览所选类别"),
-            ("[NavLeft]/[NavRight]", "浏览瓦片类别"),
+            ("[NavLeft]/[NavRight]", "浏览图块类别"),
             ("Shift+鼠标滚轮", "更改材质笔刷大小"),
             ("[DecreaseBrushSize]/[IncreaseBrushSize]", "更改材质笔刷大小"),
             ("[Eyedropper]", "从层级中选取材质"),
@@ -68,10 +68,10 @@ static partial class ShortcutsWindow
             ("Shift+鼠标左键", "矩形填充贴图/材料"),
             ("Shift+鼠标右键", "矩形删除贴图/材料"),
             ("[TileIgnoreDifferent]+鼠标左键", "忽略不同的材料"),
-            ("[TileIgnoreDifferent]+鼠标左键", "忽略材质或瓦片"),
+            ("[TileIgnoreDifferent]+鼠标左键", "忽略材质或图块"),
             ("[TileForcePlacement]+鼠标左键", "强制平铺放置"),
-            ("[TileForceGeometry]+鼠标左键", "强制平铺瓦片"),
-            ("[TileForceGeometry]+鼠标右键", "删除贴图及瓦片"),
+            ("[TileForceGeometry]+鼠标左键", "强制平铺图块"),
+            ("[TileForceGeometry]+鼠标右键", "删除贴图及图块"),
             ("[Select]", "开始选择"),
             ("[Copy]", "复制"),
             ("[Paste]", "粘贴"),

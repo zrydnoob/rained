@@ -572,7 +572,7 @@ static class AssetManagerGUI
         // show tile database
         if (ImGui.BeginTabBar("AssetType"))
         {
-            if (ImGui.BeginTabItem("瓦片"))
+            if (ImGui.BeginTabItem("图块"))
             {
                 // set group index to 0 when tab changed
                 if (curAssetTab != AssetType.Tile)

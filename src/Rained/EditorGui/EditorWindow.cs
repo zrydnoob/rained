@@ -322,7 +322,7 @@ static class EditorWindow
                     }
                 }
 
-                if (ImGui.MenuItem("显示瓦片主要格", null, prefs.ViewTileHeads))
+                if (ImGui.MenuItem("显示图块主要格", null, prefs.ViewTileHeads))
                 {
                     prefs.ViewTileHeads = !prefs.ViewTileHeads;
                 }
@@ -344,7 +344,7 @@ static class EditorWindow
                     PaletteWindow.IsWindowOpen = !PaletteWindow.IsWindowOpen;
                 }
 
-                if (ImGui.BeginMenu("瓦片预览"))
+                if (ImGui.BeginMenu("图块预览"))
                 {
                     var viewGfx = prefs.ViewTileGraphicPreview;
                     var viewSpecs = prefs.ViewTileSpecPreview;

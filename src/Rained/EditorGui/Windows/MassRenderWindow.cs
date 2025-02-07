@@ -7,7 +7,7 @@ using Rained.Drizzle;
 
 static class MassRenderWindow
 {
-    public const string WindowName = "Mass Render";
+    public const string WindowName = "批量渲染";
     public static bool IsWindowOpen = false;
 
     record LevelPath(string Path, string Name);
@@ -44,9 +44,9 @@ static class MassRenderWindow
         {
             RainEd.Instance.IsLevelLocked = true;
 
-            ImGui.SeparatorText("Queue");
+            ImGui.SeparatorText("队列");
             {
-                ImGuiExt.ButtonSwitch("ItemQueueSwitch", ["Files", "Folders"], ref queueItemMode);
+                ImGuiExt.ButtonSwitch("ItemQueueSwitch", ["文件", "文件夹"], ref queueItemMode);
                 var curModePaths = queueItemMode == 1 ? folderPaths : levelPaths;
 
                 /*{
@@ -75,7 +75,7 @@ static class MassRenderWindow
                     ImGui.EndListBox();
                 }
 
-                if (ImGui.Button("Add", StandardPopupButtons.ButtonSize))
+                if (ImGui.Button("添加", StandardPopupButtons.ButtonSize))
                 {
                     static bool levelCheck(string path, bool isRw)
                     {
@@ -102,16 +102,16 @@ static class MassRenderWindow
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Clear", StandardPopupButtons.ButtonSize))
+                if (ImGui.Button("清空", StandardPopupButtons.ButtonSize))
                 {
                     curModePaths.Clear();
                 }
             }
 
-            ImGui.SeparatorText("Options");
+            ImGui.SeparatorText("选项");
             {
                 ImGui.SetNextItemWidth(ImGui.GetFontSize() * 6.0f);
-                ImGui.InputInt("Threads", ref parallelismLimit);
+                ImGui.InputInt("线程", ref parallelismLimit);
                 parallelismLimit = Math.Max(parallelismLimit, 1);
 
                 ImGui.SameLine();
@@ -127,14 +127,14 @@ static class MassRenderWindow
 
             ImGui.Separator();
 
-            if (ImGui.Button("Render", StandardPopupButtons.ButtonSize) &&
+            if (ImGui.Button("渲染", StandardPopupButtons.ButtonSize) &&
                 (levelPaths.Count > 0 || folderPaths.Count > 0))
             {
                 StartRender();
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Cancel", StandardPopupButtons.ButtonSize))
+            if (ImGui.Button("取消", StandardPopupButtons.ButtonSize))
             {
                 IsWindowOpen = false;
                 levelPaths.Clear();

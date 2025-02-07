@@ -14,7 +14,7 @@ nav:
       - 概观: overview.md
       - 环境: env.md
       - 几何: geo.md
-      - 瓦片: tiles.md
+      - 图块: tiles.md
       - 相机: cameras.md
       - 灯光: light.md
       - 效果: effects.md

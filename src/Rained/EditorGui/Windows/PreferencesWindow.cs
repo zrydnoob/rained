@@ -433,11 +433,11 @@ static class PreferencesWindow
             }
             
             bool geoMaskMouseDecor = prefs.GeometryMaskMouseDecor;
-            if (ImGui.Checkbox("Geometry mask mouse decoration", ref geoMaskMouseDecor))
+            if (ImGui.Checkbox("在鼠标处显示几何层级指示器", ref geoMaskMouseDecor))
                 prefs.GeometryMaskMouseDecor = geoMaskMouseDecor;
             
             bool minUi = prefs.MinimalStatusBar;
-            if (ImGui.Checkbox("Minimal status bar", ref minUi))
+            if (ImGui.Checkbox("最小化状态栏", ref minUi))
                 prefs.MinimalStatusBar = minUi;
             
             ImGui.SameLine();
@@ -445,14 +445,14 @@ static class PreferencesWindow
             if (ImGui.BeginItemTooltip())
             {
                 ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
-                ImGui.TextWrapped("This hides certain elements from the status bar.");
+                ImGui.TextWrapped("这将隐藏状态栏中的某些元素。");
                 ImGui.PopTextWrapPos();
 
                 ImGui.End();
             }
 
             bool hideEditSwitch = prefs.HideEditorSwitch;
-            if (ImGui.Checkbox("Hide editor switch", ref hideEditSwitch))
+            if (ImGui.Checkbox("隐藏编辑器切换菜单", ref hideEditSwitch))
                 prefs.HideEditorSwitch = hideEditSwitch;
             
             ImGui.Separator();
@@ -461,22 +461,22 @@ static class PreferencesWindow
             
             // camera border view mode
             var camBorderMode = (int) prefs.CameraBorderMode;
-            if (ImGui.Combo("Camera border view mode", ref camBorderMode, "Inner Border\0Outer Border\0Both Borders"))
+            if (ImGui.Combo("相机边界渲染", ref camBorderMode, "仅渲染里边界\0仅渲染外边界\0渲染所有边界"))
                 prefs.CameraBorderMode = (UserPreferences.CameraBorderModeOption) camBorderMode;
             
             // autotile mouse mode
             var autotileMouseMode = (int) prefs.AutotileMouseMode;
-            if (ImGui.Combo("Autotile mouse mode", ref autotileMouseMode, "Click\0Hold"))
+            if (ImGui.Combo("自动图块放置模式", ref autotileMouseMode, "点击起点与终点\0按下拖动"))
                 prefs.AutotileMouseMode = (UserPreferences.AutotileMouseModeOptions) autotileMouseMode;
             
             // tile placement mode toggle
             var tilePlacementToggle = prefs.TilePlacementModeToggle ? 1 : 0;
-            if (ImGui.Combo("Tile placement modifier mode", ref tilePlacementToggle, "Hold\0Toggle"))
+            if (ImGui.Combo("强制放置快捷键模式", ref tilePlacementToggle, "按住\0切换"))
                 prefs.TilePlacementModeToggle = tilePlacementToggle != 0;
             
             // prop selection layer filter
             var propSelectionLayerFilter = (int) prefs.PropSelectionLayerFilter;
-            if (ImGui.Combo("Prop selection layer filter", ref propSelectionLayerFilter, "All\0Current\0In Front"))
+            if (ImGui.Combo("道具选择层过滤器", ref propSelectionLayerFilter, "全部层\0当前层\0当前层以后"))
                 prefs.PropSelectionLayerFilter = (UserPreferences.PropSelectionLayerFilterOption) propSelectionLayerFilter;
             
             ImGui.SameLine();
@@ -485,17 +485,11 @@ static class PreferencesWindow
             {
                 ImGui.TextUnformatted(
                     """
-                    This controls which layers you can select
-                    in the prop editor relative to the current
-                    view layer.
+                    这控制了相对于当前视图层，可以在道具编辑器中选择哪些层。
                     
-                    - All: Will allow you to select props from
-                    any layer.
-                    - Current: Will only allow you to select
-                    props in the currently viewed layer.
-                    - In Front: Will only allow you to select
-                    props in the current layer as well as all
-                    layers behind it.
+                    - 全部层：这将允许你从任何层选择道具。 
+                    - 当前层：只允许你在当前查看的层中选择道具。
+                    - 当前层以后:将只允许您选择当前层以及它后面的所有层的道具。
                     """
                 );
                 ImGui.End();
@@ -503,7 +497,7 @@ static class PreferencesWindow
 
             // light editor control scheme
             var lightEditorControlScheme = (int) prefs.LightEditorControlScheme;
-            if (ImGui.Combo("Light editor control scheme", ref lightEditorControlScheme, "Mouse\0Keyboard\0"))
+            if (ImGui.Combo("灯光编辑器控制方案e", ref lightEditorControlScheme, "鼠标\0键盘\0"))
                 prefs.LightEditorControlScheme = (UserPreferences.LightEditorControlSchemeOption) lightEditorControlScheme;
 
             ImGui.SameLine();
@@ -512,15 +506,9 @@ static class PreferencesWindow
             {
                 ImGui.TextUnformatted(
                     """
-                    This changes how the brush in the light
-                    editor will be scaled and rotated.
-
-                    - Mouse: Hold Q/E and move the mouse for
-                    scaling and rotation, respectively.
-
-                    - Keyboard: Mimics the controls in the
-                    original level editor: WASD to
-                    scale and Q/E to rotate.
+                    这将改变灯光编辑器中笔刷的缩放和旋转方式。
+                    - 鼠标:按住q/e，移动鼠标分别进行缩放和旋转。
+                    -键盘:模仿官方关卡编辑器中的控件:wasd缩放，q/e旋转。
                     """
                 );
                 ImGui.End();
@@ -529,7 +517,7 @@ static class PreferencesWindow
             ImGui.PopItemWidth();
         }
 
-        ImGui.SeparatorText("Miscellaneous");
+        ImGui.SeparatorText("杂项");
         {
             // they've brainwashed me to not add this
             //bool showHiddenEffects = prefs.ShowDeprecatedEffects;
@@ -537,25 +525,25 @@ static class PreferencesWindow
             //    prefs.ShowDeprecatedEffects = showHiddenEffects;
 
             bool versionCheck = prefs.CheckForUpdates;
-            if (ImGui.Checkbox("Check for updates", ref versionCheck))
+            if (ImGui.Checkbox("检查更新", ref versionCheck))
                 prefs.CheckForUpdates = versionCheck;
             
             bool optimizedTile = prefs.OptimizedTilePreviews;
-            if (ImGui.Checkbox("Optimized tile previews", ref optimizedTile))
+            if (ImGui.Checkbox("优化瓦片预览", ref optimizedTile))
                 prefs.OptimizedTilePreviews = optimizedTile;
             
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
                 """
-                This will optimize tile preview rendering such
+                this will optimize tile preview rendering such
                 that only tile cells located in the bounds of
-                its tile head will be rendered. If this option
+                its tile head will be rendered. if this option
                 is turned off, all tile bodies will be
                 processed regardless or not if it is within the
                 bounds of its tile head.
 
-                Turning this off may be useful if you have very
+                turning this off may be useful if you have very
                 erroneous tiles in a level and want to see them,
                 but otherwise there is no reason to do so.
                 """
@@ -579,10 +567,10 @@ static class PreferencesWindow
 
     private static void ShowShortcutsTab()
     {
-        ImGui.SeparatorText("Accessibility");
+        ImGui.SeparatorText("易用性");
         ShortcutButton(KeyShortcut.RightMouse);
         
-        ImGui.SeparatorText("General");
+        ImGui.SeparatorText("全局");
         ShortcutButton(KeyShortcut.ViewZoomIn);
         ShortcutButton(KeyShortcut.ViewZoomOut);
         ImGui.Separator();
@@ -603,7 +591,7 @@ static class PreferencesWindow
         ShortcutButton(KeyShortcut.Render);
         ShortcutButton(KeyShortcut.ExportGeometry);
 
-        ImGui.SeparatorText("Editing");
+        ImGui.SeparatorText("编辑");
         ShortcutButton(KeyShortcut.SelectEditor);
         ShortcutButton(KeyShortcut.EnvironmentEditor);
         ShortcutButton(KeyShortcut.GeometryEditor);
@@ -636,7 +624,7 @@ static class PreferencesWindow
         ShortcutButton(KeyShortcut.ToggleViewCameras);
         ShortcutButton(KeyShortcut.ToggleViewNodeIndices);
 
-        ImGui.SeparatorText("Geometry");
+        ImGui.SeparatorText("几何");
         ShortcutButton(KeyShortcut.ToggleLayer1);
         ShortcutButton(KeyShortcut.ToggleLayer2);
         ShortcutButton(KeyShortcut.ToggleLayer3);
@@ -648,18 +636,18 @@ static class PreferencesWindow
         ShortcutButton(KeyShortcut.ToolShortcutEntrance);
         ShortcutButton(KeyShortcut.ToolShortcutDot);
 
-        ImGui.SeparatorText("Tiles");
+        ImGui.SeparatorText("瓦片");
         ShortcutButton(KeyShortcut.SetMaterial);
         ImGui.Separator();
         ShortcutButton(KeyShortcut.TileForceGeometry);
         ShortcutButton(KeyShortcut.TileForcePlacement);
         ShortcutButton(KeyShortcut.TileIgnoreDifferent);
 
-        ImGui.SeparatorText("Cameras");
+        ImGui.SeparatorText("相机");
         ShortcutButton(KeyShortcut.CameraSnapX);
         ShortcutButton(KeyShortcut.CameraSnapY);
 
-        ImGui.SeparatorText("Light");
+        ImGui.SeparatorText("灯光");
         ShortcutButton(KeyShortcut.ResetBrushTransform);
         ShortcutButton(KeyShortcut.ScaleLightBrush);
         ShortcutButton(KeyShortcut.RotateLightBrush);
@@ -674,7 +662,7 @@ static class PreferencesWindow
         ShortcutButton(KeyShortcut.PreviousBrush);
         ShortcutButton(KeyShortcut.NextBrush);
 
-        ImGui.SeparatorText("Props");
+        ImGui.SeparatorText("道具");
         ShortcutButton(KeyShortcut.ToggleVertexMode);
         ShortcutButton(KeyShortcut.RopeSimulation);
         ShortcutButton(KeyShortcut.ResetSimulation);
@@ -712,7 +700,7 @@ static class PreferencesWindow
         }
 
         ImGui.SetNextItemWidth(ImGui.GetTextLineHeight() * 12.0f);
-        if (ImGui.BeginCombo("Theme", RainEd.Instance.Preferences.Theme))
+        if (ImGui.BeginCombo("主题", RainEd.Instance.Preferences.Theme))
         {
             foreach (var themeName in availableThemes)
             {
@@ -727,7 +715,7 @@ static class PreferencesWindow
             ImGui.EndCombo();
         }
 
-        if (ImGui.TreeNode("Theme Editor"))
+        if (ImGui.TreeNode("主题编辑器"))
         {
             ThemeEditor.Show();
             ImGui.TreePop();
@@ -752,7 +740,7 @@ static class PreferencesWindow
         {
             KeyShortcuts.Reset(id);
         }
-        ImGui.SetItemTooltip("Reset");
+        ImGui.SetItemTooltip("重置");
 
         ImGui.SameLine();
         ImGui.Text(nameOverride ?? KeyShortcuts.GetName(id));
@@ -774,7 +762,7 @@ static class PreferencesWindow
             }
         }
 
-        ImGui.SeparatorText("Options");
+        ImGui.SeparatorText("选项");
 
         bool boolRef;
         var prefs = RainEd.Instance.Preferences;
@@ -782,32 +770,27 @@ static class PreferencesWindow
         // static lingo runtime
         {
             boolRef = prefs.StaticDrizzleLingoRuntime;
-            if (ImGui.Checkbox("Initialize Drizzle on app startup", ref boolRef))
+            if (ImGui.Checkbox("应用程序启动时初始化 Drizzle", ref boolRef))
                 prefs.StaticDrizzleLingoRuntime = boolRef;
             
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
                 """
-                This will run the Drizzle runtime initialization
-                process once, when the app starts. This results
-                in a longer startup time and more idle RAM
-                usage, but will decrease the time it takes to
-                start a render.
+                这将在应用程序启动时运行一次 Drizzle 运行时初始化过程。这会导致更长的启动时间和更多的空闲RAM使用，但会减少启动渲染所需的时间。
 
-                This option requires a restart in order to
-                take effect.    
+                此选项需要重新启动才能生效。
                 """);
         }
 
         // show render preview
         {
             boolRef = prefs.ShowRenderPreview;
-            if (ImGui.Checkbox("Show render preview", ref boolRef))
+            if (ImGui.Checkbox("显示渲染预览", ref boolRef))
                 prefs.ShowRenderPreview = boolRef;
         }
         
-        ImGui.SeparatorText("Rendering");
+        ImGui.SeparatorText("渲染");
 
         ConfigCheckbox("Grime on gradients");
         ConfigCheckbox("Grime");

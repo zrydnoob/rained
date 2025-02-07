@@ -8,7 +8,7 @@ using Rained.Rendering;
 
 class TileEditMode : TileEditorMode, ITileSelectionState
 {
-    public override string TabName => "瓦片";
+    public override string TabName => "图块";
     
     private int selectedTileGroup = 0;
     private Tile selectedTile = RainEd.Instance.TileDatabase.Categories[0].Tiles[0];

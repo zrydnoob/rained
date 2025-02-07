@@ -309,14 +309,16 @@ class CameraEditor : IEditorMode
                     var distX = MathF.Abs(camCenter.X - thisCamCenter.X);
                     var distY = MathF.Abs(camCenter.Y - thisCamCenter.Y);
 
+
+                    // 绘制对齐指示线
                     if (horizSnap && distX < snapThreshold && distX < minDistX)
                     {
                         minDistX = distX;
                         activeCamera.Position.X = camera.Position.X;
                         Raylib.DrawLineV(
                             new Vector2(camCenter.X * Level.TileSize,camCenter.Y * Level.TileSize),
-                            new Vector2((activeCamera.Position.X + Camera.WidescreenSize.X / 2) * Level.TileSize,
-                                (activeCamera.Position.Y + Camera.WidescreenSize.Y / 2) * Level.TileSize),
+                            new Vector2((activeCamera.Position.X + Camera.WidescreenSize.X / 2) * Level.TileSize + 17,
+                                (activeCamera.Position.Y + Camera.WidescreenSize.Y / 2) * Level.TileSize + 16),
                             Color.Red
                         );
                     }
@@ -327,8 +329,8 @@ class CameraEditor : IEditorMode
                         activeCamera.Position.Y = camera.Position.Y;
                         Raylib.DrawLineV(
                             new Vector2(camCenter.X * Level.TileSize,camCenter.Y * Level.TileSize),
-                            new Vector2((activeCamera.Position.X + Camera.WidescreenSize.X / 2) * Level.TileSize,
-                                (activeCamera.Position.Y + Camera.WidescreenSize.Y / 2) * Level.TileSize),
+                            new Vector2((activeCamera.Position.X + Camera.WidescreenSize.X / 2) * Level.TileSize + 17,
+                                (activeCamera.Position.Y + Camera.WidescreenSize.Y / 2) * Level.TileSize + 16),
                             Color.Red
                         );
                     }

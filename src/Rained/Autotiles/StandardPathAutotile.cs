@@ -264,7 +264,7 @@ class StandardPathAutotile : Autotile, ITileSelectionState
         }
         else
         {
-            EditorWindow.ShowNotification("瓦片尺寸与自动瓦片尺寸不匹配");
+            EditorWindow.ShowNotification("图块尺寸与自动图块尺寸不匹配");
         }
     }
 
