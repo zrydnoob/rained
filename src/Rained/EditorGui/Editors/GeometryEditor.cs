@@ -458,7 +458,7 @@ class GeometryEditor : IEditorMode
                         window.WriteStatus("Shift+拖拽以填充选区");
                     
                     if (ToolCanFloodFill(selectedTool))
-                        window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+Click to flood fill");
+                        window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+点击以洪水填充");
                     
                     if (selectedTool == Tool.Slope)
                         window.WriteStatus("q + 拖动来绘制大斜坡");

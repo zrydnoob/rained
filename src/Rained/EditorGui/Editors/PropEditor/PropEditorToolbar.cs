@@ -464,7 +464,7 @@ partial class PropEditor : IEditorMode
                                 ImGui.ColorConvertFloat4ToU32(new Vector4(group.Color.R / 255f, group.Color.G / 255f, group.Color.B / 255f, 1f))
                             );
 
-                            if (ImGui.Selectable("  " + group.Name, selectedPropGroup == i) || searchResults.Count == 1)
+                            if (ImGui.Selectable("       " + group.Name, selectedPropGroup == i) || searchResults.Count == 1)
                             {
                                 if (i != selectedPropGroup)
                                 {
