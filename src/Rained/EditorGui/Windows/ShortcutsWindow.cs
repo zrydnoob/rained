@@ -16,7 +16,7 @@ static partial class ShortcutsWindow
             ("鼠标滚轮", "缩放"),
             ("[ViewZoomIn]/[ViewZoomOut]", "放大/缩小"),
             ("鼠标中键", "移动"),
-            ("Alt+鼠标左键", "移动"),
+            ("<Alt>+鼠标左键", "移动"),
             ("[Undo]", "撤销"),
             ("[Redo]", "重做"),
             ("[Render]", "渲染"),
@@ -28,6 +28,7 @@ static partial class ShortcutsWindow
             ("5", "编辑灯光"),
             ("6", "编辑特效"),
             ("7", "编辑道具"),
+            ("[SelectEditor]", "调出编辑模式切换轮盘"),
         ],
 
         // Environment
@@ -111,6 +112,7 @@ static partial class ShortcutsWindow
             ("鼠标右键", "擦除特效"),
             ("Shift+鼠标滚轮", "更改笔刷大小"),
             ("[DecreaseBrushSize]/[IncreaseBrushSize]", "更改笔刷大小"),
+            ("<Ctrl>+Mouse Wheel", "更改笔刷力度"),
         ],
 
         // Props
@@ -200,7 +202,10 @@ static partial class ShortcutsWindow
             for (int i = 0; i < tabData.Length; i++)
             {
                 var tuple = tabData[i];
-                var str = ShortcutRegex().Replace(tuple.Item1, ShortcutEvaluator);
+
+                string str;
+                str = ShortcutRegex().Replace(tuple.Item1, ShortcutEvaluator);
+                str = ModifierRegex().Replace(str, ModifierEvaluator);
 
                 ImGui.TableNextRow();
                 ImGui.TableSetColumnIndex(0);
@@ -219,6 +224,30 @@ static partial class ShortcutsWindow
         return KeyShortcuts.GetShortcutString(shortcutId);
     }
 
+    private static string ModifierEvaluator(Match match)
+    {
+        var modifierName = match.Value[1..^1];
+
+        switch (modifierName)
+        {
+            case "Ctrl":
+                return KeyShortcuts.CtrlName;
+            
+            case "Alt":
+                return KeyShortcuts.AltName;
+
+            case "Super":
+                return KeyShortcuts.SuperName;
+
+            default:
+                Log.Error("ShortcutsWindow: unknown modifier name " + modifierName);
+                return "<error>";
+        }
+    }
+
     [GeneratedRegex("\\[(\\w+?)\\]")]
     private static partial Regex ShortcutRegex();
+
+    [GeneratedRegex("\\<(\\w+?)\\>")]
+    private static partial Regex ModifierRegex();
 }
