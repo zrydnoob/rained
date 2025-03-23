@@ -1,39 +1,38 @@
-# Developing
-This document is for those who want to develop/modify Rained. Rained is an open-source project under the MIT license, so you are basically free to do whatever you want with it and its source as long as proper attribution is given as stated in the license. You may also contribute to Rained's development making pull requests; those are completely welcome. Some instructions here are provided in the root README.md file
-of the GitHub repository, but this document further details the development setup.
+# 开发指南
+本文档适用于希望开发或修改 Rained 的用户。Rained 是一个基于 MIT 许可证的开源项目，因此您可以自由地使用其源代码，只需按照许可证要求进行适当的署名。您也可以通过提交 Pull Request 来为 Rained 的开发做出贡献，我们非常欢迎这样的贡献。GitHub 仓库的根目录下的 README.md 文件中提供了一些说明，但本文档进一步详细介绍了开发环境的设置。
 
-## Using ANGLE
+## 使用 ANGLE
 
 !!! info
 
-    TL;DR: If you are on Windows, copy the DLLs in `src\Glib\angle\win-x64` to `C:\Program Files\dotnet`.
+    简而言之：如果您在 Windows 系统上，请将 `src\Glib\angle\win-x64` 中的 DLL 文件复制到 `C:\Program Files\dotnet` 目录下。
 
-For Windows, Rained prefers to use [ANGLE](https://chromium.googlesource.com/angle/angle), an OpenGL ES implementation for various graphics APIs. On other operating systems, Rained will prefer to use desktop OpenGL 3.3. The reasoning for this is that Windows OpenGL drivers can be a bit quirky, so to speak, and depending on the user's vendor, badly optimized. Also, I kept getting reports of OpenGL errors of a mysterious origin, although that may be fixed by now.
+在 Windows 上，Rained 倾向于使用 [ANGLE](https://chromium.googlesource.com/angle/angle)，这是一个为各种图形 API 实现的 OpenGL ES。在其他操作系统上，Rained 则倾向于使用桌面版的 OpenGL 3.3。这样做的原因是 Windows 的 OpenGL 驱动程序可能会有些问题，具体取决于用户的硬件供应商，且优化不佳。此外，我经常收到一些来源不明的 OpenGL 错误报告，尽管这些问题可能已经修复。
 
-ANGLE is provided by a set of DLLs that takes a lot of waiting to build. Fortunately, pre-built ANGLE binaries for both Windows and Linux are stored in this repository, both of which I took from an Electron project for the respective systems because I couldn't figure out how to build it myself.
+ANGLE 由一组 DLL 文件提供，这些文件的构建需要很长时间。幸运的是，本仓库中已经存储了 Windows 和 Linux 的预构建 ANGLE 二进制文件，这些文件是我从 Electron 项目中提取的，因为我自己无法成功构建它们。
 
-However, there is a hiccup with the referencing of the DLLs for Rained. Since whatever searches for the ANGLE DLLs does not go through the C# DLL resolver, that means that the ANGLE DLLs *must* either be in PATH or, on Windows, in the same folder as the running executable. There is no problem here for release packages, since it needs to be put there anyway, but when running from a non-publish build there are two ways Rained can be launched and neither of them have the ANGLE DLLs automatically put in the directories of the executables.
+然而，Rained 在引用这些 DLL 文件时存在一个问题。由于搜索 ANGLE DLL 文件的过程不经过 C# 的 DLL 解析器，这意味着 ANGLE DLL 文件必须位于 PATH 环境变量中，或者在 Windows 上，必须位于运行的可执行文件所在的目录中。对于发布包来说，这不是问题，因为无论如何都需要将这些文件放在那里，但在运行非发布版本时，Rained 有两种启动方式，这两种方式都不会自动将 ANGLE DLL 文件放在可执行文件的目录中。
 
-If the program is being ran via `dotnet Rained.dll`, the ANGLE DLLs need to be present in the directory where `dotnet.exe` is located, otherwise the program will fail to start. If the program is being ran by running Rained.exe directly, the ANGLE DLLs need to be present in the build directory containing Rained.exe. You can alternatively copy the ANGLE DLLs to a directory that's referenced in the DLL search path, and it should work just fine for both launch situations.
+如果通过 `dotnet Rained.dll` 运行程序，ANGLE DLL 文件需要位于 `dotnet.exe` 所在的目录中，否则程序将无法启动。如果通过直接运行 Rained.exe 来启动程序，ANGLE DLL 文件需要位于包含 Rained.exe 的构建目录中。您也可以将 ANGLE DLL 文件复制到 DLL 搜索路径中的某个目录，这样在两种启动情况下都能正常工作。
 
-If you don't feel like doing all of this, there is a way to build Rained with desktop OpenGL that doesn't have all this DLL nonsense as a prerequisite. How to do so is explained later in this document.
+如果您不想做这些操作，还有一种方法可以构建 Rained 并使用桌面版 OpenGL，这样就不需要这些 DLL 文件的准备工作。具体方法将在本文档后面介绍。
 
 ## .NET CLI
-The following are instructions on how to clone Rained using Git and build it using the .NET CLI:
+以下是使用 Git 克隆 Rained 并使用 .NET CLI 构建的说明：
 
-1. Clone with Git:
+1. 使用 Git 克隆：
 ```bash
 git clone --recursive https://github.com/pkhead/rained
 cd rained
 ```
 
-2. Compile Drizzle
+2. 编译 Drizzle
 ```bash
 cd src/Drizzle
 dotnet run --project Drizzle.Transpiler
 ```
 
-3. Back to the root directory, build and run Rained
+3. 返回到根目录，构建并运行 Rained
 ```bash
 # only needs to be run once
 dotnet tool restore
@@ -45,23 +44,22 @@ dotnet cake
 dotnet cake --gles=false
 ```
 
-4. Run the project!
+4. 运行项目!
 ```bash
 dotnet run --no-build --project src/Rained/Rained.csproj
 ```
 
-I unfortunately have no steps for setting up the build process in IDEs such as Visual Studio or the JetBrains one, because I
-don't use those. But hopefully, you will be able to extrapolate the information from these instructions to work with your IDE of choice.
+很遗憾，我没有在 IDE（如 Visual Studio 或 JetBrains 的 IDE）中设置构建过程的步骤，因为我不使用这些 IDE。但希望您能够从这些说明中推断出如何在您选择的 IDE 中工作。
 
-## Shaders
-If you ever want to create new shaders or modify existing ones, you will need to run them through the shader preprocessor. The shader preprocessor exists for shader sources to include other shader files---something which OpenGL shader compilation doesn't support out of the box---and to handle differences between normal GLSL and ES GLSL.
+## 着色器
+如果您想创建新的着色器或修改现有的着色器，您需要将它们通过着色器预处理器运行。着色器预处理器的存在是为了让着色器源文件包含其他着色器文件——这是 OpenGL 着色器编译本身不支持的——并处理普通 GLSL 和 ES GLSL 之间的差异。
 
-In order to use the shader preprocessor, you will need Python 3 and [glslang](https://github.com/KhronosGroup/glslang) installed on your system. I don't believe glslang has an installer, but you need to install it in a way such that typing `glslangValidator` from any terminal will run the correct executable, which you do by modifying your system or user PATH.
+为了使用着色器预处理器，您需要在系统上安装 Python 3 和 [glslang](https://github.com/KhronosGroup/glslang)。我不认为 glslang 有安装程序，但您需要以某种方式安装它，以便在任何终端中键入 `glslangValidator` 时都能运行正确的可执行文件，这可以通过修改系统或用户的 PATH 来实现。
 
-Once you have both installed, the shader preprocessor will automatically run when calling `dotnet cake`. Although without the required software installed, the preprocessing step will simply be skipped.
+一旦两者都安装好了，着色器预处理器将在调用 `dotnet cake` 时自动运行。如果没有安装所需的软件，预处理步骤将被跳过。
 
-## Documentation
-The documentation is built using [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/). You'll need python and pip to build it.
+## 文档
+文档是使用 [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) 构建的。您需要安装 python 和 pip 来构建它。
 
 ```bash
 # install material for mkdocs
@@ -74,37 +72,34 @@ mkdocs serve
 mkdocs build
 ```
 
-## Subprojects
-Rained has multiple projects in the C# solution. Here is a list of their brief descriptions:
+## 子项目
+Rained 在 C# 解决方案中有多个项目。以下是它们的简要描述：
 
 |     Name           |      Description                                           |
 | ------------------ | ---------------------------------------------------------- |
-| **Drizzle**        | Port of the original renderer from Lingo to C#.            |
-| **Glib**           | OpenGL 3.3/OpenGL ES 2.0 and Silk.NET wrapper.             |
-| **Glib.ImGui**     | ImGui.NET backend for Glib/Silk.NET.                       |
-| **Glib.Tests**     | Test program for Glib visual output.                       |
-| **ImGui.NET**      | Freetype-enabled version of ImGui.NET.                     |
-| **Rained**         | The entire Rained application.                             |
-| **Rained.Console** | C application to launch Rained from a console environment. |
-| **Rained.Tests**   | A few unit tests for Rained.                               |
+| **Drizzle**        | 将原始渲染器从 Lingo 移植到 C#。                              |
+| **Glib**           | OpenGL 3.3/OpenGL ES 2.0 和 Silk.NET 的封装。               |
+| **Glib.ImGui**     | Glib/Silk.NET 的 ImGui.NET 后端。                           |
+| **Glib.Tests**     | 用于 Glib 视觉输出的测试程序。                                |
+| **ImGui.NET**      | 启用 Freetype 的 ImGui.NET 版本。                           |
+| **Rained**         | 整个 Rained 应用程序。                                      |
+| **Rained.Console** | 从控制台环境启动 Rained 的 C 应用程序。                       |
+| **Rained.Tests**   | Rained 的一些单元测试。                                     |
 
-There is also [rainedvm](https://github.com/pkhead/rainedvm), which is a separate program that serves as a version manager utility. It is programmed in C++ and distributed separately, which is why it is a separate repository.
+还有一个 [rainedvm](https://github.com/pkhead/rainedvm)，它是一个单独的程序，作为版本管理工具。它是用 C++ 编程的，并且是单独分发的，因此它是一个单独的仓库。
 
-## The ImGui .ini file
-The `config/imgui.ini` file will always be modified whenever you launch Rained, making version control want to keep track of
-the unnecessary changes. However, it can't be put in the .gitignore since Rained needs to have an initial imgui.ini file.
-Thus, if you don't actually want to update config/imgui.ini, I advise two practices:
+## ImGui .ini 文件
+每当您启动 Rained 时，`config/imgui.ini` 文件都会被修改，这使得版本控制想要跟踪不必要的更改。然而，它不能放在 .gitignore 中，因为 Rained 需要一个初始的 imgui.ini 文件。因此，如果您实际上不想更新 config/imgui.ini，我建议两种做法：
 
-1. Run `git update-index --assume-unchanged config/imgui.ini`. This will make Git ignore any changes to the file, though
-   it may cause problems when switching branches. You can use `git stash` in this situation. If you want to undo this,
-   run `git update-index --no-assume-unchanged config/imgui.ini`.
-2. Remember to manually unstage config/imgui.ini before every commit, or manually stage every file but that one.
+1. 运行 `git update-index --assume-unchanged config/imgui.ini`。这将使 Git 忽略对该文件的任何更改，尽管在切换分支时可能会导致问题。在这种情况下，您可以使用 `git stash`。如果您想撤销此操作，请运行 `git update-index --no-assume-unchanged config/imgui.ini`。
 
-## The "nightly" tag
-The "nightly" tag really only exists so that I'm able to create nightly GitHub releases. It's a bit annoying. I wouldn't recommend interacting with it.
+2. 在每次提交之前，手动取消暂存 `config/imgui.ini`，或者手动暂存除该文件之外的所有文件。
 
-Since the action deletes and re-creates the "nightly" tag on every release, in order to update the tag
-on your clone (not that you would want to, I suppose), you would have to run the following Git commands:
+## "nightly" 标签
+"nightly" 标签的存在只是为了让我能够创建每晚的 GitHub 发布。这有点烦人。我不建议与之交互。
+
+由于每次发布时操作都会删除并重新创建 "nightly" 标签，因此要在您的克隆中更新该标签（假设您想要这样做），您需要运行以下 Git 命令：
+
 ```bash
 git tag -d nightly # delete the nightly tag on your clone
 git fetch origin tag nightly # fetch the nightly tag from origin
