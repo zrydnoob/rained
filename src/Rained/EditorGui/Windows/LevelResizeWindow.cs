@@ -159,12 +159,12 @@ class LevelResizeWindow
                 ImGui.PopStyleVar();
             }
 
-            ImGui.SeparatorText("边框图块");
+            ImGui.SeparatorText("边界");
             {
-                ImGui.InputInt("左方", ref newBufL);
-                ImGui.InputInt("上方", ref newBufT);
-                ImGui.InputInt("右方", ref newBufR);
-                ImGui.InputInt("底部", ref newBufB);
+                ImGui.InputInt("左侧边界", ref newBufL);
+                ImGui.InputInt("顶部边界", ref newBufT);
+                ImGui.InputInt("右部边界", ref newBufR);
+                ImGui.InputInt("底部边界", ref newBufB);
 
                 newBufL = Math.Max(newBufL, 0);
                 newBufR = Math.Max(newBufR, 0);

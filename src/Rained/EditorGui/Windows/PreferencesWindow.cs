@@ -366,7 +366,7 @@ static class PreferencesWindow
             // Vsync
             {
                 bool vsync = Boot.Window.VSync;
-                if (ImGui.Checkbox("Vsync", ref vsync))
+                if (ImGui.Checkbox("垂直同步", ref vsync))
                     Boot.Window.VSync = vsync;
                 
                 if (!vsync)
@@ -376,7 +376,7 @@ static class PreferencesWindow
                     ImGui.SetNextItemWidth(ImGui.GetFontSize() * 8.0f);
 
                     var refreshRate = prefs.RefreshRate;
-                    if (ImGui.SliderInt("Refresh rate", ref refreshRate, 30, 240))
+                    if (ImGui.SliderInt("帧数限制", ref refreshRate, 30, 240))
                     {
                         prefs.RefreshRate = refreshRate;
                         Raylib.SetTargetFPS(prefs.RefreshRate);
@@ -387,7 +387,7 @@ static class PreferencesWindow
             ImGui.PopItemWidth();
         }
 
-        ImGui.SeparatorText("Interface");
+        ImGui.SeparatorText("用户界面");
         {
             bool showCameraNumbers = prefs.ShowCameraNumbers;
             if (ImGui.Checkbox("显示摄像机数量", ref showCameraNumbers))
@@ -554,7 +554,7 @@ static class PreferencesWindow
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 10f);
 
             var simSpeed = prefs.FastSimulationSpeed;
-            if (ImGui.SliderFloat("Fast simulation speed", ref simSpeed, 1f, 20f, "%.0fx"))
+            if (ImGui.SliderFloat("模拟速度倍率", ref simSpeed, 1f, 20f, "%.0fx"))
             {
                 prefs.FastSimulationSpeed = simSpeed;
             }
