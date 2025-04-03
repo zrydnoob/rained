@@ -107,7 +107,7 @@ static class NewLevelWindow
                     ImGui.InputInt("左侧边界", ref levelBufL);
                     ImGui.InputInt("顶部边界", ref levelBufT);
                     ImGui.InputInt("右侧边界", ref levelBufR);
-                    ImGui.InputInt("下部边界", ref levelBufB);
+                    ImGui.InputInt("底部边界", ref levelBufB);
 
                     levelBufL = Math.Max(levelBufL, 0);
                     levelBufR = Math.Max(levelBufR, 0);
