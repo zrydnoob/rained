@@ -1,38 +1,41 @@
-# Light
-This is the editor used to control light and shadows in the level.
+# 灯光
 
-## Light angle
+在关卡中用于控制灯光和阴影的编辑器。
+
+## 灯光角度
+
 <figure markdown="span">
     ![Light angle window](img/lightangle.png)
 </figure>
 
-The top-right corner of screen houses the window used to control the direction of the light as well as its distance. You can control the two parameters either using the sliders, interacting with the light ring using the mouse, or using WASD while holding <kbd>Shift</kbd>.
+屏幕的右上角是用于控制光线方向及其距离的窗口。您可以使用滑块、使用鼠标与控制环交互或在按住<kbd>Shift</kbd>时使用 WASD 来控制这两个参数。
 
-What the light angle does is self-explanatory, but it should be noted that it's suggested to keep it near the top-left as tile/prop lighting normally assume that is the direction light is coming from.
+光线角度的作用是不言自明的，但应该注意的是，建议将其保持在左上角附近，因为贴图/道具照明通常假设这是光线的方向。
 
-The light distance parameter, or otherwise known as "flatness", controls the length of shadows. As the parameter decreases, rendered shadows will become shorter. Inversely, as the parameter increases, rendered shadows will become longer. It is similar to the way shadows in real life behave based on the position of the sun. A overhead sun is what represents the light distance being zero, with shadows being very short. As the sun (or the point on the light ring) moves away from the center, shadows become longer.
+光线距离 参数（也称为“ flatness ”）控制阴影的长度。随着参数的减小，渲染的阴影将变得更短。相反，随着参数的增加，渲染的阴影将变得更长。它类似于现实生活中阴影根据太阳位置的行为方式。头顶上的太阳表示光距离为零，阴影非常短。当太阳（或光环上的点）远离中心时，阴影会变长。
 
-## Light map
+## 光照贴图
+
 <figure markdown="span">
     ![Example lightmap](img/lightmap.png)
 </figure>
 
-The level viewport is dedicated to the editing of the light map. It is a black-and-white image, with white areas (transparent in the editor) representing sunlight and black areas (red and translucent in the editor) representing shadows. The image's shadow is casted onto the world, as if viewing the shadows casted by objects and structures behind the camera. The shadow projection shown in the light editor is not entirely accurate to what it will look like in-game, since it does not account for the different sublayer depths. But it is still a good approximation.
+关卡视口专用于编辑光照贴图。它是一个黑白图像，其中白色区域（在编辑器中透明）表示阳光，黑色区域（在编辑器中为红色和半透明）表示阴影。图像的阴影投射到世界上，就像查看摄像机后面的物体和结构投射的阴影一样。灯光编辑器中显示的阴影投影并不完全准确于它在游戏中的外观，因为它没有考虑不同的图层深度。但它仍具有很好的参考价值。
 
 !!! info
 
-    Light maps have extra space that extend past the top and left sides of the level, which is represented by the area with the white background in the editor.
+    光照贴图具有超出关卡顶部和左侧的额外空间，该空间在编辑器中以白色背景的区域表示。
 
-Light maps are usually fairly simple. As a rule of thumb, if you have an interior room, the light map should be mostly filled with shadow except for some gaps or windows, small or large, where light peeks through. If you have an outside room, the light map will be mostly filled with light except for the shadows of some structures/motifs resembling those found in the level or region itself. As always, it is best to analyze the light maps of pre-existing rooms yourself.
-
-!!! note
-
-    If you notice the level is being rendered in complete darkness even though you have light in your light map, it's likely that you've disabled sunlight in the environment editor.
-
-You edit this light map as if you were drawing an image in a paint editing program. You first select the brush shape that you want from the bottom-right window titled "Brush", either by clicking on them or using WASD. Then, when you want to paint shadows, you hold down the left mouse button over the level viewport, and when you want to erase shadows, you hold down the right mouse button instead.
-
-The brush can also be scaled and rotated. To scale the brush, you hold down the <kbd>Q</kbd> key and move your mouse. To rotate the brush, you hold down the <kbd>E</kbd> key and move your mouse up or down. If you don't like this methodology, you can change the *Light editor control scheme* setting to "Keyboard". With that, you scale using the WASD keys, rotate clockwise by holding <kbd>E</kbd>, and rotate counter-clockwise by holding <kbd>Q</kbd>. Holding down <kbd>Shift</kbd> will make it faster.
+光照贴图的编辑通常比较简单。根据生活经验，当你创建了一个室内房间时，光照贴图应主要以阴影填充，但别忘了，光线可以透过窗户、缝隙哦。当你创建了一个室外房间时，光照贴图应以光照为主，当然也可以添加一些类似于楼层或区域本身结构或图案的阴影。
 
 !!! note
 
-    Changing the setting to "Keyboard" also removes the ability to browse through the brush catalog using WASD.
+    如果编辑了光照贴图但渲染完成后的关卡仍是一片黑暗，可能是你在环境编辑器中关闭了日光。
+
+编辑此光照贴图就像在图像编辑程序中绘制图像一样。首先，从右下角标题为“笔刷”的窗口中通过单击或使用 WASD 选择所需的画笔形状。然后，在光照视图中按住左键绘制阴影，按住右键擦住阴影。
+
+笔刷也可以缩放和旋转。你可以按住<kbd>Q</kbd>键并移动鼠标进行缩放，按住<kbd>E</kbd>键时鼠标上下移动进行旋转。如果你不喜欢此方法，可以将 *灯光编辑器控制方案*设置更改为 “键盘”。这样，您可以使用 WASD 键进行缩放，按住 <kbd>E</kbd> 顺时针旋转，按住 <kbd>Q</kbd> 逆时针旋转。按住 <kbd>Shift</kbd> 会更快。
+
+!!! note
+
+    将设置更改为“键盘”也会禁用使用 WASD 更改笔刷的功能。
