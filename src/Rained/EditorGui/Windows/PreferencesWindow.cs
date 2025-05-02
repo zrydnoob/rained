@@ -37,7 +37,7 @@ static class PreferencesWindow
     private static void SetUpDrizzleConfig()
     {
         activeDrizzleConfig ??= DrizzleConfiguration.LoadConfiguration(Path.Combine(RainEd.Instance.AssetDataPath, "editorConfig.txt"));
-            
+
         drizzleConfigWatcher?.Dispose();
         drizzleConfigWatcher = new FileSystemWatcher(Path.GetDirectoryName(activeDrizzleConfig.FilePath)!, "*.txt");
         drizzleConfigWatcher.NotifyFilter |= NotifyFilters.LastWrite | NotifyFilters.FileName;
@@ -84,7 +84,7 @@ static class PreferencesWindow
             )
             {
                 Log.Debug("Drizzle config renamed/moved");
-                
+
                 activeDrizzleConfig = null;
                 drizzleConfigWatcher.Dispose();
                 SetUpDrizzleConfig();
@@ -139,7 +139,7 @@ static class PreferencesWindow
 
                 ImGui.SameLine();
                 ImGui.BeginChild("Controls", ImGui.GetContentRegionAvail());
-                
+
                 switch (selectedNavTab)
                 {
                     case NavTabEnum.General:
@@ -153,12 +153,12 @@ static class PreferencesWindow
                     case NavTabEnum.Theme:
                         ShowThemeTab(justOpened || lastNavTab != selectedNavTab);
                         break;
-                    
+
                     case NavTabEnum.Assets:
                         AssetManagerGUI.Show();
                         showAssetsTab = true;
                         break;
-                    
+
                     case NavTabEnum.Drizzle:
                         ShowDrizzleTab();
                         break;
@@ -217,12 +217,12 @@ static class PreferencesWindow
                 {
                     for (int ki = (int)ImGuiKey.NamedKey_BEGIN; ki < (int)ImGuiKey.NamedKey_END; ki++)
                     {
-                        ImGuiKey key = (ImGuiKey) ki;
-                        
+                        ImGuiKey key = (ImGuiKey)ki;
+
                         // don't process if this is a modifier key
                         if (KeyShortcuts.IsModifierKey(key))
                             continue;
-                        
+
                         if (ImGui.IsKeyPressed(key))
                         {
                             // rebind the shortcut to this key
@@ -260,7 +260,7 @@ static class PreferencesWindow
         );
 
         var prefs = RainEd.Instance.Preferences;
-        
+
         ImGui.SeparatorText("关卡颜色");
         {
             if (entered)
@@ -415,10 +415,10 @@ static class PreferencesWindow
                 var fontSize = prefs.FontSize;
                 if (ImGui.InputInt("字体大小", ref fontSize))
                     prefs.FontSize = fontSize;
-                
+
                 if (ImGui.IsItemDeactivatedAfterEdit())
                     Fonts.FontReloadQueued = true;
-                
+
                 ImGui.SameLine();
                 ImGui.TextDisabled("(?)");
                 if (ImGui.BeginItemTooltip())
@@ -435,7 +435,7 @@ static class PreferencesWindow
                 bool vsync = Boot.Window.VSync;
                 if (ImGui.Checkbox("垂直同步", ref vsync))
                     Boot.Window.VSync = vsync;
-                
+
                 if (!vsync)
                 {
                     ImGui.SameLine();
@@ -459,15 +459,15 @@ static class PreferencesWindow
             bool showCameraNumbers = prefs.ShowCameraNumbers;
             if (ImGui.Checkbox("显示摄像机数量", ref showCameraNumbers))
                 prefs.ShowCameraNumbers = showCameraNumbers;
-            
+
             bool materialSelectorPreviews = prefs.MaterialSelectorPreview;
             if (ImGui.Checkbox("在材质选择器中显示预览", ref materialSelectorPreviews))
                 prefs.MaterialSelectorPreview = materialSelectorPreviews;
-            
+
             bool doubleClickToCreateProp = prefs.DoubleClickToCreateProp;
             if (ImGui.Checkbox("双击创建道具", ref doubleClickToCreateProp))
                 prefs.DoubleClickToCreateProp = doubleClickToCreateProp;
-            
+
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             if (ImGui.BeginItemTooltip())
@@ -479,11 +479,11 @@ static class PreferencesWindow
                 );
                 ImGui.EndTooltip();
             }
-            
+
             bool hideScreenSize = prefs.HideScreenSize;
             if (ImGui.Checkbox("在调整大小窗口中隐藏屏幕大小参数", ref hideScreenSize))
                 prefs.HideScreenSize = hideScreenSize;
-            
+
             bool removeCangleLimit = prefs.RemoveCameraAngleLimit;
             if (ImGui.Checkbox("解锁相机角度限制", ref removeCangleLimit))
                 prefs.RemoveCameraAngleLimit = removeCangleLimit;
@@ -498,15 +498,15 @@ static class PreferencesWindow
 
                 ImGui.End();
             }
-            
+
             bool geoMaskMouseDecor = prefs.GeometryMaskMouseDecor;
             if (ImGui.Checkbox("在鼠标处显示几何层级指示器", ref geoMaskMouseDecor))
                 prefs.GeometryMaskMouseDecor = geoMaskMouseDecor;
-            
+
             bool minUi = prefs.MinimalStatusBar;
             if (ImGui.Checkbox("最小化状态栏", ref minUi))
                 prefs.MinimalStatusBar = minUi;
-            
+
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             if (ImGui.BeginItemTooltip())
@@ -521,31 +521,31 @@ static class PreferencesWindow
             bool hideEditSwitch = prefs.HideEditorSwitch;
             if (ImGui.Checkbox("隐藏编辑器切换菜单", ref hideEditSwitch))
                 prefs.HideEditorSwitch = hideEditSwitch;
-            
+
             ImGui.Separator();
-            
+
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 10f);
-            
+
             // camera border view mode
-            var camBorderMode = (int) prefs.CameraBorderMode;
+            var camBorderMode = (int)prefs.CameraBorderMode;
             if (ImGui.Combo("相机边界渲染", ref camBorderMode, "仅渲染里边界\0仅渲染外边界\0渲染所有边界"))
-                prefs.CameraBorderMode = (UserPreferences.CameraBorderModeOption) camBorderMode;
-            
+                prefs.CameraBorderMode = (UserPreferences.CameraBorderModeOption)camBorderMode;
+
             // autotile mouse mode
-            var autotileMouseMode = (int) prefs.AutotileMouseMode;
+            var autotileMouseMode = (int)prefs.AutotileMouseMode;
             if (ImGui.Combo("自动图块放置模式", ref autotileMouseMode, "点击起点与终点\0按下拖动"))
-                prefs.AutotileMouseMode = (UserPreferences.AutotileMouseModeOptions) autotileMouseMode;
-            
+                prefs.AutotileMouseMode = (UserPreferences.AutotileMouseModeOptions)autotileMouseMode;
+
             // tile placement mode toggle
             var tilePlacementToggle = prefs.TilePlacementModeToggle ? 1 : 0;
             if (ImGui.Combo("强制放置快捷键模式", ref tilePlacementToggle, "按住\0切换"))
                 prefs.TilePlacementModeToggle = tilePlacementToggle != 0;
-            
+
             // prop selection layer filter
-            var propSelectionLayerFilter = (int) prefs.PropSelectionLayerFilter;
+            var propSelectionLayerFilter = (int)prefs.PropSelectionLayerFilter;
             if (ImGui.Combo("道具选择层过滤器", ref propSelectionLayerFilter, "全部层\0当前层\0当前层以后"))
-                prefs.PropSelectionLayerFilter = (UserPreferences.PropSelectionLayerFilterOption) propSelectionLayerFilter;
-            
+                prefs.PropSelectionLayerFilter = (UserPreferences.PropSelectionLayerFilterOption)propSelectionLayerFilter;
+
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             if (ImGui.BeginItemTooltip())
@@ -563,9 +563,9 @@ static class PreferencesWindow
             }
 
             // light editor control scheme
-            var lightEditorControlScheme = (int) prefs.LightEditorControlScheme;
-            if (ImGui.Combo("灯光编辑器控制方案e", ref lightEditorControlScheme, "鼠标\0键盘\0"))
-                prefs.LightEditorControlScheme = (UserPreferences.LightEditorControlSchemeOption) lightEditorControlScheme;
+            var lightEditorControlScheme = (int)prefs.LightEditorControlScheme;
+            if (ImGui.Combo("灯光编辑器控制方案", ref lightEditorControlScheme, "鼠标\0键盘\0"))
+                prefs.LightEditorControlScheme = (UserPreferences.LightEditorControlSchemeOption)lightEditorControlScheme;
 
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
@@ -575,12 +575,12 @@ static class PreferencesWindow
                     """
                     这将改变灯光编辑器中笔刷的缩放和旋转方式。
                     - 鼠标:按住q/e，移动鼠标分别进行缩放和旋转。
-                    -键盘:模仿官方关卡编辑器中的控件:wasd缩放，q/e旋转。
+                    - 键盘:模仿官方关卡编辑器中的控件:wasd缩放，q/e旋转。
                     """
                 );
                 ImGui.End();
             }
-            
+
             ImGui.PopItemWidth();
         }
 
@@ -594,11 +594,11 @@ static class PreferencesWindow
             bool versionCheck = prefs.CheckForUpdates;
             if (ImGui.Checkbox("检查更新", ref versionCheck))
                 prefs.CheckForUpdates = versionCheck;
-            
+
             bool optimizedTile = prefs.OptimizedTilePreviews;
             if (ImGui.Checkbox("优化瓦片预览", ref optimizedTile))
                 prefs.OptimizedTilePreviews = optimizedTile;
-            
+
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
@@ -668,7 +668,7 @@ static class PreferencesWindow
     {
         ImGui.SeparatorText("易用性");
         ShortcutButton(KeyShortcut.RightMouse);
-        
+
         ImGui.SeparatorText("全局");
         ShortcutButton(KeyShortcut.ViewZoomIn);
         ShortcutButton(KeyShortcut.ViewZoomOut);
@@ -781,7 +781,7 @@ static class PreferencesWindow
         {
             var ext = Path.GetExtension(fileName);
             if (ext != ".json" && ext != ".jsonc") continue;
-            availableThemes.Add(Path.GetFileNameWithoutExtension(fileName));    
+            availableThemes.Add(Path.GetFileNameWithoutExtension(fileName));
         }
         availableThemes.Sort();
     }
@@ -797,7 +797,7 @@ static class PreferencesWindow
         // compile available themes when the tab is clicked
         if (entered)
         {
-            ReloadThemeList();        
+            ReloadThemeList();
         }
 
         ImGui.SetNextItemWidth(ImGui.GetTextLineHeight() * 12.0f);
@@ -825,7 +825,7 @@ static class PreferencesWindow
 
     private static void ShortcutButton(KeyShortcut id, string? nameOverride = null)
     {
-        ImGui.PushID((int) id);
+        ImGui.PushID((int)id);
 
         var btnSize = new Vector2(ImGui.GetTextLineHeight() * 8f, 0f);
         if (ImGui.Button(activeShortcut == id ? "..." : KeyShortcuts.GetShortcutString(id), btnSize))
@@ -834,7 +834,7 @@ static class PreferencesWindow
         }
 
         ImGui.SetItemTooltip(KeyShortcuts.GetShortcutString(id));
-        
+
         // reset button
         ImGui.SameLine();
         if (ImGui.Button("X"))
@@ -871,7 +871,7 @@ static class PreferencesWindow
             boolRef = prefs.StaticDrizzleLingoRuntime;
             if (ImGui.Checkbox("应用程序启动时初始化 Drizzle", ref boolRef))
                 prefs.StaticDrizzleLingoRuntime = boolRef;
-            
+
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
@@ -888,7 +888,7 @@ static class PreferencesWindow
             if (ImGui.Checkbox("显示渲染预览", ref boolRef))
                 prefs.ShowRenderPreview = boolRef;
         }
-        
+
         ImGui.SeparatorText("渲染");
 
         ConfigCheckbox("Grime on gradients");
