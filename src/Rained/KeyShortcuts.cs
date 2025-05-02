@@ -12,8 +12,8 @@ enum KeyShortcut : int
 
     // Edit modes
     EnvironmentEditor, GeometryEditor, TileEditor,
-    CameraEditor, LightEditor, EffectsEditor, PropEditor, 
-    
+    CameraEditor, LightEditor, EffectsEditor, PropEditor,
+
     // General
     NavUp, NavLeft, NavDown, NavRight,
     NewObject, RemoveObject, SwitchLayer, SwitchTab, Duplicate,
@@ -51,12 +51,13 @@ enum KeyShortcut : int
     CameraSnapX, CameraSnapY,
 
     // Props
-    ToggleVertexMode, RopeSimulation, ResetSimulation,
+    ToggleVertexMode, RopeSimulation, RopeSimulationFast, ResetSimulation,
 
     // View settings shortcuts
     ToggleViewGrid, ToggleViewTiles, ToggleViewProps,
     ToggleViewCameras, ToggleViewGraphics, ToggleViewNodeIndices,
     RotatePropCW, RotatePropCCW,
+    ChangePropSnapping,
 
     /// <summary>
     /// Do not bind - this is just the number of shortcut IDs
@@ -141,16 +142,16 @@ static class KeyShortcuts
 
             if (Mods.HasFlag(ImGuiModFlags.Ctrl))
                 str.Add(CtrlName);
-            
+
             if (Mods.HasFlag(ImGuiModFlags.Shift))
                 str.Add(ShiftName);
-            
+
             if (Mods.HasFlag(ImGuiModFlags.Alt))
                 str.Add(AltName);
-            
+
             if (Mods.HasFlag(ImGuiModFlags.Super))
                 str.Add(SuperName);
-            
+
             str.Add(ImGui.GetKeyName(Key));
 
             ShortcutString = string.Join('+', str);
@@ -170,14 +171,14 @@ static class KeyShortcuts
             // i disable imgui from receiving tab inputs
             if (Key == ImGuiKey.Tab)
                 kp = (bool)Raylib.IsKeyPressed(KeyboardKey.Tab);
-            
+
             // delete/backspace will do the same thing
             else if (Key == ImGuiKey.Delete)
                 kp = ImGui.IsKeyPressed(ImGuiKey.Delete, AllowRepeat) || ImGui.IsKeyPressed(ImGuiKey.Backspace, AllowRepeat);
 
             else
                 kp = ImGui.IsKeyPressed(Key, AllowRepeat);
-            
+
             return kp &&
             CheckModKey(ImGuiModFlags.Ctrl, ImGuiKey.ModCtrl) &&
             CheckModKey(ImGuiModFlags.Shift, ImGuiKey.ModShift) &&
@@ -199,14 +200,14 @@ static class KeyShortcuts
             // i disable imgui from receiving tab inputs
             if (Key == ImGuiKey.Tab)
                 kp = (bool)Raylib.IsKeyDown(KeyboardKey.Tab);
-            
+
             // delete/backspace will do the same thing
             else if (Key == ImGuiKey.Delete)
                 kp = ImGui.IsKeyDown(ImGuiKey.Delete) || ImGui.IsKeyDown(ImGuiKey.Backspace);
 
             else
                 kp = ImGui.IsKeyDown(Key);
-            
+
             return kp &&
             CheckModKey(ImGuiModFlags.Ctrl, ImGuiKey.ModCtrl) &&
             CheckModKey(ImGuiModFlags.Shift, ImGuiKey.ModShift) &&
@@ -214,7 +215,8 @@ static class KeyShortcuts
             CheckModKey(ImGuiModFlags.Super, ImGuiKey.ModSuper);
         }
 
-        private bool CheckModKey(ImGuiModFlags mod, ImGuiKey key) {
+        private bool CheckModKey(ImGuiModFlags mod, ImGuiKey key)
+        {
             var down = ImGui.IsKeyDown(key);
             return (Mods.HasFlag(mod) == down) || (down && AllowedMods.HasFlag(mod));
         }
@@ -250,14 +252,14 @@ static class KeyShortcuts
         for (int i = 0; i < keyStr.Length - 1; i++)
         {
             var modStr = keyStr[i];
-            
-            if (modStr == "Ctrl")
+
+            if (modStr == CtrlName)
                 mods |= ImGuiModFlags.Ctrl;
-            else if (modStr == "Alt")
+            else if (modStr == AltName)
                 mods |= ImGuiModFlags.Alt;
-            else if (modStr == "Shift")
+            else if (modStr == ShiftName)
                 mods |= ImGuiModFlags.Shift;
-            else if (modStr == "Super")
+            else if (modStr == SuperName)
                 mods |= ImGuiModFlags.Super;
             else
                 throw new Exception($"Unknown modifier key '{modStr}'");
@@ -271,7 +273,7 @@ static class KeyShortcuts
         {
             for (int ki = (int)ImGuiKey.NamedKey_BEGIN; ki < (int)ImGuiKey.NamedKey_END; ki++)
             {
-                ImGuiKey key = (ImGuiKey) ki;
+                ImGuiKey key = (ImGuiKey)ki;
                 if (keyStr[^1] == ImGui.GetKeyName(key))
                 {
                     tKey = key;
@@ -283,7 +285,7 @@ static class KeyShortcuts
             if (tKey == ImGuiKey.None)
                 throw new Exception($"Unknown key '{keyStr[^1]}'");
         }
-        
+
         // assign to binding data
         KeyShortcutBinding data = keyShortcuts[id];
         data.Key = tKey;
@@ -314,7 +316,7 @@ static class KeyShortcuts
 
     public static bool Activated(KeyShortcut id)
         => keyShortcuts[id].IsActivated;
-    
+
     public static bool Active(KeyShortcut id)
         => keyShortcuts[id].IsDown;
 
@@ -332,7 +334,7 @@ static class KeyShortcuts
 
     public static string GetShortcutString(KeyShortcut id)
         => keyShortcuts[id].ShortcutString;
-    
+
     public static string GetName(KeyShortcut id)
         => keyShortcuts[id].Name;
 
@@ -340,7 +342,7 @@ static class KeyShortcuts
     {
         // activate shortcuts on key press
         bool inputDisabled = ImGui.GetIO().WantTextInput;
-        
+
         foreach (var shortcut in keyShortcuts.Values)
         {
             shortcut.IsActivated = false;
@@ -407,7 +409,7 @@ static class KeyShortcuts
             Register("重做", KeyShortcut.Redo, ImGuiKey.Z, ImGuiModFlags.Ctrl | ImGuiModFlags.Shift, true);
 
         Register("编辑器选择", KeyShortcut.SelectEditor, ImGuiKey.GraveAccent, ImGuiModFlags.None);
-        
+
         Register("循环调整层级", KeyShortcut.SwitchLayer, ImGuiKey.Tab, ImGuiModFlags.None);
         Register("Tab 切换", KeyShortcut.SwitchTab, ImGuiKey.Tab, ImGuiModFlags.Shift);
         Register("增加画笔大小", KeyShortcut.IncreaseBrushSize, ImGuiKey.O, ImGuiModFlags.None, true);
@@ -462,10 +464,13 @@ static class KeyShortcuts
         // Prop Editor
         Register("切换到顶点模式", KeyShortcut.ToggleVertexMode, ImGuiKey.F, ImGuiModFlags.None);
         Register("模拟选定的绳索道具", KeyShortcut.RopeSimulation, ImGuiKey.Space, ImGuiModFlags.None);
+        Register("快速模拟选定绳索", KeyShortcut.RopeSimulationFast, ImGuiKey.Space, ImGuiModFlags.Shift);
         Register("重置绳索模拟", KeyShortcut.ResetSimulation, ImGuiKey.None, ImGuiModFlags.None);
-        
+
         Register("顺时针旋转道具", KeyShortcut.RotatePropCW, ImGuiKey.E, ImGuiModFlags.None);
         Register("逆时针旋转道具", KeyShortcut.RotatePropCCW, ImGuiKey.Q, ImGuiModFlags.None);
+
+        Register("更改道具对齐", KeyShortcut.ChangePropSnapping, ImGuiKey.R, ImGuiModFlags.None);
 
         // View options
         Register("网格视图", KeyShortcut.ToggleViewGrid, ImGuiKey.G, ImGuiModFlags.Ctrl);

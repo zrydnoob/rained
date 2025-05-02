@@ -184,7 +184,7 @@ partial class PropEditor : IEditorMode
 
         if (ImGuiExt.ButtonSwitch(label, values, ref selected))
         {
-            E e = (E) Convert.ChangeType(selected, ((E)targetV).GetTypeCode());
+            E e = (E)Convert.ChangeType(selected, ((E)targetV).GetTypeCode());
             foreach (var item in items)
                 field.SetValue(item, e);
         }
@@ -315,25 +315,25 @@ partial class PropEditor : IEditorMode
                     dstRec = new Rectangle(Vector2.Zero, prop.Width * 20f, prop.Height * 20f);
                 }
 
-                    var drawColor = new Color(255, (int)(whiteFade * 255f), 0, 0);
+                var drawColor = new Color(255, (int)(whiteFade * 255f), 0, 0);
 
-                    if (propTexture is not null)
-                    {
-                        propTexture.DrawRectangle(srcRect, dstRec, drawColor);
-                    }
-                    else
-                    {
-                        Raylib.DrawTexturePro(
-                            RainEd.Instance.PlaceholderTexture,
-                            srcRect, dstRec,
-                            Vector2.Zero, 0f,
-                            drawColor   
-                        );
-                    }
+                if (propTexture is not null)
+                {
+                    propTexture.DrawRectangle(srcRect, dstRec, drawColor);
+                }
+                else
+                {
+                    Raylib.DrawTexturePro(
+                        RainEd.Instance.PlaceholderTexture,
+                        srcRect, dstRec,
+                        Vector2.Zero, 0f,
+                        drawColor
+                    );
                 }
             }
-            Raylib.EndShaderMode();
-            Raylib.EndTextureMode();
+        }
+        Raylib.EndShaderMode();
+        Raylib.EndTextureMode();
     }
 
     public void DrawToolbar()
@@ -402,6 +402,18 @@ partial class PropEditor : IEditorMode
     {
         var propDb = RainEd.Instance.PropDatabase;
 
+        if (KeyShortcuts.Activated(KeyShortcut.ChangePropSnapping))
+        {
+            // cycle through the four prop snap modes
+            snappingMode = (PropSnapMode)(((int)snappingMode + 1) % 4);
+        }
+
+        if (KeyShortcuts.Activated(KeyShortcut.ChangePropSnapping))
+        {
+            // cycle through the four prop snap modes
+            snappingMode = (PropSnapMode)(((int)snappingMode + 1) % 4);
+        }
+
         if (ImGui.Begin("道具", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // work layer
@@ -414,7 +426,11 @@ partial class PropEditor : IEditorMode
 
             // snapping
             ImGui.SetNextItemWidth(ImGui.GetTextLineHeightWithSpacing() * 4f);
-            ImGui.Combo("对齐", ref snappingMode, "Off\00.5x\01x");
+            {
+                int snapModeInt = (int)snappingMode;
+                if (ImGui.Combo("对齐", ref snapModeInt, "Off\00.25x\00.5x\01x\0"))
+                    snappingMode = (PropSnapMode)snapModeInt;
+            }
 
             // flags for search bar
             var searchInputFlags = ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EscapeClearsAll;
@@ -707,8 +723,8 @@ partial class PropEditor : IEditorMode
                 if (ImGui.Button("重置变换"))
                 {
                     changeRecorder.BeginTransform();
-                        foreach (var prop in selectedProps)
-                            prop.ResetTransform();
+                    foreach (var prop in selectedProps)
+                        prop.ResetTransform();
                     changeRecorder.PushChanges();
                 }
 
@@ -716,8 +732,8 @@ partial class PropEditor : IEditorMode
                 if (ImGui.Button("翻转 X"))
                 {
                     changeRecorder.BeginTransform();
-                        foreach (var prop in selectedProps)
-                            prop.FlipX();
+                    foreach (var prop in selectedProps)
+                        prop.FlipX();
                     changeRecorder.PushChanges();
                 }
 
@@ -725,8 +741,8 @@ partial class PropEditor : IEditorMode
                 if (ImGui.Button("翻转 Y"))
                 {
                     changeRecorder.BeginTransform();
-                        foreach (var prop in selectedProps)
-                            prop.FlipY();
+                    foreach (var prop in selectedProps)
+                        prop.FlipY();
                     changeRecorder.PushChanges();
                 }
 
@@ -858,7 +874,7 @@ partial class PropEditor : IEditorMode
                         };
                         foreach (var p in selectedProps)
                             ropes.Add(p.Rope!);
-                        
+
                         MultiselectSwitchInput<PropRope, RopeReleaseMode>(ropes, "Release", "ReleaseMode", ["None", "Left", "Right"]);
 
                         if (selectedProps.Count == 1)
@@ -879,18 +895,23 @@ partial class PropEditor : IEditorMode
                                 if (ImGui.Checkbox("应用颜色", ref prop.ApplyColor))
                                     changeRecorder.PushSettingsChanges();
                             }
-                        } else if (selectedProps.Count > 1) {
+                        }
+                        else if (selectedProps.Count > 1)
+                        {
                             var prop = selectedProps[0];
 
-                            var _oldReleaseFlags = (int) prop.Rope!.ReleaseMode;
-                            var _releaseFlags = (int) prop.Rope!.ReleaseMode;
-                            if (ImGuiExt.ButtonFlags("##Release", ["Left", "Right"], ref _releaseFlags)) {
-                                if (_releaseFlags == 3) {
+                            var _oldReleaseFlags = (int)prop.Rope!.ReleaseMode;
+                            var _releaseFlags = (int)prop.Rope!.ReleaseMode;
+                            if (ImGuiExt.ButtonFlags("##Release", ["Left", "Right"], ref _releaseFlags))
+                            {
+                                if (_releaseFlags == 3)
+                                {
                                     if (_oldReleaseFlags == 1) _releaseFlags = 2;
                                     if (_oldReleaseFlags == 2) _releaseFlags = 1;
                                 }
-                                foreach (var newProp in selectedProps) {
-                                    newProp.Rope!.ReleaseMode = (RopeReleaseMode) _releaseFlags;
+                                foreach (var newProp in selectedProps)
+                                {
+                                    newProp.Rope!.ReleaseMode = (RopeReleaseMode)_releaseFlags;
                                 }
                             }
                             ImGui.SameLine();
@@ -906,7 +927,7 @@ partial class PropEditor : IEditorMode
 
                                 foreach (var prop in selectedProps)
                                     prop.Rope!.ResetModel();
-                                
+
                                 changeRecorder.PushChanges();
                             }
 
@@ -915,14 +936,14 @@ partial class PropEditor : IEditorMode
                             ImGui.SameLine();
                             ImGui.Button("模拟");
 
-                            if (ImGui.IsItemActive() || KeyShortcuts.Active(KeyShortcut.RopeSimulation) && transformMode is null)
+                            if ((ImGui.IsItemActive() || KeyShortcuts.Active(KeyShortcut.RopeSimulation)) && transformMode is null)
                             {
                                 simSpeed = 1f;
                             }
 
                             ImGui.SameLine();
                             ImGui.Button("Fast");
-                            if (ImGui.IsItemActive() && transformMode is null)
+                            if ((ImGui.IsItemActive() || KeyShortcuts.Active(KeyShortcut.RopeSimulationFast)) && transformMode is null)
                             {
                                 simSpeed = RainEd.Instance.Preferences.FastSimulationSpeed;
                             }

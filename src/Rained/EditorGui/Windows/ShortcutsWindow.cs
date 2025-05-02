@@ -130,7 +130,9 @@ static partial class ShortcutsWindow
             ("[RemoveObject]", "删除所选道具"),
             ("[ToggleVertexMode]", "切换顶点模式"),
             ("[Duplicate]", "复制选定的道具"),
-            ("[RopeSimulation]", "模拟选定的绳索道具")
+            ("[ChangePropSnapping]", "更改道具吸附"),
+            ("[RopeSimulation]", "模拟选定的绳索道具"),
+            ("[RopeSimulationFast]", "快速模拟选定绳索")
         ]
     };
 
@@ -232,7 +234,7 @@ static partial class ShortcutsWindow
         {
             case "Ctrl":
                 return KeyShortcuts.CtrlName;
-            
+
             case "Alt":
                 return KeyShortcuts.AltName;
 
