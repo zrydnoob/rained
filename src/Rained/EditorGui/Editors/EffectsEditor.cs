@@ -681,9 +681,9 @@ class EffectsEditor : IEditorMode
         changeRecorder.PushListChange();
     }
 
+    // effect preview
     private void PreviewEffect(EffectInit effectData)
     {
-        // effect preview
                     if (ImGui.IsItemHovered())
                     {
                         if (_activeEffPreview != effectData.name)
