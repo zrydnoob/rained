@@ -28,6 +28,9 @@ class EffectsEditor : IEditorMode
     private Vector2i lastBrushPos = new();
     private bool isToolActive = false;
 
+    private string _activeEffPreview = "";
+    private RlManaged.Texture2D? _loadedEffPreview = null;
+
     private ChangeHistory.EffectsChangeRecorder changeRecorder;
 
     public EffectsEditor(LevelWindow window)
@@ -179,6 +182,8 @@ class EffectsEditor : IEditorMode
                     {
                         AddEffect(effectData);
                     }
+
+                    PreviewEffect(effectData);
                 }
                 
                 ImGui.EndListBox();
@@ -674,5 +679,26 @@ class EffectsEditor : IEditorMode
         selectedEffect = level.Effects.Count;
         level.Effects.Add(new Effect(level, init));
         changeRecorder.PushListChange();
+    }
+
+    private void PreviewEffect(EffectInit effectData)
+    {
+        // effect preview
+                    if (ImGui.IsItemHovered())
+                    {
+                        if (_activeEffPreview != effectData.name)
+                        {
+                            _activeEffPreview = effectData.name;
+                            _loadedEffPreview?.Dispose();
+                            _loadedEffPreview = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "eff-previews", effectData.name + ".png"));
+                        }
+
+                        if (_loadedEffPreview is not null && Raylib_cs.Raylib.IsTextureReady(_loadedEffPreview))
+                        {
+                            ImGui.BeginTooltip();
+                            ImGuiExt.Image(_loadedEffPreview);
+                            ImGui.EndTooltip();
+                        }
+                    }
     }
 }
