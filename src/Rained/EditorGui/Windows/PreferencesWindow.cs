@@ -1,5 +1,6 @@
 using System.Numerics;
 using ImGuiNET;
+using Rained.Assets;
 using Raylib_cs;
 
 // i probably should create an IGUIWindow interface for the various miscellaneous windows...
@@ -526,11 +527,31 @@ static class PreferencesWindow
 
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 10f);
 
-            // camera border view mode
-            var camBorderMode = (int)prefs.CameraBorderMode;
-            if (ImGui.Combo("相机边界渲染", ref camBorderMode, "仅渲染里边界\0仅渲染外边界\0渲染所有边界"))
-                prefs.CameraBorderMode = (UserPreferences.CameraBorderModeOption)camBorderMode;
+            // geo icon set
+            var geometryIcons = prefs.GeometryIcons;
+            if (ImGui.BeginCombo("Geometry icon set", geometryIcons))
+            {
+                foreach (var str in GeometryIcons.Sets)
+                {
+                    var isSelected = str == geometryIcons;
+                    if (ImGui.Selectable(str, isSelected))
+                    {
+                        GeometryIcons.CurrentSet = str;
+                        prefs.GeometryIcons = GeometryIcons.CurrentSet;
+                    }
 
+                    if (isSelected)
+                        ImGui.SetItemDefaultFocus();
+                }
+
+                ImGui.EndCombo();
+            }
+            
+            // camera border view mode
+                var camBorderMode = (int) prefs.CameraBorderMode;
+            if (ImGui.Combo("相机边界渲染", ref camBorderMode, "Inner Border\0Outer Border\0Both Borders"))
+                prefs.CameraBorderMode = (UserPreferences.CameraBorderModeOption) camBorderMode;
+            
             // autotile mouse mode
             var autotileMouseMode = (int)prefs.AutotileMouseMode;
             if (ImGui.Combo("自动图块放置模式", ref autotileMouseMode, "点击起点与终点\0按下拖动"))
