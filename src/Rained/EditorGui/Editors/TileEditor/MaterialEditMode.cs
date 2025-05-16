@@ -75,7 +75,7 @@ class MaterialCatalogWidget(MaterialEditMode editor) : TileEditorCatalog
             if (!mat.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase))
                 continue;
 
-            const string leftPadding = "  ";
+            const string leftPadding = "       ";
             float colorWidth = ImGui.CalcTextSize(leftPadding).X - ImGui.GetStyle().ItemInnerSpacing.X;
             
             var cursor = ImGui.GetCursorScreenPos();

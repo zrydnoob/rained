@@ -57,7 +57,7 @@ class TileCatalogWidget(ITileSelectionState selectionState) : TileEditorCatalog
         var drawList = ImGui.GetWindowDrawList();
         float textHeight = ImGui.GetTextLineHeight();
 
-        const string leftPadding = "  ";
+        const string leftPadding = "       ";
         float colorWidth = ImGui.CalcTextSize(leftPadding).X - ImGui.GetStyle().ItemInnerSpacing.X;
 
         foreach (var i in tileSearchResults)

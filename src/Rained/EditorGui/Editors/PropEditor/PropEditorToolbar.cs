@@ -468,7 +468,7 @@ partial class PropEditor : IEditorMode
                     var boxHeight = ImGui.GetContentRegionAvail().Y;
                     if (ImGui.BeginListBox("##Groups", new Vector2(halfWidth, boxHeight)))
                     {
-                        const string leftPadding = "  ";
+                        const string leftPadding = "       ";
                         float colorWidth = ImGui.CalcTextSize(leftPadding).X - ImGui.GetStyle().ItemInnerSpacing.X;
 
                         foreach ((var i, var group) in searchResults)
@@ -553,7 +553,7 @@ partial class PropEditor : IEditorMode
                         var drawList = ImGui.GetWindowDrawList();
                         float textHeight = ImGui.GetTextLineHeight();
 
-                        const string leftPadding = "  ";
+                        const string leftPadding = "       ";
                         float colorWidth = ImGui.CalcTextSize(leftPadding).X - ImGui.GetStyle().ItemInnerSpacing.X;
 
                         foreach ((var i, var group) in tileSearchResults)

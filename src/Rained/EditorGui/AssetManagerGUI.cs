@@ -58,7 +58,7 @@ static class AssetManagerGUI
             var drawList = ImGui.GetWindowDrawList();
             float textHeight = ImGui.GetTextLineHeight();
 
-            const string leftPadding = "  ";
+            const string leftPadding = "       ";
             float colorWidth = ImGui.CalcTextSize(leftPadding).X - ImGui.GetStyle().ItemInnerSpacing.X;
 
             for (int i = 0; i < categories.Count; i++)
