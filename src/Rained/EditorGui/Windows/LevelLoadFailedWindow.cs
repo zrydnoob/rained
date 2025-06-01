@@ -59,7 +59,7 @@ static class LevelLoadFailedWindow
             // show unknown effects
             if (LoadResult!.UnrecognizedEffects.Length > 0)
             {
-                ImGui.SeparatorText("无法识别的特效");
+                ImGui.SeparatorText("无法识别的效果");
                 foreach (var name in LoadResult.UnrecognizedEffects)
                 {
                     ImGui.BulletText(name);

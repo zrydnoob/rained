@@ -8,7 +8,7 @@ namespace Rained.EditorGui.Editors;
 
 class EffectsEditor : IEditorMode
 {
-    public string Name { get => "特效"; }
+    public string Name { get => "效果"; }
     public bool SupportsCellSelection => false;
     
     private readonly LevelWindow window;
@@ -96,7 +96,7 @@ class EffectsEditor : IEditorMode
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.IncreaseBrushSize, "Increase Brush Size");
         //KeyShortcuts.ImGuiMenuItem(KeyShortcut.DecreaseBrushSize, "Decrease Brush Size");
 
-        if (ImGui.MenuItem("删除特效", selectedEffect >= 0))
+        if (ImGui.MenuItem("删除效果", selectedEffect >= 0))
             doDeleteCurrent = true;
 
         if (ImGui.MenuItem("上移效果", selectedEffect >= 0))
@@ -114,7 +114,7 @@ class EffectsEditor : IEditorMode
         var fxDatabase = RainEd.Instance.EffectsDatabase;
         altInsertion = EditorWindow.IsKeyDown(ImGuiKey.ModShift);
 
-        if (ImGui.Begin("添加特效", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("添加效果", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // work layer
             {
@@ -213,14 +213,14 @@ class EffectsEditor : IEditorMode
 
         int deleteRequest = -1;
 
-        if (ImGui.Begin("已添加特效", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("已添加效果", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             if (ImGui.BeginListBox("##EffectStack", ImGui.GetContentRegionAvail()))
             {
                 var effectInsertPreviewIndex = altInsertion ? selectedEffect+1 : selectedEffect;;
                 if (level.Effects.Count == 0)
                 {
-                    ImGui.TextDisabled("(无特效)");
+                    ImGui.TextDisabled("(无效果)");
                 }
                 else
                 {
@@ -282,7 +282,7 @@ class EffectsEditor : IEditorMode
             changeRecorder.PushListChange();
         }
 
-        if (ImGui.Begin("特效选项", ImGuiWindowFlags.NoFocusOnAppearing))
+        if (ImGui.Begin("效果选项", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // effect properties
             if (selectedEffect >= 0)
@@ -470,7 +470,7 @@ class EffectsEditor : IEditorMode
             }
             else
             {
-                ImGui.TextDisabled("未选择特效");
+                ImGui.TextDisabled("未选择效果");
             }
         }
         ImGui.End();

@@ -17,7 +17,7 @@ nav:
       - 贴图: tiles.md
       - 相机: cameras.md
       - 灯光: light.md
-      - 特效: effects.md
+      - 效果: effects.md
       - 道具: props.md
     - 渲染和运行: rendering.md
     - 延伸阅读: resources.md

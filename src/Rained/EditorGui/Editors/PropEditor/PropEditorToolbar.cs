@@ -8,7 +8,7 @@ namespace Rained.EditorGui.Editors;
 
 partial class PropEditor : IEditorMode
 {
-    private readonly string[] PropRenderTimeNames = ["渲染特效前", "渲染特效后"];
+    private readonly string[] PropRenderTimeNames = ["渲染效果前", "渲染效果后"];
     private readonly string[] RopeReleaseModeNames = ["None", "Left", "Right"];
 
     enum SelectionMode
@@ -1124,7 +1124,7 @@ partial class PropEditor : IEditorMode
                         }
                         else
                         {
-                            ImGui.TextWrapped("如果颜色被激活，建议在特效之后渲染这个道具，因为特效不会影响颜色层。");
+                            ImGui.TextWrapped("如果颜色被激活，建议在效果之后渲染这个道具，因为效果不会影响颜色层。");
                         }
                     }
 
