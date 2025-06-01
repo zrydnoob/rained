@@ -58,6 +58,7 @@ v2.4.0:
   - prop editor lasso select
 
 Do Soon:
+- Add geo big slope to manual
 - toggle for showing shortcuts in tile editor
 - tile graphics ludo's seamless tile types?
 - could there be an option to change the move confirm shortcut? my laptop preset has change layer on enter so would be very useful for me if it’s ok ^^
@@ -90,7 +91,6 @@ Other features:
 - undo/redo for level resize
 - level resze drag
 - level resize change history
-- put asterik in window title for unsaved levels
 - allow user to open levels with unrecognized tiles/props
   without erasing unrecognized assets
   - so need to figure out how to store tiles/props by name only instead of

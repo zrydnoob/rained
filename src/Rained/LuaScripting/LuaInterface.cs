@@ -7,7 +7,7 @@ namespace Rained.LuaScripting;
 
 static class LuaInterface
 {
-    public const int VersionMajor = 3;
+    public const int VersionMajor = 4;
     public const int VersionMinor = 0;
     public const int VersionRevision = 0;
 
@@ -26,7 +26,8 @@ static class LuaInterface
     {
         Host = host;
 
-        scriptsPath = Path.GetRelativePath(Environment.CurrentDirectory, Path.Combine(Boot.AppDataPath, "scripts"));
+        // scriptsPath = Path.GetRelativePath(Environment.CurrentDirectory, Path.Combine(Boot.AppDataPath, "scripts"));
+        scriptsPath = Path.Combine(Boot.AppDataPath, "scripts");
 
         luaState = new Lua()
         {
@@ -39,7 +40,7 @@ static class LuaInterface
 
         // configure package.path
         var package = (LuaTable)luaState["package"];
-        package["path"] = Path.Combine(scriptsPath, "?.lua") + ";" + Path.Combine(scriptsPath, "?", "init.lua");
+        package["path"] = Path.Combine(scriptsPath, "?.lua") + ";" + Path.Combine(scriptsPath, "?", "init.lua") + ";" + package["path"];
 
         // global functions
         LuaHelpers.PushCsFunction(luaState.State, new Action<string, bool?>(AutoRequire));
@@ -114,10 +115,10 @@ static class LuaInterface
         if (runAutoloads)
         {
             LuaHelpers.DoFile(luaState.State, Path.Combine(scriptsPath, "init.lua"));
-            if (Directory.Exists(Path.Combine(scriptsPath, "autoload")))
-            {
-                LuaHelpers.DoString(luaState.State, "autorequire('autoload', true)");
-            }
+            // if (Directory.Exists(Path.Combine(scriptsPath, "autoload")))
+            // {
+            //     LuaHelpers.DoString(luaState.State, "autorequire('autoload', true)");
+            // }
         }
     }
 
@@ -155,6 +156,7 @@ static class LuaInterface
         PropModule.Init(lua, luaState);
         HistoryModule.Init(lua, luaState);
         GuiModule.Init(lua);
+        ViewModule.Init(lua, luaState);
 
         return 1;
     }

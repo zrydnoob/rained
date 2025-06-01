@@ -7,17 +7,17 @@ static class RainedModule
 {
     private static readonly Dictionary<int, int> registeredCmds = [];
     private const string CommandID = "RainedCommandID";
-    private static readonly string[] fileBrowserOpenMode = ["write", "read", "multiRead", "directory", "multiDirectory"];
-
-    private static int filebrowserCoro = 0;
-    private static FileBrowser? fileBrowser = null;
-
-    private static nint levelFilterUserdata;
     
     private static readonly List<LuaCallback> updateCallbacks = [];
     private static readonly List<LuaCallback> preRenderCallbacks = [];
     private static readonly List<LuaCallback> postRenderCallbacks = [];
     private static readonly List<LuaCallback> renderFailCallbacks = [];
+
+    private static readonly List<LuaCallback> docChangedCallbacks = [];
+    private static readonly List<LuaCallback> docOpenedCallbacks = [];
+    private static readonly List<LuaCallback> docClosingCallbacks = [];
+    private static readonly List<LuaCallback> docSavingCallbacks = [];
+    private static readonly List<LuaCallback> docSavedCallbacks = [];
 
     public static void Init(Lua lua, NLua.Lua nLua)
     {
@@ -188,6 +188,17 @@ static class RainedModule
             return 1;
         });
 
+        lua.ModuleFunction("closeDocument", static (nint luaPtr) =>
+        {
+            var lua = Lua.FromIntPtr(luaPtr);
+            var idx = (int)lua.CheckInteger(1) - 1;
+
+            if (idx >= 0 && idx < +LuaInterface.Host.DocumentCount)
+                LuaInterface.Host.CloseDocument(idx);
+
+            return 0;
+        });
+
         lua.NewMetaTable(CommandID);
         LuaHelpers.PushLuaFunction(lua, static (Lua lua) =>
         {
@@ -340,105 +351,14 @@ static class RainedModule
             var lua = Lua.FromIntPtr(luaPtr);
             var w = (int)lua.CheckInteger(1);
             var h = (int)lua.CheckInteger(2);
-            var filePath = lua.OptString(3, "");
+            string? filePath;
+            if (lua.IsNoneOrNil(3))
+                filePath = null;
+            else
+                filePath = lua.CheckString(3);
 
             LuaInterface.Host.NewLevel(w, h, filePath);
             return 0;
-        });
-
-        {
-            lua.NewTable();
-
-            levelFilterUserdata = lua.NewIndexedUserData(1, 1);
-            lua.SetField(-2, "level");
-
-            lua.SetField(-2, "fileFilters");
-        }
-
-        lua.ModuleFunction("openFileBrowser", static (nint luaPtr) =>
-        {
-            var lua = Lua.FromIntPtr(luaPtr);
-            var openMode = (FileBrowser.OpenMode)lua.CheckOption(1, null, fileBrowserOpenMode);
-            if (!lua.IsNoneOrNil(2)) lua.CheckType(2, LuaType.Table);
-
-            if (lua.PushThread())
-            {
-                return lua.ErrorWhere("cannot call openFileBrowser from non-yieldable thread");
-            }
-
-            List<(string name, bool isRw, string[] ext)> filters = [];
-            int c = (int)lua.Length(2);
-            for (int i = 1; i <= c; i++)
-            {
-                lua.GetInteger(2, i);
-
-                // hardcoded built-in filters
-                if (lua.IsUserData(-1) && lua.ToUserData(-1) == levelFilterUserdata)
-                {
-                    filters.Add(("Level file", true, null!));
-                    lua.Pop(1);
-                    continue;
-                }
-
-                lua.ArgumentCheck(lua.IsTable(-1), 2, "invalid filters table");
-
-                // get filter name
-                lua.GetInteger(-1, 1);
-                lua.ArgumentCheck(lua.IsString(-1), 2, "invalid filters table");
-                var filterName = lua.ToString(-1);
-                lua.Pop(1);
-
-                // get filter extensions
-                lua.GetInteger(-1, 2);
-
-                if (lua.IsTable(-1))
-                {
-                    int c2 = (int)lua.Length(-1);
-                    string[] filterExts = new string[c2];
-                    int j = 0;
-                    for (int k = 1; k <= c2; k++)
-                    {
-                        lua.GetInteger(-1, k);
-                        lua.ArgumentCheck(lua.IsString(-1), 2, "invalid filters table");
-                        filterExts[j++] = lua.ToString(-1);
-                        lua.Pop(1);
-                    }
-
-                    filters.Add((filterName, false, filterExts));
-                }
-                else
-                {
-                    lua.ArgumentCheck(lua.IsString(-1), 2, "invalid filters table");
-                    var filterExt = lua.ToString(-1);
-                    filters.Add((filterName, false, [filterExt]));
-                }
-
-                lua.Pop(1);
-            }
-
-            fileBrowser = new FileBrowser(openMode, FileBrowserCallback, null);
-            foreach (var (name, isRw, ext) in filters)
-            {
-                if (isRw)
-                {
-                    fileBrowser.AddFilterWithCallback("Level file", static (string path, bool isRw) => isRw, ".txt");
-                    fileBrowser.PreviewCallback ??= (string path, bool isRw) =>
-                    {
-                        if (isRw) return new BrowserLevelPreview(path);
-                        return null;
-                    };
-                }
-                else
-                {
-                    fileBrowser.AddFilter(name, ext);
-                }
-            }
-
-            filebrowserCoro = LuaInterface.LuaState.Ref(LuaRegistry.Index);
-            return lua.YieldK(0, 0, static (nint luaPtr, int status, nint k) =>
-            {
-                return 1;
-            });
         });
 
         lua.ModuleFunction("onUpdate", static (nint luaPtr) =>
@@ -500,6 +420,71 @@ static class RainedModule
             
             return 1;
         });
+
+        lua.ModuleFunction("onDocumentChanged", static (nint luaPtr) =>
+        {
+            var lua = Lua.FromIntPtr(luaPtr);
+            lua.CheckType(1, LuaType.Function);
+            lua.PushCopy(1);
+            var cb = new LuaCallback(lua)
+            {
+                OnDisconnect = static (Lua lua, LuaCallback cb) => docChangedCallbacks.Remove(cb)
+            };
+            docChangedCallbacks.Add(cb);
+            return 1;
+        });
+
+        lua.ModuleFunction("onDocumentOpened", static (nint luaPtr) =>
+        {
+            var lua = Lua.FromIntPtr(luaPtr);
+            lua.CheckType(1, LuaType.Function);
+            lua.PushCopy(1);
+            var cb = new LuaCallback(lua)
+            {
+                OnDisconnect = static (Lua lua, LuaCallback cb) => docOpenedCallbacks.Remove(cb)
+            };
+            docOpenedCallbacks.Add(cb);
+            return 1;
+        });
+
+        lua.ModuleFunction("onDocumentClosing", static (nint luaPtr) =>
+        {
+            var lua = Lua.FromIntPtr(luaPtr);
+            lua.CheckType(1, LuaType.Function);
+            lua.PushCopy(1);
+            var cb = new LuaCallback(lua)
+            {
+                OnDisconnect = static (Lua lua, LuaCallback cb) => docClosingCallbacks.Remove(cb)
+            };
+            docClosingCallbacks.Add(cb);
+            return 1;
+        });
+
+        lua.ModuleFunction("onDocumentSaving", static (nint luaPtr) =>
+        {
+            var lua = Lua.FromIntPtr(luaPtr);
+            lua.CheckType(1, LuaType.Function);
+            lua.PushCopy(1);
+            var cb = new LuaCallback(lua)
+            {
+                OnDisconnect = static (Lua lua, LuaCallback cb) => docSavingCallbacks.Remove(cb)
+            };
+            docSavingCallbacks.Add(cb);
+            return 1;
+        });
+
+        lua.ModuleFunction("onDocumentSaved", static (nint luaPtr) =>
+        {
+            var lua = Lua.FromIntPtr(luaPtr);
+            lua.CheckType(1, LuaType.Function);
+            lua.PushCopy(1);
+            var cb = new LuaCallback(lua)
+            {
+                OnDisconnect = static (Lua lua, LuaCallback cb) => docSavedCallbacks.Remove(cb)
+            };
+            docSavedCallbacks.Add(cb);
+            return 1;
+        });
     }
 
     public static void UpdateCallback(float dt)
@@ -559,32 +544,55 @@ static class RainedModule
         }
     }
 
-    private static void FileBrowserCallback(string[] items)
+    public static void DocumentChangedCallback(int index)
     {
-        var mLua = LuaInterface.LuaState;
-        mLua.RawGetInteger(LuaRegistry.Index, filebrowserCoro);
-
-        LuaInterface.LuaState.Unref(LuaRegistry.Index, filebrowserCoro);
-        filebrowserCoro = 0;
-
-        var lua = mLua.ToThread(-1);
-
-        lua.NewTable();
-        int i = 1;
-        foreach (var str in items)
+        foreach (var cb in docChangedCallbacks)
         {
-            lua.PushString(str);
-            lua.RawSetInteger(-2, i++);
+            cb.LuaState.PushInteger(index+1);
+            cb.Invoke(1);
         }
+    }
 
-        LuaHelpers.ResumeCoroutine(lua, null, 1, out _);
+    public static void DocumentOpenedCallback(int index)
+    {
+        foreach (var cb in docOpenedCallbacks)
+        {
+            cb.LuaState.PushInteger(index+1);
+            cb.Invoke(1);
+        }
+    }
+
+    public static void DocumentClosingCallback(int index)
+    {
+        foreach (var cb in docClosingCallbacks)
+        {
+            cb.LuaState.PushInteger(index+1);
+            cb.Invoke(1);
+        }
+    }
+
+    public static void DocumentSavingCallback(int index)
+    {
+        foreach (var cb in docSavingCallbacks)
+        {
+            cb.LuaState.PushInteger(index+1);
+            cb.Invoke(1);
+        }
+    }
+
+    public static void DocumentSavedCallback(int index)
+    {
+        foreach (var cb in docSavedCallbacks)
+        {
+            cb.LuaState.PushInteger(index+1);
+            cb.Invoke(1);
+        }
     }
 
     private static void RunCommand(Lua lua, int id)
     {
-        Lua coro = lua.NewThread();
-        coro.RawGetInteger(LuaRegistry.Index, registeredCmds[id]);
-        LuaHelpers.ResumeCoroutine(coro, null, 0, out _);
+        lua.RawGetInteger(LuaRegistry.Index, registeredCmds[id]);
+        LuaHelpers.Call(lua, 0, 0);
         
         //lua.PushCFunction(_errHandler);
         //lua.PCall(0, 0, -2);
@@ -592,7 +600,7 @@ static class RainedModule
 
     public static void UIUpdate()
     {
-        FileBrowser.Render(ref fileBrowser);
+        // FileBrowser.Render(ref fileBrowser);
     }
 
     public static void RemoveAllCommands(Lua lua)

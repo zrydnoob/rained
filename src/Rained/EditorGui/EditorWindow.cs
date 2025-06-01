@@ -215,13 +215,30 @@ static class EditorWindow
                         LuaScripting.LuaInterface.HandleException(e);
                     }
                 }
+                
+                if (ImGui.MenuItem("Execute Script..."))
+                {
+                    var startDir = Path.Combine(Boot.AppDataPath, "scripts");
+                    fileBrowser = new FileBrowser(
+                        mode: FileBrowser.OpenMode.Read,
+                        openDir: startDir, 
+                        callback: (string[] paths) =>
+                        {
+                            if (paths.Length == 0) return;
+                            LuaScripting.LuaHelpers.DoFile(LuaScripting.LuaInterface.LuaState, paths[0]);
+                        }
+                    );
+                    fileBrowser.AddFilter("Lua file", ".lua");
+                }
+
+                ImGui.Separator();
 
                 if (ImGui.MenuItem("Preferences"))
                 {
                     PreferencesWindow.OpenWindow();
                 }
 
-                LuaScripting.Modules.GuiModule.MenuHook("file");
+                LuaScripting.Modules.GuiModule.MenuHook("File", true);
 
                 ImGui.Separator();
                 if (ImGui.MenuItem("退出", "Alt+F4"))
@@ -270,7 +287,7 @@ static class EditorWindow
                     }
                 }
 
-                LuaScripting.Modules.GuiModule.MenuHook("edit");
+                LuaScripting.Modules.GuiModule.MenuHook("Edit", true);
 
                 ImGui.Separator();
                 if (fileActive)
@@ -389,7 +406,7 @@ static class EditorWindow
                     switchToHomeTab = true;
                 }
 
-                LuaScripting.Modules.GuiModule.MenuHook("view");
+                LuaScripting.Modules.GuiModule.MenuHook("View", true);
 
                 ImGui.Separator();
 
@@ -419,9 +436,18 @@ static class EditorWindow
                     AboutWindow.IsWindowOpen = true;
                 }
 
-                LuaScripting.Modules.GuiModule.MenuHook("help");
+                LuaScripting.Modules.GuiModule.MenuHook("Help", true);
                 
                 ImGui.EndMenu();
+            }
+
+            foreach (var menuName in LuaScripting.Modules.GuiModule.CustomMenus)
+            {
+                if (ImGui.BeginMenu(menuName))
+                {
+                    LuaScripting.Modules.GuiModule.MenuHook(menuName, false);
+                    ImGui.EndMenu();
+                }
             }
 
             ImGui.EndMainMenuBar();

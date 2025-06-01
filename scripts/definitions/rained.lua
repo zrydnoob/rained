@@ -49,6 +49,10 @@ OBJECT_TYPE = {
 ---@class CallbackHandle
 ---@field disconnect fun(self:CallbackHandle) Disconnect the callback handle.
 
+---@class DocumentInfo
+---@field name string
+---@field filePath string
+
 ---@class CommandInfo
 ---@field name string The display name of the command.
 ---@field callback fun() The function to run when the command is invoked.
@@ -76,8 +80,8 @@ function rained.getApiVersion() end
 ---it was opened normally and so is in GUI mode.
 ---
 ---Due to the lack of a GUI, several things are different in batch mode:
---- - commands, autotiles, and onUpdate are no-ops
---- - the history module will not be defined
+--- - commands, autotiles, and onUpdate are no-ops.
+--- - `rained.history`, `rained.gui`, and `rained.view` will be nil.
 --- - alert will instead print messages to stdout.
 ---@return boolean isConsole
 function rained.isBatchMode() end
@@ -106,10 +110,6 @@ function rained.registerCommand(info) end
 ---@param name string The display name of the command.
 ---@param callback function The action to run on command.
 function rained.registerCommand(name, callback) end
-
----@class DocumentInfo
----@field name string
----@field filePath string
 
 ---Get the number of open documents.
 ---
@@ -160,6 +160,31 @@ function rained.closeDocument(index) end
 ---@return boolean
 function rained.isDocumentOpen() end
 
+---Register a callback to be ran whenever the active document had changed.
+---@param func fun(index:integer)
+---@return CallbackHandle
+function rained.onDocumentChanged(func) end
+
+---Register a callback to be ran whenever a document is opened.
+---@param func fun(index:integer)
+---@return CallbackHandle
+function rained.onDocumentOpened(func) end
+
+---Register a callback to be ran whenever a document is closing.
+---@param func fun(index:integer)
+---@return CallbackHandle
+function rained.onDocumentClosing(func) end
+
+---Register a callback to be ran whenever a document is about to be saved.
+---@param func fun(index:integer)
+---@return CallbackHandle
+function rained.onDocumentSaving(func) end
+
+---Register a callback to be ran whenever a document was successfully saved.
+---@param func fun(index:integer)
+---@return CallbackHandle
+function rained.onDocumentSaved(func) end
+
 ---Opens a level from file. Returns diagnostic information if there were problems loading the level
 ---but it could be opened regardless, but nil if successful.
 ---@param filePath string The file path to the level txt file.
@@ -171,24 +196,6 @@ function rained.openLevel(filePath) end
 ---@param height integer The height of the newly created level.
 ---@param filePath string? The optional file path to associate with the level.
 function rained.newLevel(width, height, filePath) end
-
----Open the file browser, blocking the script until the user has either submitted or canceled.
----
----A given filter has three formats:
----1. `{name: string, extWithPeriod: string}`
----2. `{name: string, extensions: string[]}`
----3. `rained.fileFilters.level`
----
----@param openMode FileBrowserOpenMode
----@param filters any[]?
----@return string[]
-function rained.openFileBrowser(openMode, filters) end
-
-rained.fileFilters = {}
-
----@type userdata
-local ud
-rained.fileFilters.level = ud
 
 ---@deprecated
 ---**DEPRECATED: Use `rained.level.width` instead.**
