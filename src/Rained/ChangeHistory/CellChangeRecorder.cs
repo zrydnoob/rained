@@ -19,7 +19,7 @@ class CellChangeRecord : IChangeRecord
         public Vector2i? NewChainPos = newChainPos;
     }
 
-    public int EditMode;
+    public int EditMode = -1;
     public List<CellChange> CellChanges = [];
     public List<ChainHolderChange> ChainHolderChanges = [];
 
@@ -29,7 +29,7 @@ class CellChangeRecord : IChangeRecord
     public void Apply(bool useNew)
     {
         var level = RainEd.Instance.Level;
-        RainEd.Instance.LevelView.EditMode = EditMode;
+        if (EditMode != -1) RainEd.Instance.LevelView.EditMode = EditMode;
 
         foreach (CellChange change in CellChanges)
         {
@@ -60,7 +60,10 @@ class CellChangeRecorder : ChangeRecorder
     private LevelCell[,,]? snapshotLayers = null;
     private Dictionary<(int, int, int), Vector2i>? snapshotChains = null;
 
-    public void BeginChange()
+    public override bool Active => snapshotLayers is not null;
+    private bool userCreated = false;
+
+    public void BeginChange(bool userCreated = true)
     {
         if (snapshotLayers != null)
         {
@@ -73,17 +76,20 @@ class CellChangeRecorder : ChangeRecorder
         snapshotChains = [];
         foreach (var (k, v) in RainEd.Instance.Level.ChainData)
             snapshotChains[k] = v;
+        
+        this.userCreated = userCreated;
     }
 
-    public CellChangeRecord? EndChange()
+    public override IChangeRecord? EndChange()
     {
         if (snapshotLayers is null || snapshotChains is null)
             return null;
-
-        var changes = new CellChangeRecord()
+        
+        var changes = new CellChangeRecord();
+        if (userCreated)
         {
-            EditMode = RainEd.Instance.LevelView.EditMode
-        };
+            changes.EditMode = RainEd.Instance.LevelView.EditMode;
+        }
 
         var level = RainEd.Instance.Level;
 
@@ -142,21 +148,12 @@ class CellChangeRecorder : ChangeRecorder
         return null;
     }
 
-    public void TryPushChange()
-    {
-        var change = EndChange();
-        if (change is not null)
-        {
-            RainEd.Instance.ChangeHistory.Push(change);
-        }
-    }
-
     public void CancelChange()
     {
         snapshotLayers = null;
         snapshotChains = null;
     }
-
+    
     public void PushChange()
     {
         if (snapshotLayers is null || snapshotChains is null)

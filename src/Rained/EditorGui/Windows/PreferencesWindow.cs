@@ -1,6 +1,7 @@
 using System.Numerics;
 using ImGuiNET;
 using Rained.Assets;
+using Rained.Drizzle;
 using Raylib_cs;
 
 // i probably should create an IGUIWindow interface for the various miscellaneous windows...
@@ -18,10 +19,11 @@ static class PreferencesWindow
         Shortcuts = 1,
         Theme = 2,
         Assets = 3,
-        Drizzle = 4
+        Drizzle = 4,
+        Scripts = 5
     }
 
-    private readonly static string[] NavTabs = ["全局", "快捷键", "主题", "资产", "Drizzle"];
+    private readonly static string[] NavTabs = ["全局", "快捷键", "主题", "资产", "Drizzle", "Scripts"];
     private readonly static string[] RendererNames = ["Direct3D 11", "Direct3D 12", "OpenGL", "Vulkan"];
     private static NavTabEnum selectedNavTab = NavTabEnum.General;
 
@@ -130,6 +132,10 @@ static class PreferencesWindow
                 {
                     for (int i = 0; i < NavTabs.Length; i++)
                     {
+                        // don't show scripts tab if there are no scripts with preferences guis
+                        if (i == (int)NavTabEnum.Scripts && !LuaScripting.Modules.GuiModule.HasPreferencesCallbacks)
+                            continue;
+                        
                         if (ImGui.Selectable(NavTabs[i], i == (int)selectedNavTab))
                         {
                             selectedNavTab = (NavTabEnum)i;
@@ -162,6 +168,10 @@ static class PreferencesWindow
 
                     case NavTabEnum.Drizzle:
                         ShowDrizzleTab();
+                        break;
+
+                    case NavTabEnum.Scripts:
+                        LuaScripting.Modules.GuiModule.PrefsHook();
                         break;
                 }
 
@@ -346,6 +356,38 @@ static class PreferencesWindow
             ImGui.AlignTextToFramePadding();
             ImGui.Text("Tile Specs L2");
 
+            // grid opacity
+            float gridOpacity = prefs.GridOpacity;
+            if (ImGui.SliderFloat("##Grid Opacity", ref gridOpacity, 0f, 0.5f))
+            {
+                prefs.GridOpacity = gridOpacity;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("X##ResetGRIDOP"))
+            {
+                prefs.GridOpacity = UserPreferences.DefaultGridOpacity;
+            }
+            ImGui.SetItemTooltip("Reset");
+            ImGui.SameLine();
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text("Grid Opacity");
+
+            // spec opacity
+            float specOpacity = prefs.TileSpecOpacity;
+            if (ImGui.SliderFloat("##Tile Specs Opacity", ref specOpacity, 0f, 1f))
+            {
+                prefs.TileSpecOpacity = specOpacity;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("X##ResetTILESPEC"))
+            {
+                prefs.TileSpecOpacity = UserPreferences.DefaultTileSpecOpacity;
+            }
+            ImGui.SetItemTooltip("Reset");
+            ImGui.SameLine();
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text("Tile Specs Opacity");
+
             // update layer colors in preferences class
             prefs.LayerColor1 = Vec3ToHexColor(layerColor1);
             prefs.LayerColor2 = Vec3ToHexColor(layerColor2);
@@ -435,20 +477,46 @@ static class PreferencesWindow
             {
                 bool vsync = Boot.Window.VSync;
                 if (ImGui.Checkbox("垂直同步", ref vsync))
+                {
                     Boot.Window.VSync = vsync;
+                    prefs.Vsync = vsync;
 
+                    if (vsync)
+                    {
+                        Boot.RefreshRate = Boot.DefaultRefreshRate;
+                    }
+                }
+                
                 if (!vsync)
                 {
                     ImGui.SameLine();
 
                     ImGui.SetNextItemWidth(ImGui.GetFontSize() * 8.0f);
 
+                    ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImGui.GetStyle().ItemInnerSpacing);
                     var refreshRate = prefs.RefreshRate;
-                    if (ImGui.SliderInt("帧数限制", ref refreshRate, 30, 240))
+                    if (ImGui.SliderInt("###Refresh rate", ref refreshRate, 30, 240))
                     {
                         prefs.RefreshRate = refreshRate;
-                        Raylib.SetTargetFPS(prefs.RefreshRate);
                     }
+
+                    if (ImGui.IsItemDeactivatedAfterEdit())
+                    {
+                        Boot.RefreshRate = prefs.RefreshRate;
+                        prefs.RefreshRate = Boot.RefreshRate;
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.PopStyleVar();
+                    if (ImGui.Button("X###refreshratereset"))
+                    {
+                        Boot.RefreshRate = Boot.DefaultRefreshRate;
+                        prefs.RefreshRate = Boot.RefreshRate;
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.AlignTextToFramePadding();
+                    ImGui.Text("Refresh rate");
                 }
             }
 
@@ -655,6 +723,12 @@ static class PreferencesWindow
                     ImGui.PopTextWrapPos();
                     ImGui.EndTooltip();
                 }
+            }
+
+            var saveBackups = prefs.SaveFileBackups;
+            if (ImGui.Checkbox("Save backups of files", ref saveBackups))
+            {
+                prefs.SaveFileBackups = saveBackups;
             }
 
             ImGui.Separator();
@@ -887,19 +961,30 @@ static class PreferencesWindow
         bool boolRef;
         var prefs = RainEd.Instance.Preferences;
 
+        ImGui.BeginDisabled(DrizzleManager.StaticRuntime is null);
+        if (ImGui.Button("Discard Drizzle runtime"))
+            DrizzleManager.DisposeStaticRuntime();
+        ImGui.EndDisabled();
+
         // static lingo runtime
         {
             boolRef = prefs.StaticDrizzleLingoRuntime;
-            if (ImGui.Checkbox("应用程序启动时初始化 Drizzle", ref boolRef))
+            if (ImGui.Checkbox("Persistent Drizzle runtime", ref boolRef))
+            {
                 prefs.StaticDrizzleLingoRuntime = boolRef;
-
+                if (!boolRef)
+                    DrizzleManager.DisposeStaticRuntime();
+            }
+            
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
                 """
-                这将在应用程序启动时运行一次 Drizzle 运行时初始化过程。这会导致更长的启动时间和更多的空闲RAM使用，但会减少启动渲染所需的时间。
-
-                此选项需要重新启动才能生效。
+                This will keep a Drizzle runtime in the background
+                after a render, instead of discarding it and
+                recreating a new one on the next render. This
+                results in more idle RAM usage, but will decrease
+                the time it takes for subsequent renders.
                 """);
         }
 

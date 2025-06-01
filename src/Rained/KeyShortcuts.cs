@@ -43,6 +43,7 @@ enum KeyShortcut : int
     ZoomLightIn, ZoomLightOut,
     RotateLightCW, RotateLightCCW,
     ScaleLightBrush, RotateLightBrush,
+    LightmapStretch,
 
     RotateBrushCW, RotateBrushCCW,
     PreviousBrush, NextBrush,
@@ -456,6 +457,8 @@ static class KeyShortcuts
         Register("下一个笔刷", KeyShortcut.NextBrush, ImGuiKey.X, ImGuiModFlags.None,
             allowRepeat: true
         );
+
+        Register("Lightmap Warp", KeyShortcut.LightmapStretch, ImGuiKey.None, ImGuiModFlags.None);
 
         // Camera Editor
         Register("相机 X 轴捕捉", KeyShortcut.CameraSnapX, ImGuiKey.Q, ImGuiModFlags.None);

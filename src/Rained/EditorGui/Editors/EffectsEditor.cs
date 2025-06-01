@@ -15,6 +15,7 @@ class EffectsEditor : IEditorMode
     private int selectedGroup = 0;
     private int selectedEffect = -1;
     private string searchQuery = string.Empty;
+    private bool doInsertAfter = false;
 
     public int SelectedEffect { get => selectedEffect; set => selectedEffect = value; }
 
@@ -82,7 +83,7 @@ class EffectsEditor : IEditorMode
 
     private static readonly string[] plantColorNames =
     [
-        "颜色1", "颜色2", "死亡"
+        "1", "2", "X"
     ];
 
     private bool doDeleteCurrent = false;
@@ -110,6 +111,7 @@ class EffectsEditor : IEditorMode
     {
         var level = RainEd.Instance.Level;
         var fxDatabase = RainEd.Instance.EffectsDatabase;
+        doInsertAfter = EditorWindow.IsKeyDown(ImGuiKey.ModShift);
 
         if (ImGui.Begin("添加特效", ImGuiWindowFlags.NoFocusOnAppearing))
         {
@@ -158,6 +160,7 @@ class EffectsEditor : IEditorMode
             {
                 foreach (int i in groupsPassingSearch)
                 {
+                    if (fxDatabase.Groups[i].name == "_deprecated_") continue;
                     if (ImGui.Selectable(fxDatabase.Groups[i].name, i == selectedGroup) || groupsPassingSearch.Count == 1)
                         selectedGroup = i;
                 }
@@ -174,7 +177,7 @@ class EffectsEditor : IEditorMode
                 for (int i = 0; i < effectsList.Count; i++)
                 {
                     var effectData = effectsList[i];
-                    if (effectData.deprecated) continue; // ignore deprecated effects
+                    // if (effectData.deprecated) continue; // ignore deprecated effects
 
                     if (searchQuery != "" && !effectData.name.Contains(searchQuery, StringComparison.CurrentCultureIgnoreCase)) continue;
 
@@ -213,6 +216,7 @@ class EffectsEditor : IEditorMode
         {
             if (ImGui.BeginListBox("##EffectStack", ImGui.GetContentRegionAvail()))
             {
+                var effectInsertPreviewIndex = doInsertAfter ? selectedEffect+1 : selectedEffect;;
                 if (level.Effects.Count == 0)
                 {
                     ImGui.TextDisabled("(无特效)");
@@ -376,26 +380,10 @@ class EffectsEditor : IEditorMode
                 // plant color property
                 if (effect.Data.usePlantColors)
                 {
-                    if (ImGui.BeginCombo("颜色", plantColorNames[effect.PlantColor]))
+                    if (ImGuiExt.ButtonSwitch("颜色", plantColorNames, ref effect.PlantColor, ButtonGroupOptions.ShowID))
                     {
-                        for (int i = 0; i < plantColorNames.Length; i++)
-                        {
-                            bool isSelected = i == effect.PlantColor;
-                            if (ImGui.Selectable(plantColorNames[i], isSelected))
-                            {
-                                effect.PlantColor = i;
-                                hadChanged = true;
-                            }
-
-                            if (isSelected)
-                                ImGui.SetItemDefaultFocus();
-                        }
-
-                        ImGui.EndCombo();
-                    }
-
-                    if (ImGui.IsItemEdited())
                         hadChanged = true;
+                    }
                 }
 
                 // affect colors and gradients
@@ -414,22 +402,32 @@ class EffectsEditor : IEditorMode
                     // string config
                     if (configInfo is CustomEffectString strConfig)
                     {
-                        if (ImGui.BeginCombo(strConfig.Name, strConfig.Options[configValue]))
+                        if (strConfig.IsColorOption)
                         {
-                            for (int i = 0; i < strConfig.Options.Length; i++)
+                            if (ImGuiExt.ButtonSwitch(strConfig.Name, plantColorNames, ref configValue, ButtonGroupOptions.ShowID))
                             {
-                                bool isSelected = i == configValue;
-                                if (ImGui.Selectable(strConfig.Options[i], isSelected))
+                                hadChanged = true;
+                            }
+                        }
+                        else
+                        {
+                            if (ImGui.BeginCombo(strConfig.Name, strConfig.Options[configValue]))
+                            {
+                                for (int i = 0; i < strConfig.Options.Length; i++)
                                 {
-                                    configValue = i;
-                                    hadChanged = true;
+                                    bool isSelected = i == configValue;
+                                    if (ImGui.Selectable(strConfig.Options[i], isSelected))
+                                    {
+                                        configValue = i;
+                                        hadChanged = true;
+                                    }
+
+                                    if (isSelected)
+                                        ImGui.SetItemDefaultFocus();
                                 }
 
-                                if (isSelected)
-                                    ImGui.SetItemDefaultFocus();
+                                ImGui.EndCombo();
                             }
-
-                            ImGui.EndCombo();
                         }
                     }
 
@@ -551,6 +549,9 @@ class EffectsEditor : IEditorMode
             Fade = 30f / 255f,
             ActiveLayer = window.WorkLayer
         });
+
+        if (selectedEffect >= level.Effects.Count)
+            selectedEffect = -1;
 
         if (selectedEffect >= 0)
         {
@@ -693,10 +694,33 @@ class EffectsEditor : IEditorMode
 
     private void AddEffect(EffectInit init)
     {
-        changeRecorder.BeginListChange();
         var level = RainEd.Instance.Level;
-        selectedEffect = level.Effects.Count;
-        level.Effects.Add(new Effect(level, init));
+        changeRecorder.BeginListChange();
+
+        var newEffect = new Effect(level, init);
+        if (selectedEffect != -1)
+        {
+            // shift: insert after selected effect
+            // no shift: insert before selected effect
+            if (doInsertAfter)
+                level.Effects.Insert(++selectedEffect, newEffect);
+            else
+                level.Effects.Insert(selectedEffect, newEffect);
+        }
+        else
+        {
+            if (doInsertAfter)
+            {
+                level.Effects.Add(newEffect);
+                selectedEffect = level.Effects.Count - 1;
+            }
+            else
+            {
+                level.Effects.Insert(0, newEffect);
+                selectedEffect = 0;
+            }
+        }
+        
         changeRecorder.PushListChange();
     }
 }

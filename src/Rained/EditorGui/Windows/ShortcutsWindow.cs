@@ -113,6 +113,7 @@ static partial class ShortcutsWindow
             ("Shift+鼠标滚轮", "更改笔刷大小"),
             ("[DecreaseBrushSize]/[IncreaseBrushSize]", "更改笔刷大小"),
             ("<Ctrl>+Mouse Wheel", "更改笔刷力度"),
+            ("Shift+Add effect", "选中后添加特效")
         ],
 
         // Props

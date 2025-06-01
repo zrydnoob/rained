@@ -21,7 +21,7 @@ class CellSelectionChangeRecord(
 {
     public CellSelectionData data = data;
     public int? editMode;
-    public CellChangeRecord? cellChangeRecord;
+    public IChangeRecord? cellChangeRecord;
 
     public void Apply(bool useNew)
     {
@@ -54,10 +54,7 @@ class CellSelectionChangeRecord(
         data.cutoutPos = tmpCutoutPos;
         data.cutoutSize = tmpCutoutSize;
 
-        if (cellChangeRecord is not null)
-        {
-            cellChangeRecord.Apply(useNew);
-        }
+        cellChangeRecord?.Apply(useNew);
     }
 }
 
@@ -70,6 +67,8 @@ class CellSelectionChangeRecorder : ChangeRecorder
 
     int? editMode = null;
     bool trackGeo;
+
+    public override bool Active => _active;
 
     public void BeginChange(bool saveEditMode = false)
     {
@@ -116,23 +115,22 @@ class CellSelectionChangeRecorder : ChangeRecorder
         _active = true;
     }
 
-    public void TryPushChange()
+    public override IChangeRecord? EndChange()
     {
-        if (_active)
-        {
-            var data = new CellSelectionData(
-                new Vector2i(cutoutX, cutoutY), new Vector2i(cutoutW, cutoutH),
-                tempCutout,
-                (LayerSelection?[])tempSelections.Clone()
-            );
+        if (!_active) return null;
+        
+        var data = new CellSelectionData(
+            new Vector2i(cutoutX, cutoutY), new Vector2i(cutoutW, cutoutH),
+            tempCutout,
+            (LayerSelection?[])tempSelections.Clone()
+        );
 
-            RainEd.Instance.ChangeHistory.Push(new CellSelectionChangeRecord(data)
-            {
-                editMode = editMode,
-                cellChangeRecord = trackGeo ? RainEd.Instance.LevelView.CellChangeRecorder.EndChange() : null
-            });
-            _active = false;
-        }
+        _active = false;
+        return new CellSelectionChangeRecord(data)
+        {
+            editMode = editMode,
+            cellChangeRecord = trackGeo ? RainEd.Instance.LevelView.CellChangeRecorder.EndChange() : null
+        };
     }
 
     public void PushChange()

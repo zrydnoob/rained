@@ -382,14 +382,22 @@ class UserPreferences
     [JsonPropertyName("tileSpec2")]
     public string TileSpec2String { get => TileSpec2.ToString(); set => TileSpec2 = new HexColorRGBA(value); }
 
+    public static float DefaultGridOpacity = 0.2f;
+    public float GridOpacity { get; set; } = DefaultGridOpacity;
+
+    public static float DefaultTileSpecOpacity = 1.0f;
+    public float TileSpecOpacity { get; set; } = DefaultTileSpecOpacity;
+
+
     public string Theme { get; set; }
     public string Font { get; set; }
     public int FontSize { get; set; } = 13;
     public float ContentScale { get; set; }
     public bool ImGuiMultiViewport { get; set; }
-    public bool Vsync { get; set; } = false;
+    public bool Vsync { get; set; } = true;
     public int RefreshRate { get; set; } = 0;
     public string GeometryIcons { get; set; } = "Rained";
+    public bool SaveFileBackups { get; set; } = true;
 
     public Dictionary<string, string> Shortcuts { get; set; }
     public uint MaxRecentFiles { get; set; } = 20;
