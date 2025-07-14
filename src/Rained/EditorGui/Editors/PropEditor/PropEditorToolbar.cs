@@ -803,7 +803,7 @@ partial class PropEditor : IEditorMode
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Depth Move", btnSize))
+                if (ImGui.Button("纵深移动", btnSize))
                 {
                     ImGui.OpenPopup("ZTranslate");
                     zTranslateValue = 0;
@@ -854,10 +854,10 @@ partial class PropEditor : IEditorMode
                     ImGui.GetTextLineHeightWithSpacing() * 12f,
                     ImGui.GetContentRegionAvail().X - ImGui.GetTextLineHeightWithSpacing() * 8f
                 ));
-                MultiselectDragInt("Render Order", "RenderOrder", 0.02f);
-                MultiselectSliderInt("Depth Offset", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
-                MultiselectSliderInt("Seed", "Seed", 0, 999);
-                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "Render Time", "RenderTime", PropRenderTimeNames);
+                MultiselectDragInt("渲染顺序", "RenderOrder", 0.02f);
+                MultiselectSliderInt("纵深偏移", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
+                MultiselectSliderInt("随机种子", "Seed", 0, 999);
+                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "渲染时机", "RenderTime", PropRenderTimeNames);
 
                 // custom depth, if available
                 {
@@ -1155,14 +1155,14 @@ partial class PropEditor : IEditorMode
 
     public void ShowEditMenu()
     {
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Copy, "Copy");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Copy, "复制");
 
         // TODO: grey this out if prop clipboard data is not available
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Paste, "Paste");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Paste, "粘贴");
 
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "Duplicate Selected Prop(s)");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "Delete Selected Prop(s)");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleVertexMode, "Toggle Vertex Edit");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "复制选中道具");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "删除选中道具");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleVertexMode, "切换顶点编辑");
     }
 
     private static int Mod(int a, int b)

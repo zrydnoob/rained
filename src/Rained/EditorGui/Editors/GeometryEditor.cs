@@ -494,9 +494,9 @@ class GeometryEditor : IEditorMode
 
     public void ShowEditMenu()
     {
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Select, "Select");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Copy, "Copy", false, CellSelection.Instance is not null);
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Paste, "Paste", false);
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Select, "选择");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Copy, "复制", false, CellSelection.Instance is not null);
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Paste, "粘贴", false);
     }
 
     public void DrawViewport(RlManaged.RenderTexture2D mainFrame, RlManaged.RenderTexture2D[] layerFrames)

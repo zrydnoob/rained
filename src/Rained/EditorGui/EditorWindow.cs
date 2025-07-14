@@ -216,7 +216,7 @@ static class EditorWindow
                     }
                 }
                 
-                if (ImGui.MenuItem("Execute Script..."))
+                if (ImGui.MenuItem("执行脚本..."))
                 {
                     var startDir = Path.Combine(Boot.AppDataPath, "scripts");
                     fileBrowser = new FileBrowser(
@@ -233,7 +233,7 @@ static class EditorWindow
 
                 ImGui.Separator();
 
-                if (ImGui.MenuItem("Preferences"))
+                if (ImGui.MenuItem("偏好"))
                 {
                     PreferencesWindow.OpenWindow();
                 }

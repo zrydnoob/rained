@@ -121,23 +121,23 @@ class LightEditor : IEditorMode
     public void ShowEditMenu()
     {
         KeyShortcuts.ImGuiMenuItem(KeyShortcut.ResetBrushTransform, "重置笔刷变换");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.LightmapStretch, "Warp", enabled: !warpMode);
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.LightmapStretch, "形变", enabled: !warpMode);
     }
 
     public void DrawStatusBar()
     {
         if (warpMode)
         {
-            ImGui.Text("Warp");
+            ImGui.Text("形变");
 
             ImGui.SameLine();
-            if (ImGui.Button("OK") || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
+            if (ImGui.Button("确认") || EditorWindow.IsKeyPressed(ImGuiKey.Enter))
             {
                 warpModeSubmit = true;
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Cancel") || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
+            if (ImGui.Button("取消  ") || EditorWindow.IsKeyPressed(ImGuiKey.Escape))
             {
                 warpMode = false;
             }
@@ -235,9 +235,9 @@ class LightEditor : IEditorMode
             }
 
             var rotInRadians = Util.Mod(brushRotation, 360f) / 180f * MathF.PI;
-            ImGui.DragFloat2("Size", ref brushSize, 2f, 1f, float.PositiveInfinity, "%.0f px", ImGuiSliderFlags.AlwaysClamp);
+            ImGui.DragFloat2("大小", ref brushSize, 2f, 1f, float.PositiveInfinity, "%.0f px", ImGuiSliderFlags.AlwaysClamp);
             if (ImGui.IsItemActive()) brushPreview = true;
-            if (ImGui.SliderAngle("Rotation", ref rotInRadians, 0f, 360f))
+            if (ImGui.SliderAngle("旋转", ref rotInRadians, 0f, 360f))
                 brushRotation = rotInRadians / MathF.PI * 180f;
             if (ImGui.IsItemActive()) brushPreview = true;
 
