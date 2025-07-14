@@ -86,16 +86,16 @@ static class ThemeEditor
         //ImGui.ShowFontSelector("Fonts##Selector");
 
         // Simplified Settings (expose floating-pointer border sizes as boolean representing 0.0f or 1.0f)
-        if (ImGui.SliderFloat("FrameRounding", ref style.FrameRounding, 0.0f, 12.0f, "%.0f"))
+        if (ImGui.SliderFloat("框架圆角", ref style.FrameRounding, 0.0f, 12.0f, "%.0f"))
             style.GrabRounding = style.FrameRounding; // Make GrabRounding always the same value as FrameRounding
-        { bool border = style.WindowBorderSize > 0.0f; if (ImGui.Checkbox("WindowBorder", ref border)) { style.WindowBorderSize = border ? 1.0f : 0.0f; } }
+        { bool border = style.WindowBorderSize > 0.0f; if (ImGui.Checkbox("窗口边框", ref border)) { style.WindowBorderSize = border ? 1.0f : 0.0f; } }
         ImGui.SameLine();
-        { bool border = style.FrameBorderSize > 0.0f;  if (ImGui.Checkbox("FrameBorder",  ref border)) { style.FrameBorderSize  = border ? 1.0f : 0.0f; } }
+        { bool border = style.FrameBorderSize > 0.0f;  if (ImGui.Checkbox("框架边框",  ref border)) { style.FrameBorderSize  = border ? 1.0f : 0.0f; } }
         ImGui.SameLine();
-        { bool border = style.PopupBorderSize > 0.0f;  if (ImGui.Checkbox("PopupBorder",  ref border)) { style.PopupBorderSize  = border ? 1.0f : 0.0f; } }
+        { bool border = style.PopupBorderSize > 0.0f;  if (ImGui.Checkbox("弹出框边框",  ref border)) { style.PopupBorderSize  = border ? 1.0f : 0.0f; } }
 
         // Save/Revert button
-        if (ImGui.Button("Save Ref"))
+        if (ImGui.Button("保存"))
         {
             //@ref = ref_saved_style = style;
             ImGuiExt.SaveStyleRef(style, ref ref_saved_style);
@@ -103,15 +103,15 @@ static class ThemeEditor
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Revert Ref"))
+        if (ImGui.Button("重置"))
             ImGuiExt.LoadStyleRef(@ref, style);
         ImGui.SameLine();
         HelpMarker("""
-            Save/revert changes in local non-persistent storage. Default Colors definition are not affected.
-            Use "Save To File" below to save them somewhere.
+            在本地非持久性存储中保存 / 还原更改。默认颜色定义不受影响。
+            请使用下方的 “保存到文件” 将其保存至某处。
             """);
 
-        if (ImGui.Button("Save to File"))
+        if (ImGui.Button("保存到文件"))
         {
             var styleState = new SerializableStyle(ImGuiExt.Style);
             styleState.WriteToFile(Path.Combine(Boot.AppDataPath, "config", "themes", RainEd.Instance.Preferences.Theme + ".json"));
@@ -123,7 +123,7 @@ static class ThemeEditor
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Save to File As"))
+        if (ImGui.Button("文件另存为"))
         {
             SaveStyle();
 
@@ -143,57 +143,57 @@ static class ThemeEditor
 
         if (ImGui.BeginTabBar("##tabs", ImGuiTabBarFlags.None))
         {
-            if (ImGui.BeginTabItem("Sizes"))
+            if (ImGui.BeginTabItem("Size"))
             {
-                ImGui.SeparatorText("Main");
-                ImGui.SliderFloat2("WindowPadding", ref style.WindowPadding, 0.0f, 20.0f, "%.0f");
-                ImGui.SliderFloat2("FramePadding", ref style.FramePadding, 0.0f, 20.0f, "%.0f");
-                ImGui.SliderFloat2("ItemSpacing", ref style.ItemSpacing, 0.0f, 20.0f, "%.0f");
-                ImGui.SliderFloat2("ItemInnerSpacing", ref style.ItemInnerSpacing, 0.0f, 20.0f, "%.0f");
-                ImGui.SliderFloat2("TouchExtraPadding", ref style.TouchExtraPadding, 0.0f, 10.0f, "%.0f");
-                ImGui.SliderFloat("IndentSpacing", ref style.IndentSpacing, 0.0f, 30.0f, "%.0f");
-                ImGui.SliderFloat("ScrollbarSize", ref style.ScrollbarSize, 1.0f, 20.0f, "%.0f");
-                ImGui.SliderFloat("GrabMinSize", ref style.GrabMinSize, 1.0f, 20.0f, "%.0f");
+                ImGui.SeparatorText("主要");
+                ImGui.SliderFloat2("窗口内边距", ref style.WindowPadding, 0.0f, 20.0f, "%.0f");
+                ImGui.SliderFloat2("框架内边距", ref style.FramePadding, 0.0f, 20.0f, "%.0f");
+                ImGui.SliderFloat2("项目间距", ref style.ItemSpacing, 0.0f, 20.0f, "%.0f");
+                ImGui.SliderFloat2("项目内部间距", ref style.ItemInnerSpacing, 0.0f, 20.0f, "%.0f");
+                ImGui.SliderFloat2("触摸额外边距", ref style.TouchExtraPadding, 0.0f, 10.0f, "%.0f");
+                ImGui.SliderFloat("缩进间距", ref style.IndentSpacing, 0.0f, 30.0f, "%.0f");
+                ImGui.SliderFloat("滚动条尺寸", ref style.ScrollbarSize, 1.0f, 20.0f, "%.0f");
+                ImGui.SliderFloat("抓取最小尺寸", ref style.GrabMinSize, 1.0f, 20.0f, "%.0f");
 
-                ImGui.SeparatorText("Borders");
-                ImGui.SliderFloat("WindowBorderSize", ref style.WindowBorderSize, 0.0f, 1.0f, "%.0f");
-                ImGui.SliderFloat("ChildBorderSize", ref style.ChildBorderSize, 0.0f, 1.0f, "%.0f");
-                ImGui.SliderFloat("PopupBorderSize", ref style.PopupBorderSize, 0.0f, 1.0f, "%.0f");
-                ImGui.SliderFloat("FrameBorderSize", ref style.FrameBorderSize, 0.0f, 1.0f, "%.0f");
-                ImGui.SliderFloat("TabBorderSize", ref style.TabBorderSize, 0.0f, 1.0f, "%.0f");
-                ImGui.SliderFloat("TabBarBorderSize", ref style.TabBarBorderSize, 0.0f, 2.0f, "%.0f");
+                ImGui.SeparatorText("边框");
+                ImGui.SliderFloat("窗口边框宽度", ref style.WindowBorderSize, 0.0f, 1.0f, "%.0f");
+                ImGui.SliderFloat("子窗口边框宽度", ref style.ChildBorderSize, 0.0f, 1.0f, "%.0f");
+                ImGui.SliderFloat("弹出框边框宽度", ref style.PopupBorderSize, 0.0f, 1.0f, "%.0f");
+                ImGui.SliderFloat("框架边框宽度", ref style.FrameBorderSize, 0.0f, 1.0f, "%.0f");
+                ImGui.SliderFloat("标签页边框宽度", ref style.TabBorderSize, 0.0f, 1.0f, "%.0f");
+                ImGui.SliderFloat("标签栏边框宽度", ref style.TabBarBorderSize, 0.0f, 2.0f, "%.0f");
 
-                ImGui.SeparatorText("Rounding");
-                ImGui.SliderFloat("WindowRounding", ref style.WindowRounding, 0.0f, 12.0f, "%.0f");
-                ImGui.SliderFloat("ChildRounding", ref style.ChildRounding, 0.0f, 12.0f, "%.0f");
-                ImGui.SliderFloat("FrameRounding", ref style.FrameRounding, 0.0f, 12.0f, "%.0f");
-                ImGui.SliderFloat("PopupRounding", ref style.PopupRounding, 0.0f, 12.0f, "%.0f");
-                ImGui.SliderFloat("ScrollbarRounding", ref style.ScrollbarRounding, 0.0f, 12.0f, "%.0f");
-                ImGui.SliderFloat("GrabRounding", ref style.GrabRounding, 0.0f, 12.0f, "%.0f");
-                ImGui.SliderFloat("TabRounding", ref style.TabRounding, 0.0f, 12.0f, "%.0f");
+                ImGui.SeparatorText("圆角");
+                ImGui.SliderFloat("窗口圆角半径", ref style.WindowRounding, 0.0f, 12.0f, "%.0f");
+                ImGui.SliderFloat("子窗口圆角半径", ref style.ChildRounding, 0.0f, 12.0f, "%.0f");
+                ImGui.SliderFloat("框架圆角半径", ref style.FrameRounding, 0.0f, 12.0f, "%.0f");
+                ImGui.SliderFloat("弹出框圆角半径", ref style.PopupRounding, 0.0f, 12.0f, "%.0f");
+                ImGui.SliderFloat("滚动条圆角半径", ref style.ScrollbarRounding, 0.0f, 12.0f, "%.0f");
+                ImGui.SliderFloat("抓取控件圆角半径", ref style.GrabRounding, 0.0f, 12.0f, "%.0f");
+                ImGui.SliderFloat("标签页圆角半径", ref style.TabRounding, 0.0f, 12.0f, "%.0f");
 
-                ImGui.SeparatorText("Tables");
-                ImGui.SliderFloat2("CellPadding", ref style.CellPadding, 0.0f, 20.0f, "%.0f");
-                ImGui.SliderAngle("TableAngledHeadersAngle", ref style.TableAngledHeadersAngle, -50.0f, +50.0f);
+                ImGui.SeparatorText("表格");
+                ImGui.SliderFloat2("单元格内边距", ref style.CellPadding, 0.0f, 20.0f, "%.0f");
+                ImGui.SliderAngle("表格倾斜表头角度", ref style.TableAngledHeadersAngle, -50.0f, +50.0f);
 
-                ImGui.SeparatorText("Widgets");
-                ImGui.SliderFloat2("WindowTitleAlign", ref style.WindowTitleAlign, 0.0f, 1.0f, "%.2f");
+                ImGui.SeparatorText("控件");
+                ImGui.SliderFloat2("窗口标题对齐方式", ref style.WindowTitleAlign, 0.0f, 1.0f, "%.2f");
                 int window_menu_button_position = (int)style.WindowMenuButtonPosition + 1;
-                if (ImGui.Combo("WindowMenuButtonPosition", ref window_menu_button_position, "None\0Left\0Right\0"))
-                    style.WindowMenuButtonPosition = (ImGuiDir)(window_menu_button_position - 1);
+                if (ImGui.Combo("窗口菜单按钮位置", ref window_menu_button_position, "无\0左侧\0右侧\0"))
+                    style.WindowMenuButtonPosition = (ImGuiDir)(window_menu_button_position - 1);               
 
                 int colorButtonPos = (int)style.ColorButtonPosition;
-                if (ImGui.Combo("ColorButtonPosition", ref colorButtonPos, "Left\0Right\0"))
-                    style.ColorButtonPosition = (ImGuiDir)colorButtonPos;
-                
-                ImGui.SliderFloat2("ButtonTextAlign", ref style.ButtonTextAlign, 0.0f, 1.0f, "%.2f");
-                ImGui.SameLine(); HelpMarker("Alignment applies when a button is larger than its text content.");
-                ImGui.SliderFloat2("SelectableTextAlign", ref style.SelectableTextAlign, 0.0f, 1.0f, "%.2f");
-                ImGui.SameLine(); HelpMarker("Alignment applies when a selectable is larger than its text content.");
-                ImGui.SliderFloat("SeparatorTextBorderSize", ref style.SeparatorTextBorderSize, 0.0f, 10.0f, "%.0f");
-                ImGui.SliderFloat2("SeparatorTextAlign", ref style.SeparatorTextAlign, 0.0f, 1.0f, "%.2f");
-                ImGui.SliderFloat2("SeparatorTextPadding", ref style.SeparatorTextPadding, 0.0f, 40.0f, "%.0f");
-                ImGui.SliderFloat("LogSliderDeadzone", ref style.LogSliderDeadzone, 0.0f, 12.0f, "%.0f");
+                if (ImGui.Combo("颜色按钮位置", ref colorButtonPos, "左侧\0右侧\0"))
+                    style.ColorButtonPosition = (ImGuiDir)colorButtonPos;               
+
+                ImGui.SliderFloat2("按钮文本对齐方式", ref style.ButtonTextAlign, 0.0f, 1.0f, "%.2f");
+                ImGui.SameLine(); HelpMarker("当按钮大于其文本内容时应用的对齐方式。");
+                ImGui.SliderFloat2("可选文本对齐方式", ref style.SelectableTextAlign, 0.0f, 1.0f, "%.2f");
+                ImGui.SameLine(); HelpMarker("当选中文本大于其内容时应用的对齐方式。");
+                ImGui.SliderFloat("分隔符文本边框大小", ref style.SeparatorTextBorderSize, 0.0f, 10.0f, "%.0f");
+                ImGui.SliderFloat2("分隔符文本对齐方式", ref style.SeparatorTextAlign, 0.0f, 1.0f, "%.2f");
+                ImGui.SliderFloat2("分隔符文本内边距", ref style.SeparatorTextPadding, 0.0f, 40.0f, "%.0f");
+                ImGui.SliderFloat("对数滑块死区", ref style.LogSliderDeadzone, 0.0f, 12.0f, "%.0f");
 
                 /*
                 TODO: put this in General preferences
@@ -254,15 +254,15 @@ static class ThemeEditor
                 ImGui.SameLine(); ImGui.Checkbox("Only Modified Colors", ref output_only_modified);*/
 
                 //ImGuiTextFilterPtr filterPtr = new()
-                filter.FilterDraw("Filter colors", ImGui.GetFontSize() * 16);
+                filter.FilterDraw("过滤颜色", ImGui.GetFontSize() * 16);
 
-                if (ImGui.RadioButton("Opaque", alpha_flags == ImGuiColorEditFlags.None))             { alpha_flags = ImGuiColorEditFlags.None; } ImGui.SameLine();
+                if (ImGui.RadioButton("f", alpha_flags == ImGuiColorEditFlags.None))             { alpha_flags = ImGuiColorEditFlags.None; } ImGui.SameLine();
                 if (ImGui.RadioButton("Alpha",  alpha_flags == ImGuiColorEditFlags.AlphaPreview))     { alpha_flags = ImGuiColorEditFlags.AlphaPreview; } ImGui.SameLine();
                 if (ImGui.RadioButton("Both",   alpha_flags == ImGuiColorEditFlags.AlphaPreviewHalf)) { alpha_flags = ImGuiColorEditFlags.AlphaPreviewHalf; } ImGui.SameLine();
                 HelpMarker(
-                    "In the color list:\n" +
-                    "Left-click on color square to open color picker,\n" +
-                    "Right-click to open edit options menu.");
+                    "在颜色列表中:\n" +
+                    "左键打开颜色选择器,\n" +
+                    "右键打开编辑选项菜单");
 
                 ImGui.SetNextWindowSizeConstraints(new Vector2(0.0f, ImGui.GetTextLineHeightWithSpacing() * 10), new(float.MaxValue, float.MaxValue));
                 ImGui.BeginChild("##colors", Vector2.Zero, ImGuiChildFlags.Border | ImGuiChildFlags.NavFlattened, ImGuiWindowFlags.AlwaysVerticalScrollbar | ImGuiWindowFlags.AlwaysHorizontalScrollbar);

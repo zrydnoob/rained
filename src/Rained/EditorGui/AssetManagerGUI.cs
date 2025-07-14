@@ -512,14 +512,14 @@ static class AssetManagerGUI
         assetManager ??= new AssetManager();
 
         ImGui.BeginDisabled();
-        ImGui.TextWrapped("Note: I don't think this feature works too well. For now, it's better to edit inits manually.");
+        ImGui.TextWrapped("注意：我认为这个功能效果不太好。目前，最好手动编辑初始化设置。");
         ImGui.EndDisabled();
         
-        ImGui.Text("Any changes here require a restart in order to take effect.");
+        ImGui.Text("此处的任何更改都需要重启才能生效。");
         ImGui.Separator();
 
         ImGui.AlignTextToFramePadding();
-        ImGui.Text("Data Path");
+        ImGui.Text("Data 路径");
         ImGui.SameLine();
 
         var oldPath = RainEd.Instance.AssetDataPath;
