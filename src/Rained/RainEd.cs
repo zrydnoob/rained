@@ -718,6 +718,12 @@ sealed class RainEd
         if (tab is not null && !_tabs.Contains(tab))
             throw new ArgumentException("Given LevelTab is not in Tabs list", nameof(tab));
 
+        if (_currentTab?.CellSelection is not null)
+        {
+            _currentTab.CellSelection.CancelMove();
+            _currentTab.CellSelection.ClearSelection();
+        }
+        
         _currentTab = tab;
         if (_currentTab is not null)
         {
