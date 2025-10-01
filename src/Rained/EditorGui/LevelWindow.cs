@@ -1,4 +1,5 @@
 namespace Rained.EditorGui;
+
 using System.Numerics;
 using Raylib_cs;
 using ImGuiNET;
@@ -7,15 +8,23 @@ using Rained.Rendering;
 using Rained.LevelData;
 using CellSelection = Editors.CellEditing.CellSelection;
 
+enum CellDirtyFlags
+{
+    Geometry = 1,
+    Objects = 2,
+    Material = 4,
+    TileHead = 8
+};
+
 class LevelWindow
 {
     public bool IsWindowOpen = true;
 
     private const float ZoomFactorPerStep = 1.5f;
-    private const int MaxZoomSteps = 7;
-    private const int MinZoomSteps = -5;
+    private const int MaxZoomSteps = 11;
+    private const int MinZoomSteps = -10;
 
-    public float ViewZoom { get => RainEd.Instance.CurrentTab!.ViewZoom; private set => RainEd.Instance.CurrentTab!.ViewZoom = value; }
+    public float ViewZoom { get => RainEd.Instance.CurrentTab!.ViewZoom; set => RainEd.Instance.CurrentTab!.ViewZoom = value; }
     public ref int WorkLayer => ref RainEd.Instance.CurrentTab!.WorkLayer;
     public ref Vector2 ViewOffset => ref RainEd.Instance.CurrentTab!.ViewOffset;
 
@@ -34,8 +43,8 @@ class LevelWindow
     public bool IsViewportHovered { get => canvasWidget.IsHovered; }
 
     private readonly IEditorMode[] editorModes = new IEditorMode[7];
-    private int selectedMode = (int) EditModeEnum.Environment;
-    private int queuedEditMode = (int) EditModeEnum.None;
+    private int selectedMode = (int)EditModeEnum.Environment;
+    private int queuedEditMode = (int)EditModeEnum.None;
 
     public int EditMode
     {
@@ -133,7 +142,7 @@ class LevelWindow
         }
 
         Renderer = new LevelEditRender();
-        
+
         cellChangeRecorder = new ChangeHistory.CellChangeRecorder();
         RainEd.Instance.ChangeHistory.Cleared += () =>
         {
@@ -163,7 +172,7 @@ class LevelWindow
         prefs.UsePalette = Renderer.UsePalette;
         prefs.PaletteFadeIndex = Renderer.Palette.FadeIndex;
         prefs.PaletteFade = Renderer.Palette.Mix;
-        
+
         foreach (var mode in editorModes)
         {
             mode.SavePreferences(prefs);
@@ -189,8 +198,28 @@ class LevelWindow
     {
         foreach (var mode in editorModes)
             mode.ReloadLevel();
-        
+
         RainEd.Instance.CurrentTab!.NodeData.Reset();
+    }
+
+    public void ChangeLevel(Level newLevel)
+    {
+        foreach (var mode in editorModes)
+            mode.ChangeLevel(newLevel);
+
+        RainEd.Instance.CurrentTab!.NodeData.Reset();
+    }
+
+    public void LevelCreated(Level level)
+    {
+        foreach (var mode in editorModes)
+            mode.LevelCreated(level);
+    }
+
+    public void LevelClosed(Level level)
+    {
+        foreach (var mode in editorModes)
+            mode.LevelClosed(level);
     }
 
     public void ResetView()
@@ -223,10 +252,10 @@ class LevelWindow
         if (newMode != selectedMode)
         {
             Log.Information("Switch to {Editor} editor", editorModes[newMode].Name);
-            
+
             if (!editorModes[newMode].SupportsCellSelection && CellSelection.Instance is not null)
             {
-                CellSelection.Instance.SubmitMove();
+                CellSelection.Instance.Deactivate();
                 CellSelection.Instance = null;
             }
 
@@ -310,31 +339,32 @@ class LevelWindow
                     // scroll keybinds
                     var moveX = (EditorWindow.IsKeyDown(ImGuiKey.RightArrow) ? 1 : 0) - (EditorWindow.IsKeyDown(ImGuiKey.LeftArrow) ? 1 : 0);
                     var moveY = (EditorWindow.IsKeyDown(ImGuiKey.DownArrow) ? 1 : 0) - (EditorWindow.IsKeyDown(ImGuiKey.UpArrow) ? 1 : 0);
-                    var moveSpeed = EditorWindow.IsKeyDown(ImGuiKey.ModShift) ? 60f : 30f;
+                    var speedMult = Math.Max(0.75f, 1.0f / ViewZoom);
+                    var moveSpeed = (EditorWindow.IsKeyDown(ImGuiKey.ModShift) ? 90f : 30f) * speedMult;
                     ViewOffset.X += moveX * Level.TileSize * moveSpeed * dt;
                     ViewOffset.Y += moveY * Level.TileSize * moveSpeed * dt;
 
                     // edit mode keybinds
                     if (KeyShortcuts.Activated(KeyShortcut.EnvironmentEditor))
-                        newEditMode = (int) EditModeEnum.Environment;
-                    
+                        newEditMode = (int)EditModeEnum.Environment;
+
                     if (KeyShortcuts.Activated(KeyShortcut.GeometryEditor))
-                        newEditMode = (int) EditModeEnum.Geometry;
-                    
+                        newEditMode = (int)EditModeEnum.Geometry;
+
                     if (KeyShortcuts.Activated(KeyShortcut.TileEditor))
-                        newEditMode = (int) EditModeEnum.Tile;
-                    
+                        newEditMode = (int)EditModeEnum.Tile;
+
                     if (KeyShortcuts.Activated(KeyShortcut.CameraEditor))
-                        newEditMode = (int) EditModeEnum.Camera;
-                    
+                        newEditMode = (int)EditModeEnum.Camera;
+
                     if (KeyShortcuts.Activated(KeyShortcut.LightEditor))
-                        newEditMode = (int) EditModeEnum.Light;
-                    
+                        newEditMode = (int)EditModeEnum.Light;
+
                     if (KeyShortcuts.Activated(KeyShortcut.EffectsEditor))
-                        newEditMode = (int) EditModeEnum.Effect;
+                        newEditMode = (int)EditModeEnum.Effect;
 
                     if (KeyShortcuts.Activated(KeyShortcut.PropEditor))
-                        newEditMode = (int) EditModeEnum.Prop;
+                        newEditMode = (int)EditModeEnum.Prop;
                 }
 
                 // change edit mode if requested
@@ -412,6 +442,23 @@ class LevelWindow
         mouseCx = (int)Math.Floor(mouseCellFloat.X);
         mouseCy = (int)Math.Floor(mouseCellFloat.Y);
 
+        // view controls
+        if (canvasWidget.IsHovered)
+        {
+            // middle click pan
+            if (EditorWindow.IsPanning || ImGui.IsMouseDown(ImGuiMouseButton.Middle))
+            {
+                var mouseDelta = Raylib.GetMouseDelta();
+                ViewOffset -= mouseDelta / ViewZoom;
+            }
+
+            // begin alt+left panning
+            if (ImGui.IsKeyDown(ImGuiKey.ModAlt) && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            {
+                EditorWindow.IsPanning = true;
+            }
+        }
+
         // draw viewport
         // the blending functions here are some stupid hack
         // to fix transparent object writing to the fbo's alpha value
@@ -471,23 +518,6 @@ class LevelWindow
 
         RainEd.RenderContext.BlendMode = Glib.BlendMode.Normal;
 
-        // view controls
-        if (canvasWidget.IsHovered)
-        {
-            // middle click pan
-            if (EditorWindow.IsPanning || ImGui.IsMouseDown(ImGuiMouseButton.Middle))
-            {
-                var mouseDelta = Raylib.GetMouseDelta();
-                ViewOffset -= mouseDelta / ViewZoom;
-            }
-
-            // begin alt+left panning
-            if (ImGui.IsKeyDown(ImGuiKey.ModAlt) && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-            {
-                EditorWindow.IsPanning = true;
-            }
-        }
-
         // scroll wheel zooming
         if (!OverrideMouseWheel)
         {
@@ -546,7 +576,6 @@ class LevelWindow
         );
     }
 
-    // seems a bit random to be placed here but i'm lazy
     /// <summary>
     /// Invalidate geometry for both the renderer and node list.
     /// </summary>
@@ -558,5 +587,35 @@ class LevelWindow
         Renderer.InvalidateGeo(x, y, layer);
         if (layer == 0)
             RainEd.Instance.CurrentTab!.NodeData.InvalidateCell(x, y);
+    }
+
+    /// <summary>
+    /// Invalidate data of a cell.
+    /// </summary>
+    /// <param name="x">The X position of the dirty cell.</param>
+    /// <param name="y">The Y position of the dirty cell.</param>
+    /// <param name="layer">The work layer of the dirty cell.</param>
+    /// <param name="flags">The data to invalidate.</param>
+    public void InvalidateCell(int x, int y, int layer, CellDirtyFlags flags = CellDirtyFlags.Geometry | CellDirtyFlags.Objects)
+    {
+        if (flags.HasFlag(CellDirtyFlags.Geometry))
+            Renderer.InvalidateGeo(x, y, layer);
+
+        if (layer == 0 && flags.HasFlag(CellDirtyFlags.Objects))
+            RainEd.Instance.CurrentTab!.NodeData.InvalidateCell(x, y);
+
+        if (flags.HasFlag(CellDirtyFlags.TileHead))
+            Renderer.InvalidateTileHead(x, y, layer);
+    }
+
+    /// <summary>
+    /// Invalidate all data of a cell.
+    /// </summary>
+    /// <param name="x">The X position of the dirty cell.</param>
+    /// <param name="y">The Y position of the dirty cell.</param>
+    /// <param name="layer">The work layer of the dirty cell.</param>
+    public void InvalidateCell(int x, int y, int layer)
+    {
+        InvalidateCell(x, y, layer, CellDirtyFlags.Geometry | CellDirtyFlags.Objects | CellDirtyFlags.Material | CellDirtyFlags.TileHead);
     }
 }

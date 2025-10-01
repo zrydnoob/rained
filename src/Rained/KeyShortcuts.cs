@@ -43,6 +43,7 @@ enum KeyShortcut : int
     ZoomLightIn, ZoomLightOut,
     RotateLightCW, RotateLightCCW,
     ScaleLightBrush, RotateLightBrush,
+    LightmapStretch,
 
     RotateBrushCW, RotateBrushCCW,
     PreviousBrush, NextBrush,
@@ -457,6 +458,8 @@ static class KeyShortcuts
             allowRepeat: true
         );
 
+        Register("Lightmap Warp", KeyShortcut.LightmapStretch, ImGuiKey.None, ImGuiModFlags.None);
+
         // Camera Editor
         Register("相机 X 轴捕捉", KeyShortcut.CameraSnapX, ImGuiKey.Q, ImGuiModFlags.None);
         Register("相机 Y 轴捕捉", KeyShortcut.CameraSnapY, ImGuiKey.E, ImGuiModFlags.None);
@@ -467,8 +470,8 @@ static class KeyShortcuts
         Register("快速模拟选定绳索", KeyShortcut.RopeSimulationFast, ImGuiKey.Space, ImGuiModFlags.Shift);
         Register("重置绳索模拟", KeyShortcut.ResetSimulation, ImGuiKey.None, ImGuiModFlags.None);
 
-        Register("顺时针旋转道具", KeyShortcut.RotatePropCW, ImGuiKey.E, ImGuiModFlags.None);
-        Register("逆时针旋转道具", KeyShortcut.RotatePropCCW, ImGuiKey.Q, ImGuiModFlags.None);
+        Register("顺时针旋转道具", KeyShortcut.RotatePropCW, ImGuiKey.E, ImGuiModFlags.Shift);
+        Register("逆时针旋转道具", KeyShortcut.RotatePropCCW, ImGuiKey.Q, ImGuiModFlags.Shift);
 
         Register("更改道具对齐", KeyShortcut.ChangePropSnapping, ImGuiKey.R, ImGuiModFlags.None);
 

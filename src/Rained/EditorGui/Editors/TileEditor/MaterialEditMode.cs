@@ -1,5 +1,7 @@
 namespace Rained.EditorGui.Editors;
+
 using ImGuiNET;
+using Rained.EditorGui.AssetPreviews;
 using Rained.LevelData;
 using Raylib_cs;
 using System.Numerics;
@@ -8,9 +10,7 @@ class MaterialCatalogWidget(MaterialEditMode editor) : TileEditorCatalog
 {
     private readonly List<int> matSearchResults = [];
     private readonly MaterialEditMode editor = editor;
-
-    private RlManaged.Texture2D? _loadedMatPreview = null;
-    private string _activeMatPreview = "";
+    private readonly MaterialPreview matPreview = new();
 
     protected override void ProcessSearch(string searchQuery)
     {
@@ -44,26 +44,23 @@ class MaterialCatalogWidget(MaterialEditMode editor) : TileEditorCatalog
         }
     }
 
-    public override void ShowGroupList()
+    protected override void RenderGroupList()
     {
         var matDb = RainEd.Instance.MaterialDatabase;
 
         foreach (var i in matSearchResults)
         {
             var group = matDb.Categories[i];
-            
+
             if (ImGui.Selectable(group.Name, editor.SelectedGroup == i) || matSearchResults.Count == 1)
                 editor.SelectedGroup = i;
         }
     }
 
-    public override void ShowAssetList()
+    protected override void RenderItemList()
     {
         var matDb = RainEd.Instance.MaterialDatabase;
         var prefs = RainEd.Instance.Preferences;
-
-        var drawList = ImGui.GetWindowDrawList();
-        float textHeight = ImGui.GetTextLineHeight();
 
         var matList = matDb.Categories[editor.SelectedGroup].Materials;
 
@@ -74,35 +71,16 @@ class MaterialCatalogWidget(MaterialEditMode editor) : TileEditorCatalog
             // don't show this prop if it doesn't pass search test
             if (!mat.Name.Contains(SearchQuery, StringComparison.CurrentCultureIgnoreCase))
                 continue;
-            
-            var cursor = ImGui.GetCursorScreenPos();
-            if (ImGui.Selectable("       " + mat.Name, mat.ID == editor.SelectedMaterial))
+
+            if (ColoredSelectable(mat.Name, mat.Color, mat.ID == editor.SelectedMaterial))
             {
                 editor.SelectedMaterial = mat.ID;
             }
 
-            drawList.AddRectFilled(
-                p_min: cursor,
-                p_max: cursor + new Vector2(10f, textHeight),
-                ImGui.ColorConvertFloat4ToU32(new Vector4(mat.Color.R / 255f, mat.Color.G / 255f, mat.Color.B / 255f, 1f))
-            );
-
             // show material preview when hovered
             if (prefs.MaterialSelectorPreview && ImGui.IsItemHovered())
             {
-                if (_activeMatPreview != mat.Name)
-                {
-                    _activeMatPreview = mat.Name;
-                    _loadedMatPreview?.Dispose();
-                    _loadedMatPreview = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "mat-previews", mat.Name + ".png"));
-                }
-
-                if (_loadedMatPreview is not null && Raylib_cs.Raylib.IsTextureReady(_loadedMatPreview))
-                {
-                    ImGui.BeginTooltip();
-                    ImGuiExt.ImageSize(_loadedMatPreview, _loadedMatPreview.Width * Boot.PixelIconScale, _loadedMatPreview.Height * Boot.PixelIconScale);
-                    ImGui.EndTooltip();
-                }
+                matPreview.RenderPreviewTooltip(mat.Name);
             }
         }
     }
@@ -111,7 +89,7 @@ class MaterialCatalogWidget(MaterialEditMode editor) : TileEditorCatalog
 class MaterialEditMode : TileEditorMode
 {
     public override string TabName => "材料";
-    
+
     private int selectedMaterial = 1;
     private int selectedMatGroup = 0;
     private int materialBrushSize = 1;
@@ -155,10 +133,10 @@ class MaterialEditMode : TileEditorMode
     public override void Process()
     {
         base.Process();
-        
+
         var level = RainEd.Instance.Level;
         var window = RainEd.Instance.LevelView;
-        
+
         if (lastMouseX != window.MouseCx || lastMouseY != window.MouseCy)
         {
             lastMouseX = window.MouseCx;
@@ -275,7 +253,7 @@ class MaterialEditMode : TileEditorMode
                     materialBrushSize += 2;
                 else if (Raylib.GetMouseWheelMove() < 0.0f || KeyShortcuts.Activated(KeyShortcut.DecreaseBrushSize))
                     materialBrushSize -= 2;
-                
+
                 materialBrushSize = Math.Clamp(materialBrushSize, 1, 21);
             }
 
@@ -300,7 +278,7 @@ class MaterialEditMode : TileEditorMode
                 placeMode = 1;
             else if (RightMouseDown)
                 placeMode = 2;
-            
+
             if (placeMode != 0 && (placeMode == 1 || !removedOnSameCell))
             {
                 // place or remove materials inside cursor
@@ -359,7 +337,7 @@ class MaterialEditMode : TileEditorMode
         base.IdleProcess();
 
         var matDb = RainEd.Instance.MaterialDatabase;
-        
+
         // A/D to change selected group
         if (KeyShortcuts.Activated(KeyShortcut.NavLeft))
         {

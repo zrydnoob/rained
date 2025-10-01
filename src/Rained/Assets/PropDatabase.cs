@@ -1,5 +1,6 @@
 using Rained.Assets;
 using Raylib_cs;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 namespace Rained.Assets;
 
@@ -362,18 +363,41 @@ record class PropInit
     private void GetPropSize()
     {
         if (sizeKnown) return;
+        pixelWidth = 20;
+        pixelHeight = 20;
 
-        var texture = RainEd.Instance.AssetGraphics.GetPropTexture(this);
-
-        if (texture is not null)
+        if (RainEd.Instance is not null)
         {
-            pixelWidth = texture.Width;
-            pixelHeight = texture.Height;
+            var texture = RainEd.Instance.AssetGraphics.GetPropTexture(this);
+
+            if (texture is not null)
+            {
+                pixelWidth = texture.Width;
+                pixelHeight = texture.Height;
+            }
         }
         else
         {
-            pixelWidth = 20;
-            pixelHeight = 20;
+            // headless image loading (no gpu)
+            string texturePath = AssetGraphicsProvider.GetFilePath(
+                Path.Combine(AssetDataPath.GetPath(), "Props"),
+                Name + ".png");
+
+            if (!File.Exists(texturePath) && DrizzleCast.GetFileName(Name + ".png", out string? castPath))
+            {
+                texturePath = castPath!;
+            }
+
+            try
+            {
+                using var img = Glib.Image.FromFile(texturePath, Glib.PixelFormat.RGBA);
+                pixelWidth = img.Width;
+                pixelHeight = img.Height;
+            }
+            catch (Exception e)
+            {
+                Log.Error("Could not load image {ImagePath}: {Exception}", texturePath, e.ToString());
+            }
         }
 
         sizeKnown = true;
@@ -511,6 +535,13 @@ class PropDatabase
     [#nm:"Twisted Thread", #tp:"long", #depth:0, #tags:[], #notes:[]]
     [#nm:"Stretched Wire", #tp:"long", #depth:0, #tags:[], #notes:[]]
     [#nm:"Long Barbed Wire", #tp:"long", #depth:0, #tags:[], #notes:[]]
+
+    -["April Longs", color(0, 255, 0)]
+    [#nm:"Moss Drop", #tp:"long", #depth:3, #tags:[], #notes:["Keep in mind this long will droop in in front of anything solid, if you dont want something to collide with it, render it after this prop"]]
+    [#nm:"Moss Drop A", #tp:"long", #depth:3, #tags:["effectColorA"], #notes:["Keep in mind this long will droop in in front of anything solid, if you dont want something to collide with it, render it after this prop"]]
+    [#nm:"Moss Drop B", #tp:"long", #depth:3, #tags:["effectColorB"], #notes:["Keep in mind this long will droop in in front of anything solid, if you dont want something to collide with it, render it after this prop"]]
+    [#nm:"Moss Hang", #tp:"long", #depth:3, #tags:[], #notes:["For best results you should place this on the back sublayers of whatever layer you're trying to place this on, and allow the moss to kinda 'lerch' forward. The moss starts placing in the middle of the long, and follows gravity."]]
+    [#nm:"Moss Hang A", #tp:"long", #depth:3, #tags:["effectColorA"], #notes:["For best results you should place this on the back sublayers of whatever layer you're trying to place this on, and allow the moss to kinda 'lerch' forward. The moss starts placing in the middle of the long, and follows gravity."]]
     """;
 
     public readonly List<PropCategory> Categories;
@@ -537,7 +568,7 @@ class PropDatabase
         InitCustomColors();
     }
 
-    public bool TryGetPropFromName(string name, out PropInit? value)
+    public bool TryGetPropFromName(string name, [NotNullWhen(true)] out PropInit? value)
     {
         return allProps.TryGetValue(name, out value);
     }
@@ -584,7 +615,7 @@ class PropDatabase
     private void InitProps(TileDatabase tileDatabase)
     {
         // read prop init file
-        var initFilePath = Path.Combine(RainEd.Instance.AssetDataPath, "Props", "Init.txt");
+        var initFilePath = Path.Combine(AssetDataPath.GetPath(), "Props", "Init.txt");
         var lingoParser = new Lingo.LingoParser();
         int lineNo = 0;
 
@@ -745,7 +776,7 @@ class PropDatabase
     private void InitCustomColors()
     {
         // read propColors.txt
-        var initFilePath = Path.Combine(RainEd.Instance.AssetDataPath, "Props", "propColors.txt");
+        var initFilePath = Path.Combine(AssetDataPath.GetPath(), "Props", "propColors.txt");
         var lingoParser = new Lingo.LingoParser();
 
         foreach (var line in File.ReadLines(initFilePath))

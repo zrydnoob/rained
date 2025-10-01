@@ -7,9 +7,7 @@ Props are used similarly to tiles but with a higher degree of freedom for placem
 positioned into any of the 30 sublayers rather than only one of the 3 work layers. Additionally, props are also used to make destruction effects and place
 physically simulated ropes, tubes, and wires.
 
-!!! tip
-
-    Unlike tiles, props do not affect geometry. If you want a prop to be collidable, you must place fitting geometry and make it invisible. This is done by either using the Glass material, or filling them with an empty tile.
+Unlike tiles, however, props do not affect geometry. If you want a prop to be collidable, you must place fitting geometry and make it invisible. This is done by using the Invisible Wall geometry type, the Invisible material, or filling them with an empty tile.
 
 ## Editing props
 You first must select the prop you want to place in the prop catalog, similar to how you would with tiles. Then, to place it down, either right-click in the level view or press the <kbd>C</kbd> key.
@@ -76,11 +74,15 @@ is on, you can't warp them as you would with a standard prop. Instead, you can o
 Rope-type props are similar to long props in terms of editing, but they also include a physically simulated rope. Each segment of the rope is displayed as
 a dot. To simulate the rope, hold down the Simulate button or the <kbd>Space</kbd> key. The rope will freeze once the button is let go.
 
+!!! tip
+
+    Like long props, if you go into vertex mode, you can drag the two ends of rope points instead of manually moving/rotating/scaling them.
+
 ## Prop options
 On the bottom-right is a window titled "Prop Options". This is where you can edit the options of one or more props that are currently selected. The following is a list of all possible prop options. Note that not all props will have every option available.
 
 - **Render Order:** Affects the order the prop is rendered in if a destruction prop is in the level.
-- **Depth Offset:** The sublayer position of the prop, ranging from 0-29. The next work layer is reached every 10 units.
+- **Depth Offset:** The sublayer position of the prop, ranging from 0-29. Each sublayer is 1/10th of a work layer.
 - **Seed:** Seed used for procedural generation.
 - **Render Time:** Used to control whether or not the prop renders before or after effects.
 - **Custom Depth:** The size of the prop in terms of sublayers.
@@ -93,6 +95,14 @@ The following options are applicable only to rope-type props:
 - **Flexibility:** Controls the flexibility of the prop. Scaling the prop vertically does the same thing.
 - **Release:** Controls which end of the prop is not attached.
 - **Thickness:** The thickness of the rope.
+
+### Prop controls
+The **Prop Options** window also has four buttons that deal with transforming the selected props.
+
+1. **Reset:** Resets the prop rotation and size.
+2. **Flip X:** Flips the selected props across the vertical axis.
+3. **Flip Y:** Flips the selected props across the horizontal axis.
+4. **Depth Move:** Opens a popup with a slider allowing you to move the selected props by the distance marked by the slider when "OK" is pressed. The "Wrap around" option, will make props wrap back to the opposite layer of the level if they exceed the minimum or maximum sublayer position.
 
 <!--
 Multiple props can be selected at once

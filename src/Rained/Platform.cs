@@ -213,15 +213,19 @@ static partial class Platform
 
     /// <summary>
     /// Send a file to the trash bin.
+    /// 
+    /// note that the return value always returns true if the file does not exist (and therefore does nothing),
+    /// even if the function does not actually support trashing the file on that platform.
     /// </summary>
     /// <param name="filePath">The path of the file to trash.</param>
     /// <returns>True if the operation is supported on the running platform, false if not.</returns>
-    public static bool TrashFile(string file)
+    public static bool TrashFile(string file, bool deleteAsFallback = true)
     {
         file = Path.GetFullPath(file);
         if (!File.Exists(file))
         {
-            throw new FileNotFoundException($"Attempt to trash nonexistent file \"{file}\"");
+            // throw new FileNotFoundException($"Attempt to trash nonexistent file \"{file}\"");
+            return true;
         }
 
         if (OperatingSystem.IsWindows())
@@ -307,6 +311,12 @@ static partial class Platform
             catch {}
             if (success) return true;
 
+            if (deleteAsFallback)
+            {
+                Log.Warning("File trashing is not supported on this platform, resorted to permanent deletion.");   
+                File.Delete(file);
+            }
+
             return false;
         }
     }
@@ -314,20 +324,27 @@ static partial class Platform
     #region Clipboard
     public enum ClipboardDataType
     {
-        LevelCells
+        LevelCells,
+        Props
     }
 
     private static bool _win32_didRegisterFormats = false;
     private static uint _win32_levelCellsFmt;
+    private static uint _win32_propsFmt;
 
     private const string LevelCellsMimeType = "application/x.rainworld-level-cells";
+    private const string PropMimeType = "application/x.rainworld-props";
 
     private static void Win32RegisterFormats()
     {
         if (_win32_didRegisterFormats) return;
+
         _win32_levelCellsFmt = RegisterClipboardFormatW(LevelCellsMimeType);
         ThrowWin32ErrorIfZero(_win32_levelCellsFmt);
-        
+
+        _win32_propsFmt = RegisterClipboardFormatW(PropMimeType);
+        ThrowWin32ErrorIfZero(_win32_propsFmt);
+
         _win32_didRegisterFormats = true;
     }
 
@@ -339,6 +356,7 @@ static partial class Platform
             var formatId = type switch
             {
                 ClipboardDataType.LevelCells => _win32_levelCellsFmt,
+                ClipboardDataType.Props => _win32_propsFmt,
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 
@@ -391,6 +409,7 @@ static partial class Platform
             var mimeType = type switch
             {
                 ClipboardDataType.LevelCells => LevelCellsMimeType,
+                ClipboardDataType.Props => PropMimeType,
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 
@@ -421,6 +440,7 @@ static partial class Platform
             var fileName = type switch
             {
                 ClipboardDataType.LevelCells => ".clipcells",
+                ClipboardDataType.Props => ".clipprops",
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 
@@ -455,6 +475,7 @@ static partial class Platform
                 var formatId = type switch
                 {
                     ClipboardDataType.LevelCells => _win32_levelCellsFmt,
+                    ClipboardDataType.Props => _win32_propsFmt,
                     _ => throw new ArgumentOutOfRangeException(nameof(type))
                 };
                 
@@ -503,6 +524,7 @@ static partial class Platform
             var mimeType = type switch
             {
                 ClipboardDataType.LevelCells => LevelCellsMimeType,
+                ClipboardDataType.Props => PropMimeType,
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 
@@ -535,6 +557,7 @@ static partial class Platform
             var fileName = type switch
             {
                 ClipboardDataType.LevelCells => ".clipcells",
+                ClipboardDataType.Props => ".clipprops",
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
 

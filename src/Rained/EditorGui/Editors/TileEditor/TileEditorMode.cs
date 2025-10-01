@@ -1,48 +1,15 @@
 namespace Rained.EditorGui.Editors;
+
 using Raylib_cs;
 using System.Numerics;
 using Rained.LevelData;
 using Rained.Assets;
 using ImGuiNET;
 
-abstract class TileEditorCatalog
+abstract class TileEditorCatalog : CatalogWidget
 {
-    private string searchQuery = "";
-    protected string SearchQuery => searchQuery;
-    public Vector2? WidgetSize = null;
-
-    abstract public void ShowGroupList();
-    abstract public void ShowAssetList();
-    abstract protected void ProcessSearch(string searchQuery);
-    public void ProcessSearch() => ProcessSearch(SearchQuery);
-
-    public void Draw()
-    {
-        var searchInputFlags = ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EscapeClearsAll;
-        var widgetWidth = WidgetSize?.X ?? ImGui.GetContentRegionAvail().X;
-
-        ImGui.SetNextItemWidth(widgetWidth);
-        if (ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, searchInputFlags))
-        {
-            ProcessSearch();
-        }
-
-        var halfWidth = widgetWidth / 2f - ImGui.GetStyle().ItemSpacing.X / 2f;
-        var boxHeight = WidgetSize?.Y ?? ImGui.GetContentRegionAvail().Y;
-        if (ImGui.BeginListBox("##Groups", new Vector2(halfWidth, boxHeight)))
-        {
-            ShowGroupList();
-            ImGui.EndListBox();
-        }
-        
-        // group listing (effects) list box
-        ImGui.SameLine();
-        if (ImGui.BeginListBox("##Tiles", new Vector2(halfWidth, boxHeight)))
-        {
-            ShowAssetList();
-            ImGui.EndListBox();
-        }
-    }
+    protected override bool HasSearch => true;
+    protected override bool Dual => true;
 }
 
 abstract class TileEditorMode(TileEditor editor)
@@ -68,18 +35,18 @@ abstract class TileEditorMode(TileEditor editor)
     {
         if (EditorWindow.IsMouseClicked(ImGuiMouseButton.Left))
             LeftMouseDown = true;
-        
+
         if (KeyShortcuts.Activated(KeyShortcut.RightMouse))
             RightMouseDown = true;
-        
+
         if (EditorWindow.IsMouseReleased(ImGuiMouseButton.Left))
             LeftMouseDown = false;
-        
+
         if (KeyShortcuts.Deactivated(KeyShortcut.RightMouse))
             RightMouseDown = false;
     }
 
-    virtual public void IdleProcess() {}
+    virtual public void IdleProcess() { }
 
     abstract public void DrawToolbar();
 
@@ -89,7 +56,7 @@ abstract class TileEditorMode(TileEditor editor)
         LeftMouseDown = false;
         RightMouseDown = false;
     }
-    
+
     public virtual void Unfocus()
     {
         rectMode = RectMode.Inactive;
@@ -99,5 +66,5 @@ abstract class TileEditorMode(TileEditor editor)
         RainEd.Instance.LevelView.CellChangeRecorder.TryPushChange();
     }
 
-    public virtual void UndidOrRedid() {}
+    public virtual void UndidOrRedid() { }
 }

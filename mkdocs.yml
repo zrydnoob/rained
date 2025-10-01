@@ -1,49 +1,49 @@
 site_name: Rained
 
 plugins:
-  - offline
-  - search
+    - offline
+    - search
 
 nav:
-  - 主页: index.md
-  - 指南:
-    - 快速指南: brief.md
-    - 安装和更新: install-updates.md
-    - 用户界面: user-interface.md
-    - 关卡编辑:
-      - 概述: overview.md
-      - 环境: env.md
-      - 几何: geo.md
-      - 贴图: tiles.md
-      - 相机: cameras.md
-      - 灯光: light.md
-      - 特效: effects.md
-      - 道具: props.md
-    - 渲染和运行: rendering.md
-    - 延伸阅读: resources.md
-  - 开发: developing.md
+    - 主页: index.md
+    - 指南:
+          - 快速指南: brief.md
+          - 安装和更新: install-updates.md
+          - 用户界面: user-interface.md
+          - 关卡编辑:
+                - 概述: overview.md
+                - 环境: env.md
+                - 几何: geo.md
+                - 贴图: tiles.md
+                - 相机: cameras.md
+                - 灯光: light.md
+                - 特效: effects.md
+                - 道具: props.md
+          - 渲染和运行: rendering.md
+          - 延伸阅读: resources.md
+    - 开发: developing.md
 
 theme:
-  name: material
-  language: zh
-  favicon: "img/favicon.ico"
-  logo: "img/favicon.ico"
-  palette:
-    scheme: slate
-  features:
-    - content.tabs.link
+    name: material
+    language: zh
+    favicon: 'img/favicon.ico'
+    logo: 'img/favicon.ico'
+    palette:
+        scheme: slate
+    features:
+        - content.tabs.link
 
 markdown_extensions:
-  - admonition
-  - def_list
-  - attr_list
-  - md_in_html
-  - pymdownx.superfences
-  - pymdownx.details
-  - pymdownx.tabbed:
-      alternate_style: true
+    - admonition
+    - def_list
+    - attr_list
+    - md_in_html
+    - pymdownx.superfences
+    - pymdownx.details
+    - pymdownx.tabbed:
+          alternate_style: true
 
-site_url: ""
-docs_dir: "docs/zh"
-site_dir: "dist/docs/zh"
+site_url: ''
+docs_dir: 'docs/zh'
+site_dir: 'dist/docs/zh'
 use_directory_urls: false

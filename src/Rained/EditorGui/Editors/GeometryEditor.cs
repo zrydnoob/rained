@@ -1,9 +1,11 @@
 namespace Rained.EditorGui.Editors;
+
 using Raylib_cs;
 using ImGuiNET;
 using System.Numerics;
 using Rained.LevelData;
 using CellSelection = CellEditing.CellSelection;
+using Rained.Assets;
 
 class GeometryEditor : IEditorMode
 {
@@ -70,29 +72,29 @@ class GeometryEditor : IEditorMode
 
     private static readonly Dictionary<Tool, Vector2> ToolTextureOffsets = new()
     {
-        { Tool.Wall,            new(1, 0) },
-        { Tool.Air,             new(2, 0) },
-        { Tool.Inverse,         new(0, 0) },
-        { Tool.Slope,           new(3, 0) },
-        { Tool.Platform,        new(0, 1) },
-        { Tool.Rock,            new(1, 1) },
-        { Tool.Spear,           new(2, 1) },
-        { Tool.Crack,           new(3, 1) },
-        { Tool.HorizontalBeam,  new(0, 2) },
-        { Tool.VerticalBeam,    new(1, 2) },
-        { Tool.Glass,           new(2, 2) },
-        { Tool.ShortcutEntrance,new(3, 2) },
-        { Tool.Shortcut,        new(0, 3) },
-        { Tool.CreatureDen,     new(1, 3) },
+        { Tool.Wall,            new(0, 0) },
+        { Tool.Air,             new(1, 0) },
+        { Tool.Inverse,         new(2, 0) },
+        { Tool.Glass,           new(3, 0) },
+        { Tool.Slope,           new(0, 1) },
+        { Tool.Platform,        new(1, 1) },
+        { Tool.HorizontalBeam,  new(2, 1) },
+        { Tool.VerticalBeam,    new(3, 1) },
+        { Tool.Rock,            new(0, 2) },
+        { Tool.Spear,           new(1, 2) },
+        { Tool.Crack,           new(2, 2) },
+        { Tool.Waterfall,       new(3, 2) },
+        { Tool.ShortcutEntrance,new(0, 3) },
+        { Tool.Shortcut,        new(1, 3) },
         { Tool.Entrance,        new(2, 3) },
-        { Tool.Hive,            new(3, 3) },
-        { Tool.ForbidFlyChain,  new(0, 4) },
-        { Tool.Waterfall,       new(2, 4) },
-        { Tool.WhackAMoleHole,  new(3, 4) },
-        { Tool.ScavengerHole,   new(0, 5) },
-        { Tool.GarbageWorm,     new(1, 5) },
-        { Tool.WormGrass,       new(2, 5) },
-        { Tool.CopyBackwards,   new(3, 5) }
+        { Tool.CreatureDen,     new(3, 3) },
+        { Tool.WhackAMoleHole,  new(0, 4) },
+        { Tool.ScavengerHole,   new(1, 4) },
+        { Tool.Hive,            new(2, 4) },
+        { Tool.ForbidFlyChain,  new(3, 4) },
+        { Tool.GarbageWorm,     new(0, 5) },
+        { Tool.WormGrass,       new(1, 5) },
+        { Tool.CopyBackwards,   new(2, 5) }
     };
 
     private static readonly Color[] LayerColors =
@@ -106,7 +108,6 @@ class GeometryEditor : IEditorMode
     private bool isToolActive = false;
     private bool ignoreClick = false;
     private bool isErasing = false;
-    private readonly RlManaged.Texture2D toolIcons;
 
     // tool rect - for wall/air/inverse/geometry tools
     private bool isToolRectActive;
@@ -115,7 +116,8 @@ class GeometryEditor : IEditorMode
     private int toolRectY;
     private int lastMouseX, lastMouseY;
 
-    private bool[] layerMask;
+    private readonly bool[] layerMask;
+    public bool[] LayerMask => layerMask;
 
     private enum MirrorFlags
     {
@@ -128,14 +130,16 @@ class GeometryEditor : IEditorMode
     private int mirrorOriginX;
     private int mirrorOriginY;
 
-    private float MirrorPositionX {
+    private float MirrorPositionX
+    {
         get => mirrorOriginX / 2f;
-        set => mirrorOriginX = (int) Math.Round(value * 2f);
+        set => mirrorOriginX = (int)Math.Round(value * 2f);
     }
 
-    private float MirrorPositionY {
+    private float MirrorPositionY
+    {
         get => mirrorOriginY / 2f;
-        set => mirrorOriginY = (int) Math.Round(value * 2f);
+        set => mirrorOriginY = (int)Math.Round(value * 2f);
     }
 
     public GeometryEditor(LevelWindow levelView)
@@ -146,7 +150,6 @@ class GeometryEditor : IEditorMode
         mirrorOriginY = RainEd.Instance.Level.Height;
 
         window = levelView;
-        toolIcons = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath, "assets", "tool-icons.png"));
 
         switch (RainEd.Instance.Preferences.GeometryViewMode)
         {
@@ -193,6 +196,8 @@ class GeometryEditor : IEditorMode
         layerMask[1] = false;
         layerMask[2] = false;
         layerMask[window.WorkLayer] = true;
+
+        CellSelection.GeometryFillCallback = SelectionFill;
     }
 
     public void Unload()
@@ -355,17 +360,17 @@ class GeometryEditor : IEditorMode
 
             {
                 float buttonSize = 24f * Boot.PixelIconScale + 4f;
-                buttonsPerRow = (int) (ImGui.GetContentRegionAvail().X / buttonSize);
+                buttonsPerRow = (int)(ImGui.GetContentRegionAvail().X / buttonSize);
                 if (buttonsPerRow < 1) buttonsPerRow = 1;
             }
 
             {
                 float buttonSize = 24f * Boot.PixelIconScale + 4f;
-                buttonsPerRow = (int) (ImGui.GetContentRegionAvail().X / buttonSize);
+                buttonsPerRow = (int)(ImGui.GetContentRegionAvail().X / buttonSize);
                 if (buttonsPerRow < 1) buttonsPerRow = 1;
             }
 
-            for (int i = 0; i < (int) Tool.ToolCount; i++)
+            for (int i = 0; i < (int)Tool.ToolCount; i++)
             {
                 Tool toolEnum = (Tool)i;
 
@@ -391,7 +396,7 @@ class GeometryEditor : IEditorMode
                 ImGui.PushID(i);
 
                 // create tool button, select if clicked
-                if (ImGuiExt.ImageButtonRect("ToolButton", toolIcons, 24 * Boot.PixelIconScale, 24 * Boot.PixelIconScale, new Rectangle(texOffset.X * 24, texOffset.Y * 24, 24, 24), textColor))
+                if (ImGuiExt.ImageButtonRect("ToolButton", GeometryIcons.ToolbarTexture, 24 * Boot.PixelIconScale, 24 * Boot.PixelIconScale, new Rectangle(texOffset.X * 24, texOffset.Y * 24, 24, 24), textColor))
                 {
                     selectedTool = toolEnum;
                 }
@@ -435,9 +440,9 @@ class GeometryEditor : IEditorMode
             // show mirror toggles
             ImGui.Text("镜像");
             {
-                var _mirrorFlags = (int) mirrorFlags;
+                var _mirrorFlags = (int)mirrorFlags;
                 if (ImGuiExt.ButtonFlags("##Mirror", ["X", "Y"], ref _mirrorFlags))
-                    mirrorFlags = (MirrorFlags) _mirrorFlags;
+                    mirrorFlags = (MirrorFlags)_mirrorFlags;
             }
 
             ImGui.PopItemWidth();
@@ -456,10 +461,10 @@ class GeometryEditor : IEditorMode
                 {
                     if (ToolCanRectPlace(selectedTool))
                         window.WriteStatus("Shift+拖拽以填充选区");
-                    
+
                     if (ToolCanFloodFill(selectedTool))
                         window.WriteStatus(KeyShortcuts.GetShortcutString(KeyShortcut.FloodFill) + "+点击以洪水填充");
-                    
+
                     if (selectedTool == Tool.Slope)
                         window.WriteStatus("q + 拖动来绘制大斜坡");
                 }
@@ -602,7 +607,7 @@ class GeometryEditor : IEditorMode
                     if (EditorWindow.IsMouseClicked(ImGuiMouseButton.Left))
                         mirrorDrag |= MirrorFlags.MirrorX;
                 }
-                
+
                 if (EditorWindow.IsMouseDoubleClicked(ImGuiMouseButton.Left))
                 {
                     mirrorOriginX = RainEd.Instance.Level.Width;
@@ -646,10 +651,10 @@ class GeometryEditor : IEditorMode
 
         if (mirrorCursor.HasFlag(MirrorFlags.MirrorX) && mirrorCursor.HasFlag(MirrorFlags.MirrorY))
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
-        
+
         else if (mirrorCursor.HasFlag(MirrorFlags.MirrorX))
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
-        
+
         else if (mirrorCursor.HasFlag(MirrorFlags.MirrorY))
             ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNS);
 
@@ -674,10 +679,10 @@ class GeometryEditor : IEditorMode
         // WASD navigation
         if (!ImGui.GetIO().WantCaptureKeyboard && !ImGui.GetIO().WantTextInput)
         {
-            int toolRow = (int) selectedTool / buttonsPerRow;
-            int toolCol = (int) selectedTool % buttonsPerRow;
-            int toolCount = (int) Tool.ToolCount;
-            
+            int toolRow = (int)selectedTool / buttonsPerRow;
+            int toolCol = (int)selectedTool % buttonsPerRow;
+            int toolCount = (int)Tool.ToolCount;
+
             if (KeyShortcuts.Activated(KeyShortcut.NavRight))
             {
                 if ((int)selectedTool == (toolCount - 1))
@@ -709,7 +714,7 @@ class GeometryEditor : IEditorMode
             {
                 // if on the last row, wrap back to first row
                 // else, just go to next row
-                if (toolRow == (toolCount-1) / buttonsPerRow)
+                if (toolRow == (toolCount - 1) / buttonsPerRow)
                     toolRow = 0;
                 else
                     toolRow++;
@@ -717,10 +722,10 @@ class GeometryEditor : IEditorMode
 
             if (toolRow < 0)
             {
-                toolRow = (toolCount-1) / buttonsPerRow;
+                toolRow = (toolCount - 1) / buttonsPerRow;
             }
 
-            selectedTool = (Tool) Math.Clamp(toolRow*buttonsPerRow + toolCol, 0, toolCount-1);
+            selectedTool = (Tool)Math.Clamp(toolRow * buttonsPerRow + toolCol, 0, toolCount - 1);
         }
 
         // begin selection
@@ -729,14 +734,12 @@ class GeometryEditor : IEditorMode
             CellSelection.Instance ??= new CellSelection();
             CellSelection.Instance.PasteMode = false;
         }
-        
+
         // paste
         // (copy is handled by CellSelection)
         if (KeyShortcuts.Activated(KeyShortcut.Paste))
         {
-            var cellSelectionState = CellSelection.Instance;
-            CellSelection.BeginPaste(ref cellSelectionState);
-            CellSelection.Instance = cellSelectionState;
+            CellSelection.BeginPaste();
         }
 
         bool isMouseDown = EditorWindow.IsMouseDown(ImGuiMouseButton.Left) || EditorWindow.IsMouseDown(ImGuiMouseButton.Right);
@@ -749,6 +752,7 @@ class GeometryEditor : IEditorMode
             CellSelection.Instance.Update(layerMask, ClosestActiveLayer());
             if (!CellSelection.Instance.Active)
             {
+                CellSelection.Instance.Deactivate();
                 CellSelection.Instance = null;
             }
         }
@@ -816,30 +820,30 @@ class GeometryEditor : IEditorMode
                             toolRectX = window.MouseCx;
                             toolRectY = window.MouseCy;
                         }
-                        else if (isErasing && window.IsMouseInLevel())
+                        else if (KeyShortcuts.Active(KeyShortcut.FloodFill) && ToolCanFloodFill(selectedTool))
                         {
-                            Erase(window.MouseCx, window.MouseCy);
+                            for (int l = 0; l < Level.LayerCount; l++)
+                            {
+                                if (layerMask[l])
+                                    ActivateToolFloodFill(selectedTool, window.MouseCx, window.MouseCy, l, isErasing);
+                            }
                         }
                         else
                         {
-                            if (!isToolRectActive)
+                            Action<int, int> plotFunc;
+                            if (isErasing)
                             {
-                                if (KeyShortcuts.Active(KeyShortcut.FloodFill) && EditorWindow.IsMouseClicked(ImGuiMouseButton.Left) && ToolCanFloodFill(selectedTool))
-                                {
-                                    for (int l = 0; l < Level.LayerCount; l++)
-                                    {
-                                        if (layerMask[l])
-                                            ActivateToolFloodFill(selectedTool, window.MouseCx, window.MouseCy, l);
-                                    }
-                                }
-                                else
-                                {
-                                    Rasterization.Bresenham(lastMouseX, lastMouseY, window.MouseCx, window.MouseCy, (int x, int y) =>
-                                    {
-                                        ActivateTool(selectedTool, x, y, EditorWindow.IsMouseClicked(ImGuiMouseButton.Left));
-                                    });
-                                }
+                                plotFunc = Erase;
                             }
+                            else
+                            {
+                                plotFunc = (x, y) =>
+                                {
+                                    ActivateTool(selectedTool, x, y, EditorWindow.IsMouseClicked(ImGuiMouseButton.Left));
+                                };
+                            }
+
+                            Rasterization.Bresenham(lastMouseX, lastMouseY, window.MouseCx, window.MouseCy, plotFunc);
                         }
                     }
                 }
@@ -854,7 +858,7 @@ class GeometryEditor : IEditorMode
 
         if (!EditorWindow.IsMouseDown(ImGuiMouseButton.Left) && !EditorWindow.IsMouseDown(ImGuiMouseButton.Right))
             ignoreClick = false;
-        
+
         lastMouseX = window.MouseCx;
         lastMouseY = window.MouseCy;
 
@@ -877,7 +881,7 @@ class GeometryEditor : IEditorMode
 
         for (int i = 0; i < 3; i++)
         {
-            var pos = mousePos + new Vector2(i * 8f, 0f);
+            var pos = mousePos + new Vector2(i * 8f * Boot.WindowScale, 0f);
             var col = new Vector4(LayerColors[i].R / 255f, LayerColors[i].G / 255f, LayerColors[i].B / 255f, layerMask[i] ? 1f : 0.2f);
             drawList.AddRectFilled(pos, pos + Vector2.One * 6f * Boot.WindowScale, ImGui.ColorConvertFloat4ToU32(col));
         }
@@ -898,10 +902,10 @@ class GeometryEditor : IEditorMode
 
         if (mirrorFlags.HasFlag(MirrorFlags.MirrorX) && doMirrorX)
             positions[count++] = ((int)(MirrorPositionX * 2 - tx - 1), ty);
-        
+
         if (mirrorFlags.HasFlag(MirrorFlags.MirrorY) && doMirrorY)
             positions[count++] = (tx, (int)(MirrorPositionY * 2 - ty - 1));
-        
+
         if (mirrorFlags.HasFlag(MirrorFlags.MirrorX) && mirrorFlags.HasFlag(MirrorFlags.MirrorY))
         {
             if (doMirrorX || doMirrorY)
@@ -963,7 +967,7 @@ class GeometryEditor : IEditorMode
             var level = RainEd.Instance.Level;
             if (x < 0 || y < 0) return GeoType.Air;
             if (x >= level.Width || y >= level.Height) return GeoType.Air;
-            return level.Layers[l,x,y].Geo;
+            return level.Layers[l, x, y].Geo;
         }
 
         static bool Equals(ReadOnlySpan<GeoType> a, ReadOnlySpan<GeoType> b)
@@ -1002,8 +1006,166 @@ class GeometryEditor : IEditorMode
         {
             newType = GeoType.SlopeLeftDown;
         }
-        
+
         return newType;
+    }
+
+    private void ActivateToolSingleTile(Tool tool, int tx, int ty, int layer, bool pressed)
+    {
+        var level = RainEd.Instance.Level;
+        if (!level.IsInBounds(tx, ty)) return;
+
+        var cell = level.Layers[layer, tx, ty];
+        LevelObject levelObject = LevelObject.None;
+
+        switch (tool)
+        {
+            case Tool.Wall:
+                cell.Geo = GeoType.Solid;
+                break;
+
+            case Tool.Air:
+                cell.Geo = GeoType.Air;
+                break;
+
+            case Tool.Platform:
+                cell.Geo = GeoType.Platform;
+                break;
+
+            case Tool.Glass:
+                cell.Geo = GeoType.Glass;
+                break;
+
+            case Tool.Inverse:
+                if (pressed) toolPlaceMode = cell.Geo == GeoType.Air;
+                cell.Geo = toolPlaceMode ? GeoType.Solid : GeoType.Air;
+                break;
+
+            case Tool.ShortcutEntrance:
+                if (layer != 0) break;
+
+                if (pressed) toolPlaceMode = cell.Geo == GeoType.ShortcutEntrance;
+
+                if (toolPlaceMode)
+                {
+                    if (cell.Geo == GeoType.ShortcutEntrance) cell.Geo = GeoType.Air;
+                }
+                else
+                {
+                    cell.Geo = GeoType.ShortcutEntrance;
+                }
+
+                break;
+
+            case Tool.Slope:
+                {
+                    var slopeType = CalcPossibleSlopeType(tx, ty, layer);
+                    if (slopeType != GeoType.Air)
+                    {
+                        cell.Geo = slopeType;
+                    }
+
+                    break;
+                }
+
+            case Tool.CopyBackwards:
+                {
+                    int dstLayer = (layer + 1) % 3;
+
+                    ref var dstCell = ref level.Layers[dstLayer, tx, ty];
+                    dstCell.Geo = cell.Geo;
+                    dstCell.Objects = cell.Objects;
+                    window.InvalidateGeo(tx, ty, dstLayer);
+
+                    break;
+                }
+
+            // the following will use the default object tool
+            // handler
+            case Tool.HorizontalBeam:
+                levelObject = LevelObject.HorizontalBeam;
+                break;
+
+            case Tool.VerticalBeam:
+                levelObject = LevelObject.VerticalBeam;
+                break;
+
+            case Tool.Rock:
+                levelObject = LevelObject.Rock;
+                break;
+
+            case Tool.Spear:
+                levelObject = LevelObject.Spear;
+                break;
+
+            case Tool.Crack:
+                levelObject = LevelObject.Crack;
+                break;
+
+            case Tool.Hive:
+                // hives can only be placed above ground
+                if (ty < level.Height - 1 && level.Layers[layer, tx, ty + 1].Geo == GeoType.Solid)
+                {
+                    levelObject = LevelObject.Hive;
+                }
+                else
+                {
+                    levelObject = LevelObject.None;
+                }
+                break;
+
+            case Tool.ForbidFlyChain:
+                levelObject = LevelObject.ForbidFlyChain;
+                break;
+
+            case Tool.Waterfall:
+                levelObject = LevelObject.Waterfall;
+                break;
+
+            case Tool.WormGrass:
+                levelObject = LevelObject.WormGrass;
+                break;
+
+            case Tool.Shortcut:
+                levelObject = LevelObject.Shortcut;
+                break;
+
+            case Tool.Entrance:
+                levelObject = LevelObject.Entrance;
+                break;
+
+            case Tool.CreatureDen:
+                levelObject = LevelObject.CreatureDen;
+                break;
+
+            case Tool.WhackAMoleHole:
+                levelObject = LevelObject.WhackAMoleHole;
+                break;
+
+            case Tool.GarbageWorm:
+                levelObject = LevelObject.GarbageWorm;
+                break;
+
+            case Tool.ScavengerHole:
+                levelObject = LevelObject.ScavengerHole;
+                break;
+        }
+
+        if (levelObject != LevelObject.None)
+        {
+            // player can only place objects on work layer 1 (except if it's a beam or crack)
+            if (layer == 0 || levelObject == LevelObject.HorizontalBeam || levelObject == LevelObject.VerticalBeam || levelObject == LevelObject.Crack || levelObject == LevelObject.Hive)
+            {
+                if (pressed) toolPlaceMode = cell.Has(levelObject);
+                if (toolPlaceMode)
+                    cell.Remove(levelObject);
+                else
+                    cell.Add(levelObject);
+            }
+        }
+
+        level.Layers[layer, tx, ty] = cell;
+        window.InvalidateGeo(tx, ty, layer);
     }
 
     private void ActivateToolSingleTile(Tool tool, int tx, int ty, bool pressed)
@@ -1016,159 +1178,11 @@ class GeometryEditor : IEditorMode
         for (int layer = 0; layer < 3; layer++)
         {
             if (!layerMask[layer]) continue;
-
-            var cell = level.Layers[layer, tx, ty];
-            LevelObject levelObject = LevelObject.None;
-
-            switch (tool)
-            {
-                case Tool.Wall:
-                    cell.Geo = GeoType.Solid;
-                    break;
-
-                case Tool.Air:
-                    cell.Geo = GeoType.Air;
-                    break;
-
-                case Tool.Platform:
-                    cell.Geo = GeoType.Platform;
-                    break;
-
-                case Tool.Glass:
-                    cell.Geo = GeoType.Glass;
-                    break;
-
-                case Tool.Inverse:
-                    if (pressed) toolPlaceMode = cell.Geo == GeoType.Air;
-                    cell.Geo = toolPlaceMode ? GeoType.Solid : GeoType.Air;
-                    break;
-
-                case Tool.ShortcutEntrance:
-                    if (layer != 0) break;
-
-                    if (pressed) toolPlaceMode = cell.Geo == GeoType.ShortcutEntrance;
-
-                    if (toolPlaceMode) {
-                        if (cell.Geo == GeoType.ShortcutEntrance) cell.Geo = GeoType.Air;
-                    } else {
-                        cell.Geo = GeoType.ShortcutEntrance;
-                    }
-
-                    break;
-
-                case Tool.Slope:
-                {
-                    var slopeType = CalcPossibleSlopeType(tx, ty, layer);
-                    if (slopeType != GeoType.Air)
-                    {
-                        cell.Geo = slopeType;
-                    }
-
-                        break;
-                    }
-
-                case Tool.CopyBackwards:
-                    {
-                        int dstLayer = (layer + 1) % 3;
-
-                    ref var dstCell = ref level.Layers[dstLayer, tx, ty];
-                    dstCell.Geo = cell.Geo;
-                    dstCell.Objects = cell.Objects;
-                    window.InvalidateGeo(tx, ty, dstLayer);
-
-                        break;
-                    }
-
-                // the following will use the default object tool
-                // handler
-                case Tool.HorizontalBeam:
-                    levelObject = LevelObject.HorizontalBeam;
-                    break;
-
-                case Tool.VerticalBeam:
-                    levelObject = LevelObject.VerticalBeam;
-                    break;
-
-                case Tool.Rock:
-                    levelObject = LevelObject.Rock;
-                    break;
-
-                case Tool.Spear:
-                    levelObject = LevelObject.Spear;
-                    break;
-
-                case Tool.Crack:
-                    levelObject = LevelObject.Crack;
-                    break;
-
-                case Tool.Hive:
-                    // hives can only be placed above ground
-                    if (ty < level.Height - 1 && level.Layers[layer, tx, ty + 1].Geo == GeoType.Solid)
-                    {
-                        levelObject = LevelObject.Hive;
-                    }
-                    else
-                    {
-                        levelObject = LevelObject.None;
-                    }
-                    break;
-
-                case Tool.ForbidFlyChain:
-                    levelObject = LevelObject.ForbidFlyChain;
-                    break;
-
-                case Tool.Waterfall:
-                    levelObject = LevelObject.Waterfall;
-                    break;
-
-                case Tool.WormGrass:
-                    levelObject = LevelObject.WormGrass;
-                    break;
-
-                case Tool.Shortcut:
-                    levelObject = LevelObject.Shortcut;
-                    break;
-
-                case Tool.Entrance:
-                    levelObject = LevelObject.Entrance;
-                    break;
-
-                case Tool.CreatureDen:
-                    levelObject = LevelObject.CreatureDen;
-                    break;
-
-                case Tool.WhackAMoleHole:
-                    levelObject = LevelObject.WhackAMoleHole;
-                    break;
-
-                case Tool.GarbageWorm:
-                    levelObject = LevelObject.GarbageWorm;
-                    break;
-
-                case Tool.ScavengerHole:
-                    levelObject = LevelObject.ScavengerHole;
-                    break;
-            }
-
-            if (levelObject != LevelObject.None)
-            {
-                // player can only place objects on work layer 1 (except if it's a beam or crack)
-                if (layer == 0 || levelObject == LevelObject.HorizontalBeam || levelObject == LevelObject.VerticalBeam || levelObject == LevelObject.Crack || levelObject == LevelObject.Hive)
-                {
-                    if (pressed) toolPlaceMode = cell.Has(levelObject);
-                    if (toolPlaceMode)
-                        cell.Remove(levelObject);
-                    else
-                        cell.Add(levelObject);
-                }
-            }
-
-            level.Layers[layer, tx, ty] = cell;
-            window.InvalidateGeo(tx, ty, layer);
+            ActivateToolSingleTile(tool, tx, ty, layer, pressed);
         }
     }
 
-    private void ActivateToolFloodFill(Tool tool, int srcX, int srcY, int layer)
+    private void ActivateToolFloodFill(Tool tool, int srcX, int srcY, int layer, bool isErasing)
     {
         var level = RainEd.Instance.Level;
         var renderer = RainEd.Instance.LevelView.Renderer;
@@ -1180,8 +1194,8 @@ class GeometryEditor : IEditorMode
         GeoType geoMedium = level.Layers[layer, srcX, srcY].Geo;
         GeoType fillGeo = tool switch
         {
-            Tool.Air => GeoType.Air,
-            Tool.Wall => GeoType.Solid,
+            Tool.Air => isErasing ? GeoType.Solid : GeoType.Air,
+            Tool.Wall => isErasing ? GeoType.Air : GeoType.Solid,
             _ => throw new ArgumentException("ActivateToolFloodFill only supports Tool.Air and Tool.Wall", nameof(tool))
         };
 
@@ -1382,5 +1396,28 @@ class GeometryEditor : IEditorMode
                 ActivateTool(Tool.Slope, pos.X, pos.Y, true);
             }
         }
+    }
+
+    private void SelectionFill(CellEditing.LayerSelection?[] layers)
+    {
+        window.CellChangeRecorder.BeginChange();
+
+        for (int l = 0; l < Level.LayerCount; l++)
+        {
+            var layer = layers[l];
+            if (layer is null) continue;
+
+            // evil double-variable in for loop
+            for (int y = layer.minY, ly = 0; y <= layer.maxY; y++, ly++)
+            {
+                for (int x = layer.minX, lx = 0; x <= layer.maxX; x++, lx++)
+                {
+                    if (layer.mask[ly, lx])
+                        ActivateToolSingleTile(selectedTool, x, y, l, true);
+                }
+            }
+        }
+
+        window.CellChangeRecorder.PushChange();
     }
 }

@@ -3,6 +3,7 @@ using System.Numerics;
 using Raylib_cs;
 using Rained.Assets;
 using Rained.LevelData;
+using Rained.EditorGui.AssetPreviews;
 
 namespace Rained.EditorGui.Editors;
 
@@ -17,24 +18,41 @@ partial class PropEditor : IEditorMode
         Tiles
     };
 
-    private int selectedPropGroup = 0;
-    private int selectedTileGroup = 0;
-    private int selectedPropIdx = 0;
-    private int selectedTileIdx = 0;
     private SelectionMode selectionMode = SelectionMode.Props;
     private SelectionMode? forceSelection = null;
-    private PropInit? selectedInit;
-    private RlManaged.RenderTexture2D previewTexture = null!;
-    private PropInit? curPropPreview = null;
+    private readonly PropPreview propPreview = new();
 
-    // search results only process groups because i'm too lazy to have
-    // it also process the resulting props
-    // plus, i don't think it's much of an optimization concern because then
-    // it'd only need to filter props per one category, and there's not
-    // that many props per category
-    private string searchQuery = "";
-    private readonly List<(int, PropCategory)> searchResults = new();
-    private readonly List<(int, PropTileCategory)> tileSearchResults = new();
+    private int zTranslateValue = 0;
+    private bool zTranslateActive = false;
+    private bool zTranslateWrap = false;
+    private Dictionary<Prop, int> zTranslateDepths = [];
+
+    private PropInit? selectedInit = null;
+
+    private void PropItemPostRender(int propIndex, bool selected)
+    {
+        if (ImGui.BeginItemTooltip())
+        {
+            var prop = RainEd.Instance.PropDatabase.Categories[propCatalogWidget.SelectedGroup].Props[propIndex];
+            propPreview.UpdatePreview(prop);
+            ImGuiExt.ImageRenderTextureScaled(propPreview.Texture!, new Vector2(Boot.PixelIconScale, Boot.PixelIconScale));
+            ImGui.EndTooltip();
+        }
+    }
+
+    private void TileItemPostRender(int propIndex, bool selected)
+    {
+        if (ImGui.BeginItemTooltip())
+        {
+            var prop = RainEd.Instance.PropDatabase.TileCategories[tileCatalogWidget.SelectedGroup].Props[propIndex];
+            propPreview.UpdatePreview(prop);
+            ImGuiExt.ImageRenderTextureScaled(propPreview.Texture!, new Vector2(Boot.PixelIconScale, Boot.PixelIconScale));
+            ImGui.EndTooltip();
+        }
+    }
+
+    private GenericDualCatalogWidget propCatalogWidget;
+    private GenericDualCatalogWidget tileCatalogWidget;
 
     private bool isRopeSimulationActive = false;
     private bool wasRopeSimulationActive = false;
@@ -86,6 +104,7 @@ partial class PropEditor : IEditorMode
     {
         var field = typeof(Prop).GetField(fieldName)!;
         var targetV = (int)field.GetValue(selectedProps[0])!;
+        var style = ImGui.GetStyle();
 
         bool isSame = true;
         for (int i = 1; i < selectedProps.Count; i++)
@@ -97,10 +116,17 @@ partial class PropEditor : IEditorMode
             }
         }
 
+        bool depthOffsetInput = fieldName == nameof(Prop.DepthOffset);
+        if (depthOffsetInput)
+        {
+            var w = ImGui.CalcItemWidth() - ImGui.GetFrameHeight() * 2 - style.ItemInnerSpacing.X * 2;
+            ImGui.PushItemWidth(w);
+        }
+
         if (isSame)
         {
             int v = (int)field.GetValue(selectedProps[0])!;
-            if (ImGui.SliderInt(label, ref v, v_min, v_max, format, flags))
+            if (ImGui.SliderInt(depthOffsetInput ? "##" + label : label, ref v, v_min, v_max, format, flags))
             {
                 foreach (var prop in selectedProps)
                     field.SetValue(prop, v);
@@ -109,7 +135,7 @@ partial class PropEditor : IEditorMode
         else
         {
             int v = int.MinValue;
-            if (ImGui.SliderInt(label, ref v, v_min, v_max, string.Empty, flags))
+            if (ImGui.SliderInt(depthOffsetInput ? "##" + label : label, ref v, v_min, v_max, string.Empty, flags))
             {
                 foreach (var prop in selectedProps)
                     field.SetValue(prop, v);
@@ -117,8 +143,44 @@ partial class PropEditor : IEditorMode
         }
 
         if (ImGui.IsItemDeactivatedAfterEdit())
-        {
             changeRecorder.PushSettingsChanges();
+
+        if (depthOffsetInput)
+        {
+            // decrement/increment input
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, style.ItemInnerSpacing);
+
+            ImGui.PushButtonRepeat(true);
+            bool fast = EditorWindow.IsKeyDown(ImGuiKey.ModShift);
+            var delta = fast ? 10 : 1;
+
+            ImGui.SameLine();
+            if (ImGui.Button(fast ? "<" : "-", Vector2.One * ImGui.GetFrameHeight()))
+            {
+                foreach (var prop in selectedProps)
+                    field.SetValue(prop, Math.Max(0, (int)field.GetValue(prop)! - delta));
+            }
+
+            if (ImGui.IsItemDeactivated())
+                changeRecorder.PushSettingsChanges();
+
+            ImGui.SameLine();
+            if (ImGui.Button(fast ? ">" : "+", Vector2.One * ImGui.GetFrameHeight()))
+            {
+                foreach (var prop in selectedProps)
+                    field.SetValue(prop, Math.Min(Level.LayerCount * 10 - 1, (int)field.GetValue(prop)! + delta));
+            }
+
+            if (ImGui.IsItemDeactivated())
+                changeRecorder.PushSettingsChanges();
+
+            ImGui.PopButtonRepeat();
+
+            ImGui.SameLine();
+            ImGui.Text(label);
+
+            ImGui.PopStyleVar();
+            ImGui.PopItemWidth();
         }
     }
 
@@ -234,107 +296,6 @@ partial class PropEditor : IEditorMode
         }
     }
     #endregion
-
-    private void ProcessSearch()
-    {
-        searchResults.Clear();
-        tileSearchResults.Clear();
-        var propDb = RainEd.Instance.PropDatabase;
-
-        // normal props
-        if (selectionMode == SelectionMode.Props)
-        {
-            for (int i = 0; i < propDb.Categories.Count; i++)
-            {
-                var group = propDb.Categories[i];
-
-                // skip "Tiles as props" categories
-                if (group.IsTileCategory) continue;
-
-                foreach (var prop in group.Props)
-                {
-                    if (prop.Name.Contains(searchQuery, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        searchResults.Add((i, group));
-                        break;
-                    }
-                }
-            }
-        }
-
-        // tile props
-        else if (selectionMode == SelectionMode.Tiles)
-        {
-            for (int i = 0; i < propDb.TileCategories.Count; i++)
-            {
-                var group = propDb.TileCategories[i];
-
-                foreach (var prop in group.Props)
-                {
-                    if (prop.Name.Contains(searchQuery, StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        tileSearchResults.Add((i, group));
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    private void UpdatePreview(PropInit prop)
-    {
-        var texWidth = (int)(prop.Width * 20f);
-        var texHeight = (int)(prop.Height * 20f);
-
-        if (previewTexture is null || curPropPreview != prop)
-        {
-            curPropPreview = prop;
-
-            previewTexture?.Dispose();
-            previewTexture = RlManaged.RenderTexture2D.Load(texWidth, texHeight);
-        }
-
-        Raylib.BeginTextureMode(previewTexture);
-        Raylib.ClearBackground(Color.Blank);
-        Raylib.BeginShaderMode(Shaders.PropShader);
-        {
-            var propTexture = RainEd.Instance.AssetGraphics.GetPropTexture(prop);
-            for (int depth = prop.LayerCount - 1; depth >= 0; depth--)
-            {
-                float whiteFade = Math.Clamp(depth / 16f, 0f, 1f);
-                Rectangle srcRect, dstRec;
-
-                if (propTexture is not null)
-                {
-                    srcRect = prop.GetPreviewRectangle(0, depth);
-                    dstRec = new Rectangle(Vector2.Zero, srcRect.Size);
-                }
-                else
-                {
-                    srcRect = new Rectangle(Vector2.Zero, 2.0f * Vector2.One);
-                    dstRec = new Rectangle(Vector2.Zero, prop.Width * 20f, prop.Height * 20f);
-                }
-
-                var drawColor = new Color(255, (int)(whiteFade * 255f), 0, 0);
-
-                if (propTexture is not null)
-                {
-                    propTexture.DrawRectangle(srcRect, dstRec, drawColor);
-                }
-                else
-                {
-                    Raylib.DrawTexturePro(
-                        RainEd.Instance.PlaceholderTexture,
-                        srcRect, dstRec,
-                        Vector2.Zero, 0f,
-                        drawColor
-                    );
-                }
-            }
-        }
-        Raylib.EndShaderMode();
-        Raylib.EndTextureMode();
-    }
 
     public void DrawToolbar()
     {
@@ -454,74 +415,11 @@ partial class PropEditor : IEditorMode
                     if (selectionMode != SelectionMode.Props)
                     {
                         selectionMode = SelectionMode.Props;
-                        ProcessSearch();
+                        propCatalogWidget.SearchQuery = tileCatalogWidget.SearchQuery;
+                        propCatalogWidget.ProcessSearch();
                     }
 
-                    // search bar
-                    ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, searchInputFlags))
-                    {
-                        ProcessSearch();
-                    }
-
-                    // group list box
-                    var boxHeight = ImGui.GetContentRegionAvail().Y;
-                    if (ImGui.BeginListBox("##Groups", new Vector2(halfWidth, boxHeight)))
-                    {
-                        foreach ((var i, var group) in searchResults)
-                        {
-                            // redundant skip Tiles as props categories
-                            if (group.IsTileCategory) continue; // skip Tiles as props categories
-
-                            var cursor = ImGui.GetCursorScreenPos();
-                            ImGui.GetWindowDrawList().AddRectFilled(
-                                p_min: cursor,
-                                p_max: cursor + new Vector2(10f, ImGui.GetTextLineHeight()),
-                                ImGui.ColorConvertFloat4ToU32(new Vector4(group.Color.R / 255f, group.Color.G / 255f, group.Color.B / 255f, 1f))
-                            );
-
-                            if (ImGui.Selectable("       " + group.Name, selectedPropGroup == i) || searchResults.Count == 1)
-                            {
-                                if (i != selectedPropGroup)
-                                {
-                                    selectedPropGroup = i;
-                                    selectedPropIdx = 0;
-                                }
-                            }
-                        }
-
-                        ImGui.EndListBox();
-                    }
-
-                    // group listing (effects) list box
-                    ImGui.SameLine();
-                    if (ImGui.BeginListBox("##Props", new Vector2(halfWidth, boxHeight)))
-                    {
-                        var propList = propDb.Categories[selectedPropGroup].Props;
-
-                        for (int i = 0; i < propList.Count; i++)
-                        {
-                            var prop = propList[i];
-
-                            // don't show this prop if it doesn't pass search test
-                            if (!prop.Name.Contains(searchQuery, StringComparison.CurrentCultureIgnoreCase))
-                                continue;
-
-                            if (ImGui.Selectable(prop.Name, i == selectedPropIdx))
-                            {
-                                selectedPropIdx = i;
-                            }
-
-                            if (ImGui.BeginItemTooltip())
-                            {
-                                UpdatePreview(prop);
-                                ImGuiExt.ImageRenderTextureScaled(previewTexture, new Vector2(Boot.PixelIconScale, Boot.PixelIconScale));
-                                ImGui.EndTooltip();
-                            }
-                        }
-
-                        ImGui.EndListBox();
-                    }
+                    propCatalogWidget.Draw();
 
                     ImGui.EndTabItem();
                 }
@@ -533,75 +431,11 @@ partial class PropEditor : IEditorMode
                     if (selectionMode != SelectionMode.Tiles)
                     {
                         selectionMode = SelectionMode.Tiles;
-                        ProcessSearch();
+                        tileCatalogWidget.SearchQuery = propCatalogWidget.SearchQuery;
+                        tileCatalogWidget.ProcessSearch();
                     }
 
-                    // search bar
-                    ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-                    if (ImGui.InputTextWithHint("##Search", "搜索...", ref searchQuery, 128, searchInputFlags))
-                    {
-                        ProcessSearch();
-                    }
-
-                    // group list box
-                    var boxHeight = ImGui.GetContentRegionAvail().Y;
-                    if (ImGui.BeginListBox("##Groups", new Vector2(halfWidth, boxHeight)))
-                    {
-                        var drawList = ImGui.GetWindowDrawList();
-                        float textHeight = ImGui.GetTextLineHeight();
-
-                        foreach ((var i, var group) in tileSearchResults)
-                        {
-                            var cursor = ImGui.GetCursorScreenPos();
-                            if (ImGui.Selectable("       " + propDb.TileCategories[i].Name, selectedTileGroup == i) || tileSearchResults.Count == 1)
-                            {
-                                if (i != selectedTileGroup)
-                                {
-                                    selectedTileGroup = i;
-                                    selectedTileIdx = 0;
-                                }
-                            }
-
-                            // draw color square
-                            drawList.AddRectFilled(
-                                p_min: cursor,
-                                p_max: cursor + new Vector2(10f, textHeight),
-                                ImGui.ColorConvertFloat4ToU32(new Vector4(group.Color.R / 255f, group.Color.G / 255f, group.Color.B / 255f, 1f))
-                            );
-                        }
-
-                        ImGui.EndListBox();
-                    }
-
-                    // group listing (effects) list box
-                    ImGui.SameLine();
-                    if (ImGui.BeginListBox("##Props", new Vector2(halfWidth, boxHeight)))
-                    {
-                        var propList = propDb.TileCategories[selectedTileGroup].Props;
-
-                        for (int i = 0; i < propList.Count; i++)
-                        {
-                            var prop = propList[i];
-
-                            // don't show this prop if it doesn't pass search test
-                            if (!prop.Name.Contains(searchQuery, StringComparison.CurrentCultureIgnoreCase))
-                                continue;
-
-                            if (ImGui.Selectable(prop.Name, selectedTileIdx == i))
-                            {
-                                selectedTileIdx = i;
-                            }
-
-                            if (ImGui.BeginItemTooltip())
-                            {
-                                UpdatePreview(prop);
-                                ImGuiExt.ImageRenderTextureScaled(previewTexture, new Vector2(Boot.PixelIconScale, Boot.PixelIconScale));
-                                ImGui.EndTooltip();
-                            }
-                        }
-
-                        ImGui.EndListBox();
-                    }
+                    tileCatalogWidget.Draw();
 
                     ImGui.EndTabItem();
                 }
@@ -621,17 +455,14 @@ partial class PropEditor : IEditorMode
             {
                 while (true) // must skip over the hidden Tiles as props categories (i now doubt the goodiness of this idea)
                 {
-                    selectedPropGroup = Mod(selectedPropGroup - 1, propDb.Categories.Count);
-                    var group = propDb.Categories[selectedPropGroup];
+                    propCatalogWidget.SelectedGroup = propCatalogWidget.PreviousGroup(propCatalogWidget.SelectedGroup);
+                    var group = propDb.Categories[propCatalogWidget.SelectedGroup];
                     if (!group.IsTileCategory && group.Props.Count > 0) break;
                 }
-
-                selectedPropIdx = 0;
             }
             else if (selectionMode == SelectionMode.Tiles)
             {
-                selectedTileGroup = Mod(selectedTileGroup - 1, propDb.TileCategories.Count);
-                selectedTileIdx = 0;
+                tileCatalogWidget.SelectedGroup = Mod(tileCatalogWidget.SelectedGroup - 1, propDb.TileCategories.Count);
             }
         }
 
@@ -641,17 +472,14 @@ partial class PropEditor : IEditorMode
             {
                 while (true) // must skip over the hidden Tiles as props categories (i now doubt the goodiness of this idea)
                 {
-                    selectedPropGroup = Mod(selectedPropGroup + 1, propDb.Categories.Count);
-                    var group = propDb.Categories[selectedPropGroup];
+                    propCatalogWidget.SelectedGroup = propCatalogWidget.NextGroup(propCatalogWidget.SelectedGroup);
+                    var group = propDb.Categories[propCatalogWidget.SelectedGroup];
                     if (!group.IsTileCategory && group.Props.Count > 0) break;
                 }
-
-                selectedPropIdx = 0;
             }
             else if (selectionMode == SelectionMode.Tiles)
             {
-                selectedTileGroup = Mod(selectedTileGroup + 1, propDb.TileCategories.Count);
-                selectedTileIdx = 0;
+                tileCatalogWidget.SelectedGroup = tileCatalogWidget.NextGroup(tileCatalogWidget.SelectedGroup);
             }
         }
 
@@ -660,13 +488,11 @@ partial class PropEditor : IEditorMode
         {
             if (selectionMode == SelectionMode.Props)
             {
-                var propList = propDb.Categories[selectedPropGroup].Props;
-                selectedPropIdx = Mod(selectedPropIdx - 1, propList.Count);
+                propCatalogWidget.SelectedItem = propCatalogWidget.PreviousItem(propCatalogWidget.SelectedGroup, propCatalogWidget.SelectedItem);
             }
             else if (selectionMode == SelectionMode.Tiles)
             {
-                var propList = propDb.TileCategories[selectedTileGroup].Props;
-                selectedTileIdx = Mod(selectedTileIdx - 1, propList.Count);
+                tileCatalogWidget.SelectedItem = tileCatalogWidget.PreviousItem(tileCatalogWidget.SelectedGroup, tileCatalogWidget.SelectedItem);
             }
         }
 
@@ -674,24 +500,22 @@ partial class PropEditor : IEditorMode
         {
             if (selectionMode == SelectionMode.Props)
             {
-                var propList = propDb.Categories[selectedPropGroup].Props;
-                selectedPropIdx = Mod(selectedPropIdx + 1, propList.Count);
+                propCatalogWidget.SelectedItem = propCatalogWidget.NextItem(propCatalogWidget.SelectedGroup, propCatalogWidget.SelectedItem);
             }
             else if (selectionMode == SelectionMode.Tiles)
             {
-                var propList = propDb.TileCategories[selectedTileGroup].Props;
-                selectedTileIdx = Mod(selectedTileIdx + 1, propList.Count);
+                tileCatalogWidget.SelectedItem = tileCatalogWidget.NextItem(tileCatalogWidget.SelectedGroup, tileCatalogWidget.SelectedItem);
             }
         }
 
         // update selected init
         if (selectionMode == SelectionMode.Props)
         {
-            selectedInit = propDb.Categories[selectedPropGroup].Props[selectedPropIdx];
+            selectedInit = propDb.Categories[propCatalogWidget.SelectedGroup].Props[propCatalogWidget.SelectedItem];
         }
         else if (selectionMode == SelectionMode.Tiles)
         {
-            selectedInit = propDb.TileCategories[selectedTileGroup].Props[selectedTileIdx];
+            selectedInit = propDb.TileCategories[tileCatalogWidget.SelectedGroup].Props[tileCatalogWidget.SelectedItem];
         }
         else
         {
@@ -701,8 +525,6 @@ partial class PropEditor : IEditorMode
 
     private void OptionsToolbar()
     {
-        var propDb = RainEd.Instance.PropDatabase;
-
         if (ImGui.Begin("道具选项", ImGuiWindowFlags.NoFocusOnAppearing))
         {
             // prop transformation mode
@@ -720,7 +542,10 @@ partial class PropEditor : IEditorMode
                     ImGui.Text("选定多个道具");
                 }
 
-                if (ImGui.Button("重置变换"))
+                var btnSize = new Vector2(ImGuiExt.ButtonGroup.CalcItemWidth(ImGui.GetContentRegionAvail().X, 4), 0);
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImGui.GetStyle().ItemInnerSpacing);
+
+                if (ImGui.Button("重置", btnSize))
                 {
                     changeRecorder.BeginTransform();
                     foreach (var prop in selectedProps)
@@ -729,7 +554,7 @@ partial class PropEditor : IEditorMode
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("翻转 X"))
+                if (ImGui.Button("翻转 X", btnSize))
                 {
                     changeRecorder.BeginTransform();
                     foreach (var prop in selectedProps)
@@ -738,7 +563,7 @@ partial class PropEditor : IEditorMode
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("翻转 Y"))
+                if (ImGui.Button("翻转 Y", btnSize))
                 {
                     changeRecorder.BeginTransform();
                     foreach (var prop in selectedProps)
@@ -746,11 +571,62 @@ partial class PropEditor : IEditorMode
                     changeRecorder.PushChanges();
                 }
 
-                ImGui.PushItemWidth(ImGui.GetTextLineHeightWithSpacing() * 10f);
-                MultiselectDragInt("渲染顺序", "RenderOrder", 0.02f);
-                MultiselectSliderInt("纵深偏移", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
-                MultiselectSliderInt("种子", "Seed", 0, 999);
-                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "渲染时机", "RenderTime", PropRenderTimeNames);
+                ImGui.SameLine();
+                if (ImGui.Button("Depth Move", btnSize))
+                {
+                    ImGui.OpenPopup("ZTranslate");
+                    zTranslateValue = 0;
+                    zTranslateDepths.Clear();
+                    foreach (var prop in selectedProps)
+                        zTranslateDepths.Add(prop, prop.DepthOffset);
+                }
+
+                zTranslateActive = false;
+                if (ImGui.BeginPopup("ZTranslate"))
+                {
+                    zTranslateActive = true;
+                    ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 20f);
+                    ImGui.SliderInt("##depth", ref zTranslateValue, -29, 29);
+                    ImGui.PopItemWidth();
+
+                    ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+                    ImGui.Checkbox("Wrap around", ref zTranslateWrap);
+                    ImGui.PopStyleVar();
+
+                    if (StandardPopupButtons.Show(PopupButtonList.OKCancel, out var btn))
+                    {
+                        zTranslateActive = false;
+
+                        if (btn == 0)
+                        {
+                            changeRecorder.BeginTransform();
+                            foreach (var prop in selectedProps)
+                            {
+                                prop.DepthOffset += zTranslateValue;
+                                if (zTranslateWrap)
+                                    prop.DepthOffset = Util.Mod(prop.DepthOffset, 30);
+                                else
+                                    prop.DepthOffset = Math.Clamp(prop.DepthOffset, 0, 29);
+                            }
+                            changeRecorder.PushChanges();
+                        }
+
+                        ImGui.CloseCurrentPopup();
+                    }
+
+                    ImGui.EndPopup();
+                }
+
+                ImGui.PopStyleVar();
+
+                ImGui.PushItemWidth(Math.Max(
+                    ImGui.GetTextLineHeightWithSpacing() * 12f,
+                    ImGui.GetContentRegionAvail().X - ImGui.GetTextLineHeightWithSpacing() * 8f
+                ));
+                MultiselectDragInt("Render Order", "RenderOrder", 0.02f);
+                MultiselectSliderInt("Depth Offset", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
+                MultiselectSliderInt("Seed", "Seed", 0, 999);
+                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "Render Time", "RenderTime", PropRenderTimeNames);
 
                 // custom depth, if available
                 {
@@ -895,27 +771,6 @@ partial class PropEditor : IEditorMode
                                 if (ImGui.Checkbox("应用颜色", ref prop.ApplyColor))
                                     changeRecorder.PushSettingsChanges();
                             }
-                        }
-                        else if (selectedProps.Count > 1)
-                        {
-                            var prop = selectedProps[0];
-
-                            var _oldReleaseFlags = (int)prop.Rope!.ReleaseMode;
-                            var _releaseFlags = (int)prop.Rope!.ReleaseMode;
-                            if (ImGuiExt.ButtonFlags("##Release", ["Left", "Right"], ref _releaseFlags))
-                            {
-                                if (_releaseFlags == 3)
-                                {
-                                    if (_oldReleaseFlags == 1) _releaseFlags = 2;
-                                    if (_oldReleaseFlags == 2) _releaseFlags = 1;
-                                }
-                                foreach (var newProp in selectedProps)
-                                {
-                                    newProp.Rope!.ReleaseMode = (RopeReleaseMode)_releaseFlags;
-                                }
-                            }
-                            ImGui.SameLine();
-                            ImGui.Text("Release");
                         }
 
                         // rope simulation controls
@@ -1069,6 +924,11 @@ partial class PropEditor : IEditorMode
 
     public void ShowEditMenu()
     {
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Copy, "复制");
+
+        // TODO: grey this out if prop clipboard data is not available
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Paste, "粘贴");
+
         KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "复制选定的道具");
         KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "删除选定的道具");
         KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleVertexMode, "切换顶点编辑");

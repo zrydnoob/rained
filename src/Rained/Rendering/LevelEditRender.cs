@@ -4,6 +4,7 @@ using Rained.EditorGui;
 using Rained.LevelData;
 using Rained.Assets;
 using ImGuiNET;
+using Rained.EditorGui.Editors.CellEditing;
 namespace Rained.Rendering;
 using CameraBorderModeOption = UserPreferences.CameraBorderModeOption;
 
@@ -61,7 +62,7 @@ class LevelEditRender : IDisposable
     public int OverlayWidth { get; private set; }
     public int OverlayHeight { get; private set; }
     public bool OverlayAffectTiles;
-    public (bool mask, LevelCell cell)[,,]? OverlayGeometry { get; private set; } = null;
+    public MaskedCell[,,]? OverlayGeometry { get; private set; } = null;
     public bool IsOverlayActive => OverlayGeometry is not null;
 
     public LevelEditRender()
@@ -176,7 +177,7 @@ class LevelEditRender : IDisposable
                     if (cell.Has(objType) && !Level.ShortcutObjects.Contains(objType) && ObjectTextureOffsets.TryGetValue(objType, out Vector2 offset))
                     {
                         Raylib.DrawTextureRec(
-                            editor.LevelGraphicsTexture,
+                            GeometryIcons.RenderTexture,
                             new Rectangle(offset.X * 20, offset.Y * 20, 20, 20),
                             new Vector2(x, y) * Level.TileSize,
                             color
@@ -216,17 +217,16 @@ class LevelEditRender : IDisposable
     public void RenderNodes(Color color)
     {
         var rctx = RainEd.RenderContext!;
-        var idx = 0;
         var filter = RainEd.Instance.Preferences.NodeViewFilter.Flags;
 
-        foreach (var (nodePos, nodeType) in RainEd.Instance.CurrentTab!.NodeData.Nodes)
+        foreach (var node in RainEd.Instance.CurrentTab!.NodeData.Nodes)
         {
-            if (!filter[(int)nodeType]) continue;
+            if (!filter[(int)node.type]) continue;
             
-            var text = idx.ToString();
-            var pos = new Vector2(nodePos.X + 0.5f, nodePos.Y + 0.5f);
+            var text = node.id.ToString();
+            var pos = new Vector2(node.pos.X + 0.5f, node.pos.Y + 0.5f);
 
-            rctx.DrawColor = NodeColors[(int)nodeType];
+            rctx.DrawColor = NodeColors[(int)node.type];
             var txtSize = TextRendering.CalcOutlinedTextSize(text);
             var scale = 2f / ViewZoom * Boot.PixelIconScale;
             TextRendering.DrawTextOutlined(
@@ -234,8 +234,6 @@ class LevelEditRender : IDisposable
                 offset: pos * Level.TileSize - txtSize / 2f * scale,
                 scale: new Vector2(scale, scale)
             );
-
-            idx++;
         }
     }
 
@@ -397,7 +395,7 @@ class LevelEditRender : IDisposable
                     }
                     
                     Raylib.DrawTextureRec(
-                        editor.LevelGraphicsTexture,
+                        GeometryIcons.RenderTexture,
                         new Rectangle(texX*20, texY*20, 20, 20),
                         new Vector2(x, y) * Level.TileSize,
                         color
@@ -410,7 +408,7 @@ class LevelEditRender : IDisposable
                     if (cell.Has(objType) && ObjectTextureOffsets.TryGetValue(objType, out Vector2 offset))
                     {
                         Raylib.DrawTextureRec(
-                            editor.LevelGraphicsTexture,
+                            GeometryIcons.RenderTexture,
                             new Rectangle(offset.X * 20, offset.Y * 20, 20, 20),
                             new Vector2(x, y) * Level.TileSize,
                             Level.IsInBorder(x, y) ? color : new Color(255, 0, 0, 255)
@@ -459,7 +457,7 @@ class LevelEditRender : IDisposable
         // draw chains from chain holders
         foreach (var (k, v) in RainEd.Instance.Level.ChainData)
         {
-            if (k.Item1 != layer) break;
+            if (k.Item1 != layer) continue;
             var cellPos = new Vector2(k.Item2, k.Item3);
             var chainEnd = new Vector2(v.X, v.Y);
 
@@ -558,7 +556,7 @@ class LevelEditRender : IDisposable
         // make it fall off at a better rate.
         var opacity = MathF.Sqrt(Math.Clamp(ViewZoom, 0f, 1f));
         rctx.Shader = Shaders.GridShader.GlibShader;
-        rctx.DrawColor = new Glib.Color(1f, 1f, 1f, opacity * (50f/255f));
+        rctx.DrawColor = new Glib.Color(1f, 1f, 1f, opacity * RainEd.Instance.Preferences.GridOpacity);
         if (gridMinor.GetIndexVertexCount() > 0) rctx.Draw(gridMinor);
         if (gridMajor.GetIndexVertexCount() > 0) rctx.Draw(gridMajor);
         rctx.Shader = null;
@@ -833,7 +831,7 @@ class LevelEditRender : IDisposable
         });
     }
 
-    public void SetOverlay(int width, int height, (bool mask, LevelCell cell)[,,] geometry)
+    public void SetOverlay(int width, int height, MaskedCell[,,] geometry)
     {
         if (width <= 0) throw new ArgumentOutOfRangeException(nameof(width), "Width must be greater than 0.");
         if (height <= 0) throw new ArgumentOutOfRangeException(nameof(height), "Height must be greater than 0.");

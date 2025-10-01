@@ -6,6 +6,7 @@ using Raylib_cs;
 using ImGuiNET;
 using System.Globalization;
 using Glib;
+using Rained.LuaScripting;
 
 namespace Rained
 {
@@ -14,10 +15,13 @@ namespace Rained
         // find the location of the app data folder
 #if DATA_ASSEMBLY
         public static string AppDataPath = AppContext.BaseDirectory;
+        public static string ConfigPath = Path.Combine(AppDataPath, "config");
 #elif DATA_APPDATA
         public static string AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "rained");
+        public static string ConfigPath = Path.Combine(AppDataPath, "config");
 #else
         public static string AppDataPath = Directory.GetCurrentDirectory();
+        public static string ConfigPath = Path.Combine(AppDataPath, "config");
 #endif
 
         public const int DefaultWindowWidth = 1200;
@@ -29,6 +33,7 @@ namespace Rained
         public static Glib.Window Window => window;
         public static Glib.ImGui.ImGuiController? ImGuiController { get; private set; }
 
+
         private static BootOptions bootOptions = null!;
         public static BootOptions Options { get => bootOptions; }
 
@@ -37,6 +42,18 @@ namespace Rained
         
         // this is just the window scale, floored.
         public static int PixelIconScale { get; set; } = 1;
+
+        private static int _refreshRate = 60;
+        public static int RefreshRate {
+            get => _refreshRate;
+            set
+            {
+                _refreshRate = int.Max(1, value);
+                // Raylib.SetTargetFPS(_refreshRate);
+            }
+        }
+
+        public static int DefaultRefreshRate => window.SilkWindow.Monitor?.VideoMode.RefreshRate ?? 60;
 
         public readonly static CultureInfo UserCulture = Thread.CurrentThread.CurrentCulture;
 
@@ -48,28 +65,89 @@ namespace Rained
             if (!bootOptions.ContinueBoot)
                 return;
 
+            if (bootOptions.EffectExportOutput is not null)
+            {
+                LaunchDrizzleExport(bootOptions.EffectExportOutput);
+            }
+            else if (bootOptions.Render || bootOptions.Scripts.Count > 0)
+            {
+                LaunchBatch();
+            }
+            else
+            {
+                LaunchEditor();
+            }
+        }
+
+        private static void LaunchDrizzleExport(string path)
+        {
+            DrizzleExport.DrizzleEffectExport.Export(Assets.AssetDataPath.GetPath(), Path.Combine(AppDataPath, "assets", "drizzle-cast"), path);
+        }
+
+        private static void LaunchBatch()
+        {
+            // setup serilog
+            {
+                bool logToStdout = bootOptions.ConsoleAttached || bootOptions.LogToStdout;
+                #if DEBUG
+                logToStdout = true;
+                #endif
+
+                Log.Setup(
+                    logToStdout: false,
+                    userLoggerToStdout: false
+                );
+            }
+
+            if (bootOptions.Scripts.Count > 0 || !bootOptions.NoAutoloads)
+            {
+                var app = new APIBatchHost();
+                LuaInterface.Initialize(app, !bootOptions.NoAutoloads);
+                
+                var lua = LuaInterface.LuaState;
+                foreach (var path in bootOptions.Scripts)
+                {
+                    LuaHelpers.DoFile(lua, path);
+                }
+            }
+            else
+            {
+                // this would have been loaded by APIBatchHost ctor
+                Assets.DrizzleCast.Initialize();
+            }
+
             if (bootOptions.Render)
                 LaunchRenderer();
-            else
-                LaunchEditor();
         }
 
         private static void LaunchRenderer()
         {
-            if (string.IsNullOrEmpty(bootOptions.LevelToLoad))
+            if (bootOptions.Files.Count == 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Write("error: ");
                 Console.ResetColor();
 
-                Console.WriteLine("The level path was not given");
+                Console.WriteLine("The level path(s) were not given");
                 Environment.ExitCode = 2;
                 return;
             }
 
             try
             {
-                Drizzle.DrizzleRender.Render(bootOptions.LevelToLoad);
+                // single-file render
+                if (bootOptions.Files.Count == 1 && !Directory.Exists(bootOptions.Files[0]))
+                {
+                    Log.Information("====== Standalone render ======");
+                    Drizzle.DrizzleRender.ConsoleRender(bootOptions.Files[0]);
+                }
+
+                // mass render
+                else
+                {
+                    Log.Information("====== Standalone mass render ======");
+                    Drizzle.DrizzleMassRender.ConsoleRender([..bootOptions.Files], bootOptions.RenderThreads);
+                }
             }
             catch (Drizzle.DrizzleRenderException e)
             {
@@ -104,7 +182,10 @@ namespace Rained
                 logToStdout = true;
                 #endif
 
-                Log.Setup(logToStdout);
+                Log.Setup(
+                    logToStdout: logToStdout,
+                    userLoggerToStdout: false
+                );
             }
 
             // setup window logger
@@ -154,7 +235,13 @@ namespace Rained
                 {
                     WindowScale = window.ContentScale.Y;
 
-                    ImGuiExt.SetIniFilename(Path.Combine(AppDataPath, "config", "imgui.ini"));
+                    var iniPath = Path.Combine(ConfigPath, "imgui.ini");
+                    
+                    // create default ini file if non-existent
+                    if (!File.Exists(iniPath))
+                        File.WriteAllText(iniPath, ImGuiDefaultIni);
+
+                    ImGuiExt.SetIniFilename(Path.Combine(ConfigPath, "imgui.ini"));
                     ImGui.StyleColorsDark();
 
                     var io = ImGui.GetIO();
@@ -266,7 +353,7 @@ namespace Rained
                 //Raylib.SetConfigFlags(ConfigFlags.ResizableWindow | ConfigFlags.HiddenWindow | ConfigFlags.VSyncHint);
                 //Raylib.SetTraceLogLevel(TraceLogLevel.Warning);
                 //Raylib.InitWindow(DefaultWindowWidth, DefaultWindowHeight, "Rained");
-                //Raylib.SetTargetFPS(240);
+                Raylib.SetTargetFPS(0);
                 //Raylib.SetExitKey(KeyboardKey.Null);
 
                 {
@@ -303,7 +390,7 @@ namespace Rained
 
                 try
                 {
-                    app = new(assetDataPath, bootOptions.LevelToLoad);
+                    app = new(assetDataPath, bootOptions.Files);
                 }
                 catch (RainEdStartupException)
                 {
@@ -329,14 +416,34 @@ namespace Rained
                 {
                     Fonts.SetFont(app.Preferences.Font);
 
+                    // setup vsync state
+                    Window.VSync = app.Preferences.Vsync;
+
                     // set initial target fps
-                    var refreshRate = window.SilkWindow.Monitor?.VideoMode.RefreshRate ?? 60;
-                    if (app.Preferences.RefreshRate == 0)
-                        app.Preferences.RefreshRate = refreshRate;
-                    Raylib.SetTargetFPS(app.Preferences.RefreshRate);
+                    if (Window.VSync || app.Preferences.RefreshRate == 0)
+                    {
+                        RefreshRate = DefaultRefreshRate;
+                    }
+                    else
+                    {
+                        RefreshRate = app.Preferences.RefreshRate;
+                    }
 
                     while (app.Running)
                     {
+                        // for some reason on MacOS, turning on vsync just... doesn't?
+                        // I should probably just have framelimiting be able to work with vsync
+                        // in place, since it's possible a user's drivers don't listen to vsync on/off requests,
+                        // but... whatever.
+                        if (Window.VSync && !OperatingSystem.IsMacOS())
+                        {
+                            Raylib.SetTargetFPS(0);
+                        }
+                        else
+                        {
+                            Raylib.SetTargetFPS(_refreshRate);
+                        }
+
                         // update fonts if scale changed or reload was requested
                         var io = ImGui.GetIO();
                         if (WindowScale != curWindowScale || Fonts.FontReloadQueued)
@@ -467,5 +574,128 @@ namespace Rained
 
             DisplayError(windowTitle, windowContents);
         }
+
+        private static readonly string ImGuiDefaultIni =
+        """
+        [Window][Work area]
+        Pos=0,22
+        Size=1200,778
+        Collapsed=0
+
+        [Window][Debug##Default]
+        Pos=60,60
+        Size=400,400
+        Collapsed=0
+
+        [Window][Level]
+        Pos=10,59
+        Size=618,731
+        Collapsed=0
+        DockId=0x00000011,0
+
+        [Window][Environment]
+        Pos=986,59
+        Size=204,731
+        Collapsed=0
+        DockId=0x00000002,0
+
+        [Window][Shortcuts]
+        Pos=20,433
+        Size=427,256
+        Collapsed=0
+
+        [Window][Build]
+        Pos=1054,59
+        Size=136,731
+        Collapsed=0
+        DockId=0x00000004,0
+
+        [Window][Tile Selector]
+        Pos=630,59
+        Size=560,443
+        Collapsed=0
+        DockId=0x00000015,0
+
+        [Window][Brush]
+        Pos=1618,492
+        Size=290,489
+        Collapsed=0
+        DockId=0x0000000A,0
+
+        [Window][###Light Catalog]
+        Pos=1618,59
+        Size=290,431
+        Collapsed=0
+        DockId=0x00000009,0
+
+        [Window][Add Effect]
+        Pos=1458,59
+        Size=450,454
+        Collapsed=0
+        DockId=0x0000000D,0
+
+        [Window][Active Effects]
+        Pos=1458,515
+        Size=450,237
+        Collapsed=0
+        DockId=0x0000000F,0
+
+        [Window][Effect Options]
+        Pos=1458,754
+        Size=450,227
+        Collapsed=0
+        DockId=0x00000010,0
+
+        [Window][Props]
+        Pos=1371,59
+        Size=537,569
+        Collapsed=0
+        DockId=0x00000013,0
+
+        [Window][Prop Options]
+        Pos=1371,630
+        Size=537,351
+        Collapsed=0
+        DockId=0x00000014,0
+
+        [Window][###TileGfxPreview]
+        Pos=630,504
+        Size=281,286
+        Collapsed=0
+        DockId=0x00000017,0
+
+        [Window][###TileSpecPreview]
+        Pos=913,504
+        Size=277,286
+        Collapsed=0
+        DockId=0x00000018,0
+
+        [Docking][Data]
+        DockSpace               ID=0x172EB66B Window=0xD72479ED Pos=10,59 Size=1180,731 Split=X Selected=0x65657392
+        DockNode              ID=0x00000003 Parent=0x172EB66B SizeRef=1758,922 Split=X
+            DockNode            ID=0x00000001 Parent=0x00000003 SizeRef=1690,922 Split=X Selected=0x65657392
+            DockNode          ID=0x00000005 Parent=0x00000001 SizeRef=1334,922 Split=X Selected=0x65657392
+                DockNode        ID=0x00000007 Parent=0x00000005 SizeRef=1604,922 Split=X Selected=0x65657392
+                DockNode      ID=0x0000000B Parent=0x00000007 SizeRef=1444,922 Split=X Selected=0x65657392
+                    DockNode    ID=0x00000011 Parent=0x0000000B SizeRef=1357,922 CentralNode=1 Selected=0x65657392
+                    DockNode    ID=0x00000012 Parent=0x0000000B SizeRef=537,922 Split=Y Selected=0x1A02B0A3
+                    DockNode  ID=0x00000013 Parent=0x00000012 SizeRef=203,569 Selected=0x1A02B0A3
+                    DockNode  ID=0x00000014 Parent=0x00000012 SizeRef=203,351 Selected=0x7A56252A
+                DockNode      ID=0x0000000C Parent=0x00000007 SizeRef=450,922 Split=Y Selected=0xDCDF1A23
+                    DockNode    ID=0x0000000D Parent=0x0000000C SizeRef=203,454 Selected=0xDCDF1A23
+                    DockNode    ID=0x0000000E Parent=0x0000000C SizeRef=203,466 Split=Y Selected=0xC4692E8D
+                    DockNode  ID=0x0000000F Parent=0x0000000E SizeRef=203,237 Selected=0xC4692E8D
+                    DockNode  ID=0x00000010 Parent=0x0000000E SizeRef=203,227 Selected=0xECF6175A
+                DockNode        ID=0x00000008 Parent=0x00000005 SizeRef=290,922 Split=Y Selected=0x56944108
+                DockNode      ID=0x00000009 Parent=0x00000008 SizeRef=283,431 Selected=0x56944108
+                DockNode      ID=0x0000000A Parent=0x00000008 SizeRef=283,489 Selected=0xCA3ECDE9
+            DockNode          ID=0x00000006 Parent=0x00000001 SizeRef=560,922 Split=Y Selected=0x8B39F883
+                DockNode        ID=0x00000015 Parent=0x00000006 SizeRef=560,443 Selected=0x8B39F883
+                DockNode        ID=0x00000016 Parent=0x00000006 SizeRef=560,286 Split=X Selected=0x04D00AC7
+                DockNode      ID=0x00000017 Parent=0x00000016 SizeRef=281,159 Selected=0x04D00AC7
+                DockNode      ID=0x00000018 Parent=0x00000016 SizeRef=277,159 Selected=0x27771CA8
+            DockNode            ID=0x00000002 Parent=0x00000003 SizeRef=204,922 Selected=0xD04E21C8
+        DockNode              ID=0x00000004 Parent=0x172EB66B SizeRef=136,922 Selected=0x57F56F05
+        """;
     }
 }

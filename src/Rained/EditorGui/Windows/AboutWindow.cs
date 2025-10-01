@@ -1,5 +1,5 @@
 using ImGuiNET;
-
+using Rained.LuaScripting;
 using System.Runtime.InteropServices;
 namespace Rained.EditorGui;
 
@@ -54,7 +54,7 @@ static class AboutWindow
             
             ImGui.Text("一个雨世界关卡编辑器 - " + RainEd.Version);
             ImGui.NewLine();
-            ImGui.Text("(c) 2024 pkhead - MIT License");
+            ImGui.Text("(c) 2024-2025 pkhead - MIT License");
             ImGui.Text("Rain World - Videocult/Adult Swim Games/Akapura Games");
 
             ImGui.Bullet();
@@ -98,7 +98,10 @@ static class AboutWindow
             {
                 if (drizzleVersion is not null)
                     ImGui.BulletText($"Drizzle: {drizzleVersion}");
+                ImGui.BulletText($"Lua API: {LuaInterface.VersionMajor}.{LuaInterface.VersionMinor}.{LuaInterface.VersionRevision}");
 
+                ImGui.Separator();
+                
                 var sysInfo = systemInfo ?? GetSystemInfo();
                 ImGui.BulletText(".NET: " + sysInfo.FrameworkName);
                 ImGui.BulletText("OS: " + sysInfo.OsName);

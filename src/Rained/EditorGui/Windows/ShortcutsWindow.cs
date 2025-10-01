@@ -89,6 +89,7 @@ static partial class ShortcutsWindow
             ("[CameraSnapX]/[NavUp]/[NavDown]", "将X轴捕捉到其他相机"),
             ("[CameraSnapY]/[NavLeft]/[NavRight]", "将Y轴捕捉到其他相机"),
             ("按住 Shift", "锁定/解锁摄像机边缘限制"),
+            ("Ctrl+A", "全选摄像机"),
         ],
 
         // Light
@@ -113,6 +114,7 @@ static partial class ShortcutsWindow
             ("Shift+鼠标滚轮", "更改笔刷大小"),
             ("[DecreaseBrushSize]/[IncreaseBrushSize]", "更改笔刷大小"),
             ("<Ctrl>+Mouse Wheel", "更改笔刷力度"),
+            ("Shift+Add effect", "Add effect after selected")
         ],
 
         // Props

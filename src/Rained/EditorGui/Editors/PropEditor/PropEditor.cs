@@ -9,6 +9,8 @@ partial class PropEditor : IEditorMode
 {
     public string Name { get => "道具"; }
     public bool SupportsCellSelection => false;
+    public List<Prop> SelectedProps => selectedProps;
+    public ChangeHistory.PropChangeRecorder ChangeRecorder => changeRecorder;
 
     private enum PropSnapMode
     {
@@ -68,7 +70,6 @@ partial class PropEditor : IEditorMode
     public PropEditor(LevelWindow window)
     {
         this.window = window;
-        selectedInit = RainEd.Instance.PropDatabase.Categories[selectedPropGroup].Props[0];
 
         // register prop color names to be displayed in the custom color dropdown 
         propColorNames = new List<string>()
@@ -104,9 +105,6 @@ partial class PropEditor : IEditorMode
             }
         };
 
-        // this function is defined in PropEditorToolbar.cs
-        ProcessSearch();
-
         // load preferences
         switch (RainEd.Instance.Preferences.PropSnap)
         {
@@ -130,6 +128,61 @@ partial class PropEditor : IEditorMode
                 Log.Error("Invalid prop snap '{PropSnap}' in preferences.json", RainEd.Instance.Preferences.PropSnap);
                 break;
         }
+
+        static IEnumerable<int> GetPropGroups()
+        {
+            var list = RainEd.Instance.PropDatabase.Categories;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].IsTileCategory) continue;
+                yield return i;
+            }
+        }
+
+        propCatalogWidget = new()
+        {
+            ShowGroupColors = true,
+            ItemPostRender = PropItemPostRender,
+            GetGroups = GetPropGroups,
+
+            GetGroupInfo = (int groupIdx) =>
+            {
+                var group = RainEd.Instance.PropDatabase.Categories[groupIdx];
+                return (group.Name, group.Color);
+            },
+
+            GetItemInfo = (int groupIdx, int itemIdx) =>
+            {
+                var item = RainEd.Instance.PropDatabase.Categories[groupIdx].Props[itemIdx];
+                return (item.Name, Color.Blank);
+            },
+
+            GetItemsInGroup = (int groupIdx) => Enumerable.Range(0, RainEd.Instance.PropDatabase.Categories[groupIdx].Props.Count),
+        };
+
+        tileCatalogWidget = new()
+        {
+            ShowGroupColors = true,
+            ItemPostRender = TileItemPostRender,
+            GetGroups = () => Enumerable.Range(0, RainEd.Instance.PropDatabase.TileCategories.Count),
+
+            GetGroupInfo = (int groupIdx) =>
+            {
+                var group = RainEd.Instance.PropDatabase.TileCategories[groupIdx];
+                return (group.Name, group.Color);
+            },
+
+            GetItemInfo = (int groupIdx, int itemIdx) =>
+            {
+                var item = RainEd.Instance.PropDatabase.TileCategories[groupIdx].Props[itemIdx];
+                return (item.Name, Color.Blank);
+            },
+
+            GetItemsInGroup = (int groupIdx) => Enumerable.Range(0, RainEd.Instance.PropDatabase.TileCategories[groupIdx].Props.Count),
+        };
+
+        propCatalogWidget.ProcessSearch();
+        tileCatalogWidget.ProcessSearch();
     }
 
     public void Load()
@@ -376,6 +429,19 @@ partial class PropEditor : IEditorMode
         var level = RainEd.Instance.Level;
         var levelRender = window.Renderer;
 
+        // z translate preview
+        if (zTranslateActive)
+        {
+            foreach (var prop in selectedProps)
+            {
+                prop.DepthOffset += zTranslateValue;
+                if (zTranslateWrap)
+                    prop.DepthOffset = Util.Mod(prop.DepthOffset, 30);
+                else
+                    prop.DepthOffset = Math.Clamp(prop.DepthOffset, 0, 29);
+            }
+        }
+
         level.SortPropsByDepth();
 
         levelRender.RenderLevelComposite(mainFrame, layerFrames, new Rendering.LevelRenderConfig()
@@ -389,6 +455,13 @@ partial class PropEditor : IEditorMode
         levelRender.RenderGrid();
         levelRender.RenderBorder();
         levelRender.RenderCameraBorders();
+
+        // done z translate preview
+        if (zTranslateActive)
+        {
+            foreach (var prop in selectedProps)
+                prop.DepthOffset = zTranslateDepths[prop];
+        }
 
         // highlight selected props
         if (isWarpMode)
@@ -448,7 +521,7 @@ partial class PropEditor : IEditorMode
         }
 
         // prop transform gizmos
-        if (selectedProps.Count > 0 && !isRopeSimulationActive)
+        if (selectedProps.Count > 0 && !isRopeSimulationActive && !zTranslateActive)
         {
             bool canWarp = transformMode is WarpTransformMode ||
                 (isWarpMode && selectedProps.Count == 1);
@@ -672,7 +745,7 @@ partial class PropEditor : IEditorMode
         }
 
         // in prop transform mode
-        if (!isModeMouseDown && !isRopeSimulationActive)
+        if (!isModeMouseDown && !isRopeSimulationActive && !zTranslateActive)
         {
             // in default mode
             PropSelectUpdate();
@@ -935,8 +1008,8 @@ partial class PropEditor : IEditorMode
                             if (idx >= 0)
                             {
                                 forceSelection = SelectionMode.Tiles;
-                                selectedTileGroup = i;
-                                selectedTileIdx = idx;
+                                tileCatalogWidget.SelectedGroup = i;
+                                tileCatalogWidget.SelectedItem = idx;
                                 break;
                             }
                         }
@@ -946,8 +1019,8 @@ partial class PropEditor : IEditorMode
                     else
                     {
                         forceSelection = SelectionMode.Props;
-                        selectedPropGroup = prop.PropInit.Category.Index;
-                        selectedPropIdx = prop.PropInit.Category.Props.IndexOf(prop.PropInit);
+                        propCatalogWidget.SelectedGroup = prop.PropInit.Category.Index;
+                        propCatalogWidget.SelectedItem = prop.PropInit.Category.Props.IndexOf(prop.PropInit);
                     }
                 }
             }
@@ -977,37 +1050,45 @@ partial class PropEditor : IEditorMode
 
             foreach (var srcProp in propsToDup)
             {
-                Prop newProp;
-                if (srcProp.IsAffine)
-                {
-                    newProp = new Prop(srcProp.PropInit, srcProp.Rect.Center + Vector2.One, srcProp.Rect.Size);
-                    newProp.Rect.Rotation = srcProp.Rect.Rotation;
-                }
-                else
-                {
-                    newProp = new Prop(srcProp.PropInit, srcProp.QuadPoints);
-                    newProp.QuadPoints[0] += Vector2.One;
-                    newProp.QuadPoints[1] += Vector2.One;
-                    newProp.QuadPoints[2] += Vector2.One;
-                    newProp.QuadPoints[3] += Vector2.One;
-                }
-
-                // copy other properties to the new prop
-                // (this is the best way to do this)
-                newProp.DepthOffset = srcProp.DepthOffset;
-                newProp.ApplyColor = srcProp.ApplyColor;
-                newProp.CustomColor = srcProp.CustomColor;
-                newProp.CustomDepth = srcProp.CustomDepth;
-                newProp.RenderOrder = srcProp.RenderOrder;
-                newProp.Variation = srcProp.Variation;
-                newProp.Seed = srcProp.Seed;
-                newProp.RenderTime = srcProp.RenderTime;
-
+                Prop newProp = srcProp.Clone();
                 RainEd.Instance.Level.Props.Add(newProp);
                 selectedProps.Add(newProp);
             }
 
             changeRecorder.PushListChange();
+        }
+
+        if (KeyShortcuts.Activated(KeyShortcut.Copy))
+        {
+            if (selectedProps.Count > 0)
+            {
+                var data = PropSerialization.SerializeProps([.. selectedProps]);
+                if (data is not null)
+                {
+                    Platform.SetClipboard(Boot.Window, Platform.ClipboardDataType.Props, data);
+                }
+            }
+        }
+
+        if (KeyShortcuts.Activated(KeyShortcut.Paste))
+        {
+            if (Platform.GetClipboard(Boot.Window, Platform.ClipboardDataType.Props, out byte[]? data))
+            {
+                var props = PropSerialization.DeserializeProps(data);
+                if (props is not null && props.Length > 0)
+                {
+                    ChangeRecorder.BeginListChange();
+
+                    selectedProps.Clear();
+                    foreach (var p in props)
+                    {
+                        selectedProps.Add(p);
+                        RainEd.Instance.Level.Props.Add(p);
+                    }
+
+                    ChangeRecorder.PushListChange();
+                }
+            }
         }
     }
 }

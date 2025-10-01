@@ -1,6 +1,9 @@
 using Raylib_cs;
 using System.Numerics;
 using ImGuiNET;
+using NLua.Exceptions;
+using System.Runtime.CompilerServices;
+using Rained.EditorGui.Windows;
 namespace Rained.EditorGui;
 
 static class EditorWindow
@@ -12,7 +15,19 @@ static class EditorWindow
     private static bool isLmbReleased = false;
     private static bool isLmbDragging = false;
 
-    public static bool IsPanning { get => isLmbPanning; set => isLmbPanning = value; }
+    public static bool IsPanning
+    {
+        get => isLmbPanning;
+        set
+        {
+            isLmbPanning = value;
+            if (isLmbPanning)
+            {
+                isLmbDown = false;
+                isLmbClicked = false;
+            }
+        }
+    }
 
     public static bool IsKeyDown(ImGuiKey key)
     {
@@ -114,7 +129,8 @@ static class EditorWindow
         async Task CallbackTask()
         {
             callback(await PromptUnsavedChanges(tab, canCancel));
-        };
+        }
+        ;
 
         if (changeHistory.HasChanges || (!canCancel && string.IsNullOrEmpty(tab.FilePath)))
         {
@@ -200,10 +216,48 @@ static class EditorWindow
                 }
 
                 ImGui.Separator();
+                if (ImGui.MenuItem("重载脚本"))
+                {
+                    LuaScripting.LuaInterface.Unload();
+
+                    try
+                    {
+                        LuaScripting.LuaInterface.Initialize(new LuaScripting.APIGuiHost(), true);
+                    }
+                    catch (LuaScriptException e)
+                    {
+                        LuaScripting.LuaInterface.HandleException(e);
+                    }
+                }
+
+                if (ImGui.MenuItem("执行脚本..."))
+                {
+                    var startDir = Path.Combine(Boot.AppDataPath, "scripts");
+                    fileBrowser = new FileBrowser(
+                        mode: FileBrowser.OpenMode.Read,
+                        openDir: startDir,
+                        callback: (string[] paths) =>
+                        {
+                            if (paths.Length == 0) return;
+                            LuaScripting.LuaHelpers.DoFile(LuaScripting.LuaInterface.LuaState, paths[0]);
+                        }
+                    );
+                    fileBrowser.AddFilter("Lua file", ".lua");
+                }
+
+                ImGui.Separator();
+
                 if (ImGui.MenuItem("偏好"))
                 {
                     PreferencesWindow.OpenWindow();
                 }
+
+                if (ImGui.MenuItem("资产管理器"))
+                {
+                    AssetManagerWindow.OpenWindow();
+                }
+
+                LuaScripting.Modules.GuiModule.MenuHook("File", true);
 
                 ImGui.Separator();
                 if (ImGui.MenuItem("退出", "Alt+F4"))
@@ -237,11 +291,12 @@ static class EditorWindow
                 {
                     ImGui.Separator();
 
-                    if (ImGui.BeginMenu("命令", fileActive))
+                    if (ImGui.BeginMenu("命令"))
                     {
                         foreach (RainEd.Command cmd in customCommands)
                         {
-                            if (ImGui.MenuItem(cmd.Name))
+                            bool enabled = RainEd.Instance.CurrentTab?.Level is not null || !cmd.parameters.RequiresLevel;
+                            if (ImGui.MenuItem(cmd.Name, enabled))
                             {
                                 cmd.Callback(cmd.ID);
                             }
@@ -250,6 +305,8 @@ static class EditorWindow
                         ImGui.EndMenu();
                     }
                 }
+
+                LuaScripting.Modules.GuiModule.MenuHook("Edit", true);
 
                 ImGui.Separator();
                 if (fileActive)
@@ -352,13 +409,13 @@ static class EditorWindow
 
                     if (ImGui.MenuItem("图像预览窗口", null, ref viewGfx))
                         prefs.ViewTileGraphicPreview = viewGfx;
-                    
+
                     if (ImGui.MenuItem("几何预览窗口", null, ref viewSpecs))
                         prefs.ViewTileSpecPreview = viewSpecs;
-                    
+
                     if (ImGui.MenuItem("悬停预览", null, ref specsTooltip))
                         prefs.ViewTileSpecsOnTooltip = specsTooltip;
-                    
+
                     ImGui.EndMenu();
                 }
 
@@ -367,6 +424,9 @@ static class EditorWindow
                     homeTab = true;
                     switchToHomeTab = true;
                 }
+
+                LuaScripting.Modules.GuiModule.MenuHook("View", true);
+
                 ImGui.Separator();
 
                 if (ImGui.MenuItem("打开数据文件夹..."))
@@ -382,7 +442,7 @@ static class EditorWindow
             {
                 if (ImGui.MenuItem("README..."))
                 {
-                    Platform.OpenURL(Path.Combine(Boot.AppDataPath, "README.md"));
+                    Platform.OpenURL(Path.Combine(Boot.AppDataPath, "README.txt"));
                 }
 
                 if (ImGui.MenuItem("文档..."))
@@ -395,7 +455,18 @@ static class EditorWindow
                     AboutWindow.IsWindowOpen = true;
                 }
 
+                LuaScripting.Modules.GuiModule.MenuHook("Help", true);
+
                 ImGui.EndMenu();
+            }
+
+            foreach (var menuName in LuaScripting.Modules.GuiModule.CustomMenus)
+            {
+                if (ImGui.BeginMenu(menuName))
+                {
+                    LuaScripting.Modules.GuiModule.MenuHook(menuName, false);
+                    ImGui.EndMenu();
+                }
             }
 
             ImGui.EndMainMenuBar();
@@ -408,6 +479,44 @@ static class EditorWindow
         {
             if (paths.Length > 0) RainEd.Instance.LoadLevel(paths[0]);
         });
+    }
+
+    public delegate void AsyncSaveCallback(string? path, bool immediate);
+
+    /// <summary>
+    /// Attempts to save the current level to the optional overridePath parameter. If not specified,
+    /// it will use the already-associated file path for the level. If that doesn't exist either,
+    /// it will return false, open the GUI file browser, and run the given callback if the user
+    /// submitted to or canceled the prompt.
+    /// </summary>
+    /// <param name="callback">The optional callback to run if the file browser was opened.</param>
+    /// <param name="overridePath">The path to save the level to.</param>
+    /// <returns>True if the level was able to be saved immediately, false if not.</returns>
+    public static bool AsyncSave(AsyncSaveCallback? callback = null, string? overridePath = null)
+    {
+        if (RainEd.Instance.CurrentTab!.IsTemporaryFile && string.IsNullOrEmpty(overridePath))
+        {
+            OpenLevelBrowser(FileBrowser.OpenMode.Write, (paths) =>
+            {
+                if (paths.Length > 0)
+                {
+                    SaveLevelCallback(paths[0]);
+                    callback?.Invoke(paths[0], false);
+                }
+                else
+                {
+                    callback?.Invoke(null, false);
+                }
+            });
+            return false;
+        }
+        else
+        {
+            var path = overridePath ?? RainEd.Instance.CurrentFilePath;
+            SaveLevelCallback(path);
+            callback?.Invoke(path, true);
+            return true;
+        }
     }
 
     private static void HandleShortcuts()
@@ -429,13 +538,7 @@ static class EditorWindow
 
         if (KeyShortcuts.Activated(KeyShortcut.Save) && fileActive)
         {
-            if (RainEd.Instance.CurrentTab!.IsTemporaryFile)
-                OpenLevelBrowser(FileBrowser.OpenMode.Write, static (paths) =>
-                {
-                    if (paths.Length > 0) SaveLevelCallback(paths[0]);
-                });
-            else
-                SaveLevelCallback(RainEd.Instance.CurrentFilePath);
+            AsyncSave();
         }
 
         if (KeyShortcuts.Activated(KeyShortcut.SaveAs) && fileActive)
@@ -569,6 +672,7 @@ static class EditorWindow
         AboutWindow.ShowWindow();
         LevelLoadFailedWindow.ShowWindow();
         PreferencesWindow.ShowWindow();
+        AssetManagerWindow.ShowWindow();
         EmergencySaveWindow.ShowWindow();
         NewLevelWindow.ShowWindow();
         MassRenderWindow.ShowWindow();
@@ -635,7 +739,7 @@ static class EditorWindow
                         _prevTab = null;
                         switchToHomeTab = false;
                     }
-                    
+
                     if (ImGui.BeginTabItem("主页", ref homeTab, tabFlags))
                     {
                         if (!tabChanged)
@@ -943,10 +1047,10 @@ static class EditorWindow
 
         if (ImGui.Button("新建关卡...", btnSize))
             NewLevelWindow.OpenWindow();
-        
+
         if (ImGui.Button("打开关卡...", btnSize))
             OpenLevelPrompt();
-        
+
         if (ImGui.Button("文档...", btnSize))
             OpenManual();
 
@@ -956,7 +1060,7 @@ static class EditorWindow
         // if new version was found, make space for the text
         if (newVersion)
             listBoxSize.Y -= ImGui.GetTextLineHeight() + ImGui.GetStyle().ItemSpacing.Y + 1;
-        
+
         if (ImGui.BeginListBox("##RecentLevels", listBoxSize))
         {
             RecentLevelsList();
@@ -987,7 +1091,7 @@ static class EditorWindow
             // display 10 entries
             for (int n = 0; n < count; n++)
             {
-                var i = recentFiles.Count - (n+1);
+                var i = recentFiles.Count - (n + 1);
                 if (i < 0) break;
 
                 var filePath = recentFiles[i];
@@ -1011,11 +1115,11 @@ static class EditorWindow
 
     private static void OpenManual()
     {
-        #if DEBUG
+#if DEBUG
         var docPath = Path.Combine("dist", "docs", "en", "index.html");
-        #else
+#else
         var docPath = Path.Combine(Boot.AppDataPath, "docs", "en", "index.html");
-        #endif
+#endif
 
         if (File.Exists(docPath))
         {

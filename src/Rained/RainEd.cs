@@ -7,6 +7,8 @@ using Rained.Assets;
 using Rained.LevelData;
 using Rained.Rendering;
 using System.Reflection;
+using Rained.LuaScripting;
+using Rained.EditorGui.Windows;
 
 namespace Rained;
 
@@ -16,6 +18,14 @@ public class RainEdStartupException : Exception
     public RainEdStartupException() { }
     public RainEdStartupException(string message) : base(message) { }
     public RainEdStartupException(string message, Exception inner) : base(message, inner) { }
+}
+
+[Serializable]
+public class NoLevelException : Exception
+{
+    public NoLevelException() { }
+    public NoLevelException(string message) : base(message) { }
+    public NoLevelException(string message, System.Exception inner) : base(message, inner) { }
 }
 
 /// <summary>
@@ -38,9 +48,9 @@ sealed class RainEd
             Version = $"v{asmVersion.Major}.{asmVersion.Minor}.{asmVersion.Build}";
         }
 
-        #if !FULL_RELEASE
+#if !FULL_RELEASE
         Version += "-dev";
-        #endif
+#endif
     }
 
     public bool Running = true; // if false, Boot.cs will close the window
@@ -48,11 +58,12 @@ sealed class RainEd
     public static Glib.Window Window => Boot.Window;
     public static Glib.RenderContext RenderContext => Glib.RenderContext.Instance!;
 
-    public readonly RlManaged.Texture2D LevelGraphicsTexture;
     private LevelWindow? levelView;
 
+    private const int PREF_SAVE_INTERVAL = 60; // in seconds
     private readonly string prefFilePath;
     public UserPreferences Preferences;
+    private DateTime nextPrefsSave = DateTime.UtcNow.AddSeconds(PREF_SAVE_INTERVAL);
 
     public string AssetDataPath;
     public readonly AssetGraphicsProvider AssetGraphics;
@@ -72,13 +83,36 @@ sealed class RainEd
     public static readonly string EmergencySaveFolder = Path.Combine(Boot.AppDataPath, "emsavs");
 
     private readonly List<LevelTab> _tabs = [];
-    public IEnumerable<LevelTab> Tabs => _tabs;
+    public List<LevelTab> Tabs => _tabs;
     private LevelTab? _currentTab = null;
-    public LevelTab? CurrentTab { get => _currentTab; set => SwitchTab(value); }
+    public LevelTab? CurrentTab { get => _currentTab; set => SwitchTab(value, false); }
 
-    public Level Level { get => CurrentTab!.Level; }
-    public LevelWindow LevelView { get => levelView!; }
-    public ChangeHistory.ChangeHistory ChangeHistory { get => CurrentTab!.ChangeHistory; }
+    public Level Level
+    {
+        get
+        {
+            if (CurrentTab is null) throw new NoLevelException();
+            return CurrentTab.Level;
+        }
+    }
+
+    public LevelWindow LevelView
+    {
+        get
+        {
+            if (CurrentTab is null) throw new NoLevelException();
+            return levelView!;
+        }
+    }
+
+    public ChangeHistory.ChangeHistory ChangeHistory
+    {
+        get
+        {
+            if (CurrentTab is null) throw new NoLevelException();
+            return CurrentTab!.ChangeHistory;
+        }
+    }
 
     // this is used to set window IsEventDriven to true
     // when the user hasn't interacted with the window in a while
@@ -87,8 +121,6 @@ sealed class RainEd
     // this is used to make sure window doesn't sleep when
     // any key is held down
     private int keysPressed = 0;
-    
-    private double lastRopeUpdateTime = 0f;
 
     /// <summary>
     /// This is true whenever Rained is in a temporary state where level editing
@@ -104,19 +136,28 @@ sealed class RainEd
     /// </summary>
     public readonly RainedVersionInfo? LatestVersionInfo = null;
 
-    public struct Command(string name, Action<int> cb)
+    public struct CommandCreationParameters(string name, Action<int> callback)
+    {
+        public string Name = name;
+        public Action<int> Callback = callback;
+        public bool AutoHistory = true;
+        public bool RequiresLevel = true;
+    }
+
+    public record Command(CommandCreationParameters @params)
     {
         private static int nextID = 0;
 
         public readonly int ID = nextID++;
-        public readonly string Name = name;
-        public readonly Action<int> Callback = cb;
+        public readonly string Name = @params.Name;
+        public readonly Action<int> Callback = @params.Callback;
+        public readonly CommandCreationParameters parameters = @params;
     };
 
     private readonly List<Command> customCommands = [];
     public List<Command> CustomCommands { get => customCommands; }
 
-    public RainEd(string? assetData, string levelPath = "")
+    public RainEd(string? assetData, IEnumerable<string> levelPaths)
     {
         if (Instance != null)
             throw new Exception("Attempt to create more than one RainEd instance");
@@ -125,7 +166,7 @@ sealed class RainEd
 
         Log.Information("========================");
         Log.Information("Rained {Version} started", Version);
-        
+
         // display drizzle version
         {
             var drizzleVer = typeof(global::Drizzle.Lingo.Runtime.LingoRuntime).Assembly.GetName().Version;
@@ -134,6 +175,9 @@ sealed class RainEd
             else
                 Log.Information("Drizzle version: UNKNOWN");
         }
+
+        // display lua api version
+        Log.Information($"Lua API version: {LuaInterface.VersionMajor}.{LuaInterface.VersionMinor}.{LuaInterface.VersionRevision}");
 
         // load user preferences
         KeyShortcuts.InitShortcuts();
@@ -196,6 +240,8 @@ sealed class RainEd
         // load other graphics resources
         Shaders.LoadShaders();
         TextRendering.GenerateOutlineFont();
+        GeometryIcons.Init();
+        GeometryIcons.CurrentSet = Preferences.GeometryIcons;
 
         // run the update checker
         var versionCheckTask = Task.Run(UpdateChecker.FetchLatestVersion);
@@ -220,11 +266,24 @@ sealed class RainEd
             // init autotile catalog
             Autotiles = new AutotileCatalog();
 
-            // run lua scripts after initializing the tiles
-            // (trying to get lua error messages to show as soon as possible)
+            initPhase = "effects";
+            Log.Information("Initializing effects database...");
+            EffectsDatabase = new EffectsDatabase();
+
+            initPhase = "light brushes";
+            Log.UserLogger.Information("Reading light brushes...");
+            LightBrushDatabase = new LightBrushDatabase();
+
+            initPhase = "props";
+            Log.UserLogger.Information("Reading Props/Init.txt");
+            PropDatabase = new PropDatabase(TileDatabase);
+
+            Log.UserLogger.Information("Asset initialization done!");
+            Log.Information("----- ASSET INIT DONE! -----");
+
             try
             {
-                LuaScripting.LuaInterface.Initialize();
+                LuaScripting.LuaInterface.Initialize(new APIGuiHost(), !Boot.Options.NoAutoloads);
             }
             catch (LuaScriptException e)
             {
@@ -241,21 +300,6 @@ sealed class RainEd
                 Boot.DisplayError("Could not start", displayMsg);
                 throw new RainEdStartupException();
             }
-
-            initPhase = "effects";
-            Log.Information("Initializing effects database...");
-            EffectsDatabase = new EffectsDatabase();
-
-            initPhase = "light brushes";
-            Log.UserLogger.Information("Reading light brushes...");
-            LightBrushDatabase = new LightBrushDatabase();
-
-            initPhase = "props";
-            Log.UserLogger.Information("Reading Props/Init.txt");
-            PropDatabase = new PropDatabase(TileDatabase);
-
-            Log.UserLogger.Information("Asset initialization done!");
-            Log.Information("----- ASSET INIT DONE! -----");
         }
 #if !DEBUG
         catch (Exception e)
@@ -273,14 +317,6 @@ sealed class RainEd
         if (TileDatabase.HasErrors || PropDatabase.HasErrors)
             InitErrorsWindow.IsWindowOpen = true;
 
-        LevelGraphicsTexture = RlManaged.Texture2D.Load(Path.Combine(Boot.AppDataPath,"assets","level-graphics.png"));
-
-        if (Preferences.StaticDrizzleLingoRuntime)
-        {
-            Log.Information("Initializing Lingo runtime...");
-            Drizzle.DrizzleRender.InitStaticRuntime();
-        }
-
         UpdateTitle();
 
         // apply window preferences
@@ -293,15 +329,21 @@ sealed class RainEd
         PaletteWindow.IsWindowOpen = Preferences.ShowPaletteWindow;
 
         // level boot load
-        if (levelPath.Length > 0)
+        // defer this to next frame, because loading lightmap requires gpu stuff,
+        // and at this point the first frame hasn't been set up yet, so opengl state
+        // hadn't been initialized, so interfacing with opengl at this point results in
+        // undefined behavior.
+        var levelsToLoad = levelPaths.ToArray();
+        DeferToNextFrame(() =>
         {
-            Log.Information("Boot load " + levelPath);
-            LoadLevel(levelPath);
-        }
-        else
-        {
-            EditorWindow.RequestLoadEmergencySave();
-        }
+            foreach (var path in levelsToLoad)
+            {
+                Log.Information("Boot load " + path);
+                LoadLevel(path);
+            }
+        });
+
+        EditorWindow.RequestLoadEmergencySave();
 
         // force gc. i just added this to try to collect
         // the now-garbage asset image data, as they have
@@ -330,7 +372,6 @@ sealed class RainEd
         }
 
         Log.Information("Boot successful!");
-        lastRopeUpdateTime = Raylib.GetTime();
 
         Boot.Window.KeyDown += (Glib.Key _, int _) =>
         {
@@ -352,10 +393,10 @@ sealed class RainEd
 
         Boot.Window.MouseMove += (float x, float y) =>
             NeedScreenRefresh();
-        
+
         Boot.Window.MouseScroll += (float dx, float dy) =>
             NeedScreenRefresh();
-        
+
         Boot.Window.SilkWindow.FocusChanged += (bool focused) =>
         {
             if (focused)
@@ -375,13 +416,11 @@ sealed class RainEd
         Boot.Window.IsEventDriven = false;
     }
 
-    public void Shutdown()
+    private void SavePreferences()
     {
-        // save user-created autotiles
-        Autotiles.SaveConfig();
-
-        // save user preferences
+        Log.Information("Preferences saved");
         levelView?.SavePreferences(Preferences);
+
         Preferences.ViewKeyboardShortcuts = ShortcutsWindow.IsWindowOpen;
         Preferences.ShowPaletteWindow = PaletteWindow.IsWindowOpen;
 
@@ -391,6 +430,13 @@ sealed class RainEd
         Preferences.DataPath = AssetDataPath;
 
         UserPreferences.SaveToFile(Preferences, prefFilePath);
+    }
+
+    public void Shutdown()
+    {
+        Autotiles.SaveConfig();
+        SavePreferences();
+
         levelView?.Renderer.Dispose();
     }
 
@@ -418,51 +464,70 @@ sealed class RainEd
     {
         var tab = new LevelTab();
         _tabs.Add(tab);
-        CurrentTab = tab;
+
+        LuaScripting.Modules.RainedModule.DocumentOpenedCallback(_tabs.IndexOf(tab));
+        SwitchTab(tab, true);
     }
 
     public void OpenLevel(Level level, string filePath = "")
     {
         var tab = new LevelTab(level, filePath);
         _tabs.Add(tab);
-        CurrentTab = tab;
+        LuaScripting.Modules.RainedModule.DocumentOpenedCallback(_tabs.IndexOf(tab));
+        SwitchTab(tab, true);
     }
 
-    public void LoadLevel(string path)
-    {        
-        if (!string.IsNullOrEmpty(path))
+    public LevelLoadResult LoadLevelThrow(string path, bool showLevelLoadFailPopup = true)
+    {
+        if (string.IsNullOrEmpty(path)) throw new ArgumentException("Path is empty!", nameof(path));
+        Log.UserLogger.Information("Load level {Path}", Path.GetFileName(path));
+
+        try
         {
-            Log.UserLogger.Information("Load level {Path}", Path.GetFileName(path));
+            var loadRes = LevelSerialization.Load(path);
 
-            try
+            if (!loadRes.HadUnrecognizedAssets || !showLevelLoadFailPopup)
             {
-                var loadRes = LevelSerialization.Load(path);
+                var tab = new LevelTab(loadRes.Level, path);
+                _tabs.Add(tab);
+                Log.Information("Done!");
 
-                if (!loadRes.HadUnrecognizedAssets)
+                LuaScripting.Modules.RainedModule.DocumentOpenedCallback(_tabs.IndexOf(tab));
+                SwitchTab(tab, true);
+            }
+            else
+            {
+                // level failed to load due to unrecognized assets
+                LevelLoadFailedWindow.LoadResult = loadRes;
+                LevelLoadFailedWindow.IsWindowOpen = true;
+                LevelLoadFailedWindow.LoadAnywayCallback = () =>
                 {
                     var tab = new LevelTab(loadRes.Level, path);
                     _tabs.Add(tab);
                     CurrentTab = tab;
-                    Log.Information("Done!");
-                    levelView!.LoadView();
-                }
-                else
-                {
-                    // level failed to load due to unrecognized assets
-                    LevelLoadFailedWindow.LoadResult = loadRes;
-                    LevelLoadFailedWindow.IsWindowOpen = true;
-                    LevelLoadFailedWindow.LoadAnywayCallback = () =>
-                    {
-                        var tab = new LevelTab(loadRes.Level, path);
-                        _tabs.Add(tab);
-                        CurrentTab = tab;
-                        levelView!.LoadView();
-                    };
-                }
+                };
+            }
 
-                // i think it may be useful to add it to the list
-                // even if the level failed to load due to unrecognized assets
-                AddToRecentFiles(path);
+            // i think it may be useful to add it to the list
+            // even if the level failed to load due to unrecognized assets
+            AddToRecentFiles(path);
+
+            return loadRes;
+        }
+        finally
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+    }
+
+    public void LoadLevel(string path)
+    {
+        if (!string.IsNullOrEmpty(path))
+        {
+            try
+            {
+                LoadLevelThrow(path);
             }
             catch (Exception e)
             {
@@ -490,17 +555,59 @@ sealed class RainEd
         {
             string oldFilePath = CurrentTab!.FilePath;
 
+            // store backup of level
+            if (Preferences.SaveFileBackups)
+            {
+                var levelPath = path;
+                var pngPath = Path.ChangeExtension(path, "png");
+
+                string backupTxt, backupPng;
+                if (Preferences.BackupDirectory is not null)
+                {
+                    backupTxt = Path.Combine(Preferences.BackupDirectory, Path.GetFileName(levelPath));
+                    backupPng = Path.Combine(Preferences.BackupDirectory, Path.GetFileName(pngPath));
+                }
+                else
+                {
+                    backupTxt = levelPath + "~";
+                    backupPng = pngPath + "~";
+                }
+
+                if (File.Exists(levelPath))
+                {
+                    Platform.TrashFile(backupTxt);
+                    File.Move(levelPath, backupTxt);
+                }
+
+                if (File.Exists(pngPath))
+                {
+                    Platform.TrashFile(backupPng);
+                    File.Move(pngPath, backupPng);
+                }
+            }
+
+            LuaScripting.Modules.RainedModule.DocumentSavingCallback(_tabs.IndexOf(_currentTab!));
             LevelSerialization.SaveLevelTextFile(Level, path);
-            LevelSerialization.SaveLevelLightMap(Level, path);
+            bool canSaveLightMap = LevelSerialization.SaveLevelLightMap(Level, path);
 
             CurrentTab.FilePath = path;
             CurrentTab.Name = Path.GetFileNameWithoutExtension(path);
 
             UpdateTitle();
 
-            Log.Information("Done!");
+            if (canSaveLightMap)
+            {
+                Log.Information("Done!");
+                EditorWindow.ShowNotification("Saved!");
+            }
+            else
+            {
+                Log.Information("Could not save lightmap, so it is skipped.");
+                Log.Information("Done!");
+                EditorWindow.ShowNotification("Saved, but without the light map.");
+            }
+
             CurrentTab.ChangeHistory.MarkUpToDate();
-            EditorWindow.ShowNotification("Saved!");
             AddToRecentFiles(CurrentTab.FilePath);
 
             // if the old level was an emergency save and the user
@@ -511,9 +618,11 @@ sealed class RainEd
 
             if (Util.ArePathsEquivalent(oldParentFolder, EmergencySaveFolder) && !Util.ArePathsEquivalent(newParentFolder, EmergencySaveFolder))
             {
-                File.Delete(oldFilePath);
-                File.Delete(Path.Combine(oldParentFolder, Path.GetFileName(oldFilePath)) + ".png");
+                Platform.TrashFile(oldFilePath);
+                Platform.TrashFile(Path.Combine(oldParentFolder, Path.GetFileName(oldFilePath)) + ".png");
             }
+
+            LuaScripting.Modules.RainedModule.DocumentSavedCallback(_tabs.IndexOf(_currentTab!));
 
             IsLevelLocked = false;
         }
@@ -587,11 +696,7 @@ sealed class RainEd
         {
             if (file is not null)
             {
-                if (!Platform.TrashFile(file))
-                {
-                    Log.UserLogger.Warning("File trashing is not supported on this platform, resorted to permanent deletion.");
-                    File.Delete(file);
-                }
+                Platform.TrashFile(file);
             }
         }
 
@@ -618,7 +723,7 @@ sealed class RainEd
         Log.Information("Resizing level...");
         IsLevelLocked = true;
 
-        levelView.FlushDirty();
+        levelView!.FlushDirty();
         var dstOrigin = level.Resize(newWidth, newHeight, anchorX, anchorY);
 
         levelView.ReloadLevel();
@@ -631,39 +736,60 @@ sealed class RainEd
         IsLevelLocked = false;
     }
 
-    private void SwitchTab(LevelTab? tab)
+    private void SwitchTab(LevelTab? tab, bool newLevel)
     {
         if (tab == _currentTab) return;
         if (tab is not null && !_tabs.Contains(tab))
             throw new ArgumentException("Given LevelTab is not in Tabs list", nameof(tab));
 
+        if (_currentTab?.CellSelection is not null)
+        {
+            _currentTab.CellSelection.CancelMove();
+            _currentTab.CellSelection.ClearSelection();
+        }
+
         _currentTab = tab;
         if (_currentTab is not null)
         {
-            levelView ??= new LevelWindow();
-            levelView.ReloadLevel();
-            levelView.Renderer.ReloadLevel();
+            var needInitLevelView = levelView is null;
+
+            if (newLevel)
+            {
+                levelView ??= new LevelWindow();
+                levelView.LevelCreated(_currentTab.Level);
+            }
+
+            levelView!.ChangeLevel(_currentTab.Level);
+            levelView!.Renderer.ReloadLevel();
+            if (needInitLevelView) levelView!.LoadView();
             UpdateTitle();
+
+            LuaScripting.Modules.RainedModule.DocumentChangedCallback(_tabs.IndexOf(_currentTab));
         }
     }
 
     public bool CloseTab(LevelTab tab)
     {
+        LuaScripting.Modules.RainedModule.DocumentClosingCallback(_tabs.IndexOf(tab));
+
+        levelView?.LevelClosed(tab.Level);
         tab.Dispose();
         return _tabs.Remove(tab);
     }
 
-    private void UpdateTitle()
+    public void UpdateTitle()
     {
+        string title = "Rained";
+
         if (CurrentTab is not null)
         {
             string levelName = CurrentTab.Name;
-            Raylib.SetWindowTitle($"Rained - {levelName}");
+            title += $" - {levelName}";
+            if (ChangeHistory.HasChanges)
+                title += "*";
         }
-        else
-        {
-            Raylib.SetWindowTitle("Rained");
-        }
+
+        Raylib.SetWindowTitle(title);
     }
 
     /// <summary>
@@ -671,9 +797,9 @@ sealed class RainEd
     /// </summary>
     /// <param name="name">The display name of the command.</param>
     /// <param name="cmd">The action to run on command.</param>
-    public int RegisterCommand(string name, Action<int> callback)
+    public int RegisterCommand(CommandCreationParameters @params)
     {
-        var cmd = new Command(name, callback);
+        var cmd = new Command(@params);
         customCommands.Add(cmd);
         return cmd.ID;
     }
@@ -692,6 +818,19 @@ sealed class RainEd
                 break;
             }
         }
+    }
+
+    public Command GetCommand(int id)
+    {
+        for (int i = 0; i < customCommands.Count; i++)
+        {
+            if (customCommands[i].ID == id)
+            {
+                return customCommands[i];
+            }
+        }
+
+        throw new ArgumentException("Unrecognized ID", nameof(id));
     }
 
     private readonly List<Action> deferredActions = [];
@@ -724,7 +863,7 @@ sealed class RainEd
 
     private async void AsyncCloseWindowRequest()
     {
-        if (await EditorWindow.CloseAllTabs())
+        if (await AssetManagerWindow.AppClose() && await EditorWindow.CloseAllTabs())
         {
             Running = false;
         }
@@ -737,7 +876,7 @@ sealed class RainEd
 
         AssetGraphics.Maintenance();
         AssetGraphics.CleanUpTextures();
-        
+
         foreach (var f in deferredActions) f();
         deferredActions.Clear();
 
@@ -751,22 +890,24 @@ sealed class RainEd
         }
 
         EditorWindow.UpdateMouseState();
-        
+
         Raylib.ClearBackground(new Color(51, 51, 51, 255));
         KeyShortcuts.Update();
         //ImGui.DockSpaceOverViewport();
 
         if (CurrentTab != null)
             UpdateRopeSimulation();
-        
+
         // update node data
         CurrentTab?.NodeData.Update();
-        
+
         EditorWindow.Render();
+        LuaInterface.UIUpdate();
+        LuaInterface.Update(dt);
 
         if (ImGui.IsKeyPressed(ImGuiKey.F1))
             DebugWindow.IsWindowOpen = !DebugWindow.IsWindowOpen;
-        
+
         // don't sleep rained if mouse or key is held down
         // for example, the user may be holding down a +/- imgui input, and i'm not quite sure how to detect that.
         if (ImGui.IsMouseDown(ImGuiMouseButton.Left) || ImGui.IsMouseDown(ImGuiMouseButton.Right) || ImGui.IsMouseDown(ImGuiMouseButton.Middle) ||
@@ -775,12 +916,19 @@ sealed class RainEd
             NeedScreenRefresh();
         }
 
+        // preferences save at regular intervals during application runtime
+        if (DateTime.UtcNow >= nextPrefsSave)
+        {
+            nextPrefsSave = nextPrefsSave.AddSeconds(PREF_SAVE_INTERVAL);
+            SavePreferences();
+        }
+
 #if DEBUG
         if (ImGui.IsKeyPressed(ImGuiKey.F2))
             throw new Exception("Test Exception");
 #endif
         DebugWindow.ShowWindow();
-        
+
         if (remainingActiveTime > 0f)
         {
             remainingActiveTime -= dt;
