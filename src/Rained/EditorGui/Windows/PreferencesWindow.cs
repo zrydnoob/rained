@@ -23,7 +23,7 @@ static class PreferencesWindow
         Scripts
     }
 
-    private readonly static string[] NavTabs = ["全局", "Interface", "快捷键", "主题", "Drizzle", "脚本"];
+    private readonly static string[] NavTabs = ["通用", "界面", "快捷键", "主题", "Drizzle", "脚本"];
     private readonly static string[] RendererNames = ["Direct3D 11", "Direct3D 12", "OpenGL", "Vulkan"];
     private static NavTabEnum selectedNavTab = NavTabEnum.General;
 
@@ -272,10 +272,10 @@ static class PreferencesWindow
     {
         var prefs = RainEd.Instance.Preferences;
 
-        ImGui.SeparatorText("Backups");
+        ImGui.SeparatorText("备份");
         {
             var saveBackups = prefs.SaveFileBackups;
-            if (ImGui.Checkbox("Save backups of files", ref saveBackups))
+            if (ImGui.Checkbox("保存文件备份", ref saveBackups))
             {
                 prefs.SaveFileBackups = saveBackups;
             }
@@ -285,13 +285,13 @@ static class PreferencesWindow
             if (ImGui.BeginItemTooltip())
             {
                 ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
-                ImGui.TextWrapped("When you save a level, enabling this will make Rained move the previously saved version of the level to a different file. This serves as the backup file.\n\nWith no backup directory given, the backup will be in the same directory as the work file but with a tilde (~) appended to its file extension. With one, it will be saved to the backup directory with the same name as the work file.");
+                ImGui.TextWrapped("当你保存关卡时，启用此功能将使 Rained 将之前保存的关卡版本移动到另一个文件中。此文件作为备份文件。如果未指定备份目录，备份文件将与工作文件位于同一目录，但文件扩展名后会附加一个波浪号 (~)。如果指定了备份目录，则备份文件将以与工作文件相同的名称保存在备份目录中。");
                 ImGui.PopTextWrapPos();
                 ImGui.EndTooltip();
             }
 
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Backup Directory");
+            ImGui.Text("备份目录");
             ImGui.SameLine();
 
             var backupDir = prefs.BackupDirectory;
@@ -301,16 +301,16 @@ static class PreferencesWindow
             }
         }
 
-        ImGui.SeparatorText("Assets");
+        ImGui.SeparatorText("资产");
         {
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Data Path");
+            ImGui.Text("Data 目录");
             ImGui.SameLine();
             ImGui.TextDisabled("(!)");
             if (ImGui.BeginItemTooltip())
             {
                 ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
-                ImGui.Text("Note that a restart is required in order for changes to take effect.");
+                ImGui.Text("请注意，必须重启才能使更改生效。");
                 ImGui.PopTextWrapPos();
                 ImGui.EndTooltip();
             }
@@ -341,7 +341,7 @@ static class PreferencesWindow
             var flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings;
             if (ImGui.IsPopupOpen("Error") && ImGui.BeginPopupModal("Error", flags))
             {
-                ImGui.Text("The given data folder is missing the following subdirectories:");
+                ImGui.Text("给定的数据文件夹缺少以下子目录：");
 
                 if (missingDirs is not null)
                 {
@@ -362,7 +362,7 @@ static class PreferencesWindow
             }
         }
 
-        ImGui.SeparatorText("Miscellaneous");
+        ImGui.SeparatorText("杂项");
         {
             // they've brainwashed me to not add this
             //bool showHiddenEffects = prefs.ShowDeprecatedEffects;
@@ -370,34 +370,26 @@ static class PreferencesWindow
             //    prefs.ShowDeprecatedEffects = showHiddenEffects;
 
             bool versionCheck = prefs.CheckForUpdates;
-            if (ImGui.Checkbox("Check for updates", ref versionCheck))
+            if (ImGui.Checkbox("检查更新", ref versionCheck))
                 prefs.CheckForUpdates = versionCheck;
 
             bool optimizedTile = prefs.OptimizedTilePreviews;
-            if (ImGui.Checkbox("Optimized tile previews", ref optimizedTile))
+            if (ImGui.Checkbox("优化瓦片预览", ref optimizedTile))
                 prefs.OptimizedTilePreviews = optimizedTile;
 
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
                 """
-                This will optimize tile preview rendering such
-                that only tile cells located in the bounds of
-                its tile head will be rendered. If this option
-                is turned off, all tile bodies will be
-                processed regardless or not if it is within the
-                bounds of its tile head.
-
-                Turning this off may be useful if you have very
-                erroneous tiles in a level and want to see them,
-                but otherwise there is no reason to do so.
+                这将优化瓦片预览渲染，仅渲染位于其瓦片头部边界内的瓦片单元。如果关闭此选项，无论所有瓦片主体是否处于其瓦片头部边界内，都会对其进行处理。
+                如果某个关卡中存在错误严重的瓦片，且您希望查看这些瓦片，关闭此选项可能会有所帮助；否则，没有理由这样操作。
                 """
             );
 
             // sky roots fix
             {
                 var skyRootsFix = activeDrizzleConfig!.SkyRootsFix;
-                if (ImGui.Checkbox("Require in-bounds effects by default", ref skyRootsFix))
+                if (ImGui.Checkbox("默认要求效果在边界内", ref skyRootsFix))
                 {
                     activeDrizzleConfig.SkyRootsFix = skyRootsFix;
                     activeDrizzleConfig.SavePreferences();
@@ -408,7 +400,7 @@ static class PreferencesWindow
                 if (ImGui.BeginItemTooltip())
                 {
                     ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
-                    ImGui.TextWrapped("This will set the value of the \"Require In-Bounds\" effect property for any newly created effects or effects from levels made before this option was added. This is an alias for the \"Sky roots fix\" option in the Drizzle page.");
+                    ImGui.TextWrapped("这将为所有新创建的效果，或来自此选项添加前创建的关卡中的效果，设置 “Require In-Bounds”（需在边界内）效果属性的值。此选项是 “Drizzle” 页面中 “Sky roots fix”（天空根部修复）选项的别名。");
                     ImGui.PopTextWrapPos();
                     ImGui.EndTooltip();
                 }
@@ -419,7 +411,7 @@ static class PreferencesWindow
             ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 10f);
 
             var simSpeed = prefs.FastSimulationSpeed;
-            if (ImGui.SliderFloat("Fast simulation speed", ref simSpeed, 1f, 20f, "%.0fx"))
+            if (ImGui.SliderFloat("快速模拟速率", ref simSpeed, 1f, 20f, "%.0fx"))
             {
                 prefs.FastSimulationSpeed = simSpeed;
             }
@@ -658,7 +650,7 @@ static class PreferencesWindow
 
             // geo icon set
             var geometryIcons = prefs.GeometryIcons;
-            if (ImGui.BeginCombo("Geometry icon set", geometryIcons))
+            if (ImGui.BeginCombo("设置几何图标", geometryIcons))
             {
                 foreach (var str in GeometryIcons.Sets)
                 {
@@ -678,12 +670,12 @@ static class PreferencesWindow
 
             // camera border view mode
             var camBorderMode = (int)prefs.CameraBorderMode;
-            if (ImGui.Combo("相机边界渲染", ref camBorderMode, "Inner Border\0Outer Border\0Both Borders"))
+            if (ImGui.Combo("相机边界渲染", ref camBorderMode, "内边界\0外边界\0两者"))
                 prefs.CameraBorderMode = (UserPreferences.CameraBorderModeOption)camBorderMode;
 
             // autotile mouse mode
             var autotileMouseMode = (int)prefs.AutotileMouseMode;
-            if (ImGui.Combo("Autotile mouse mode", ref autotileMouseMode, "Click\0Hold"))
+            if (ImGui.Combo("自动瓦片鼠标模式", ref autotileMouseMode, "点击\0按住"))
                 prefs.AutotileMouseMode = (UserPreferences.AutotileMouseModeOptions)autotileMouseMode;
 
             // tile placement mode toggle
@@ -693,7 +685,7 @@ static class PreferencesWindow
 
             // prop selection layer filter
             var propSelectionLayerFilter = (int)prefs.PropSelectionLayerFilter;
-            if (ImGui.Combo("Prop selection layer filter", ref propSelectionLayerFilter, "All\0Current\0In Front"))
+            if (ImGui.Combo("道具可选择层过滤", ref propSelectionLayerFilter, "全部层\0当前层\0当前层以后"))
                 prefs.PropSelectionLayerFilter = (UserPreferences.PropSelectionLayerFilterOption)propSelectionLayerFilter;
 
             ImGui.SameLine();
@@ -714,7 +706,7 @@ static class PreferencesWindow
 
             // light editor control scheme
             var lightEditorControlScheme = (int)prefs.LightEditorControlScheme;
-            if (ImGui.Combo("Light editor control scheme", ref lightEditorControlScheme, "Mouse\0Keyboard\0"))
+            if (ImGui.Combo("灯光编辑器控制方案", ref lightEditorControlScheme, "鼠标\0键盘\0"))
                 prefs.LightEditorControlScheme = (UserPreferences.LightEditorControlSchemeOption)lightEditorControlScheme;
 
             ImGui.SameLine();
@@ -732,7 +724,7 @@ static class PreferencesWindow
             }
 
             var effectPlacementPos = (int)prefs.EffectPlacementPosition;
-            if (ImGui.Combo("Effect placement position", ref effectPlacementPos, "Before selected\0After selected\0First\0Last\0"))
+            if (ImGui.Combo("效果创建位置", ref effectPlacementPos, "所选项之前\0所选项之后\0顶部\0尾部\0"))
                 prefs.EffectPlacementPosition = (UserPreferences.EffectPlacementPositionOption)effectPlacementPos;
 
             ImGui.SameLine();
@@ -741,15 +733,14 @@ static class PreferencesWindow
             {
                 ImGui.TextUnformatted(
                     """
-                    Changes where effects are inserted into
-                    the Active Effects list when created.
+                    修改效果创建时，其在 “已添加效果列表” 中的插入位置。
                     """
                 );
                 ImGui.End();
             }
 
             var effectPlacementAltPos = (int)prefs.EffectPlacementAltPosition;
-            if (ImGui.Combo("Effect placement alt position", ref effectPlacementAltPos, "Before selected\0After selected\0First\0Last\0"))
+            if (ImGui.Combo("效果创建备用位置", ref effectPlacementAltPos, "所选项之前\0所选项之后\0顶部\0尾部\0"))
                 prefs.EffectPlacementAltPosition = (UserPreferences.EffectPlacementPositionOption)effectPlacementAltPos;
 
             ImGui.SameLine();
@@ -758,9 +749,7 @@ static class PreferencesWindow
             {
                 ImGui.TextUnformatted(
                     """
-                    Changes where effects are inserted into
-                    the Active Effects list when created when
-                    SHIFT is held.
+                    当按住 Shift 键创建效果时，会将效果插入到 “已添加效果” 列表中的相关更改。
                     """
                 );
                 ImGui.End();
@@ -769,7 +758,7 @@ static class PreferencesWindow
             ImGui.PopItemWidth();
         }
 
-        ImGui.SeparatorText("Display");
+        ImGui.SeparatorText("显示");
         {
             if (entered)
             {
@@ -794,14 +783,13 @@ static class PreferencesWindow
             }
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            ImGui.Text("Content Scale");
+            ImGui.Text("内容缩放");
 
             ImGui.SameLine();
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
                 """
-                The default value for this is determined
-                by your monitor's DPI.
+                该选项的默认值由显示器的 DPI 决定。
                 """
             );
 
@@ -810,7 +798,7 @@ static class PreferencesWindow
                 ImGui.PushItemWidth(ImGui.GetFontSize() * 12f);
 
                 var curFont = Fonts.GetCurrentFont();
-                if (ImGui.BeginCombo("Font", curFont ?? ""))
+                if (ImGui.BeginCombo("字体", curFont ?? ""))
                 {
                     foreach (var fontName in Fonts.AvailableFonts)
                     {
@@ -829,7 +817,7 @@ static class PreferencesWindow
                 }
 
                 var fontSize = prefs.FontSize;
-                if (ImGui.InputInt("Font size", ref fontSize))
+                if (ImGui.InputInt("字体大小", ref fontSize))
                     prefs.FontSize = fontSize;
 
                 if (ImGui.IsItemDeactivatedAfterEdit())
@@ -839,7 +827,7 @@ static class PreferencesWindow
                 ImGui.TextDisabled("(?)");
                 if (ImGui.BeginItemTooltip())
                 {
-                    ImGui.Text("The default value for this is 13.");
+                    ImGui.Text("此选项默认值为13。");
                     ImGui.EndTooltip();
                 }
 
@@ -849,7 +837,7 @@ static class PreferencesWindow
             // Vsync
             {
                 bool vsync = Boot.Window.VSync;
-                if (ImGui.Checkbox("Vsync", ref vsync))
+                if (ImGui.Checkbox("垂直同步", ref vsync))
                 {
                     Boot.Window.VSync = vsync;
                     prefs.Vsync = vsync;
@@ -889,7 +877,7 @@ static class PreferencesWindow
 
                     ImGui.SameLine();
                     ImGui.AlignTextToFramePadding();
-                    ImGui.Text("Refresh rate");
+                    ImGui.Text("刷新率");
                 }
             }
 
@@ -902,7 +890,7 @@ static class PreferencesWindow
         ImGui.SeparatorText("易用性");
         ShortcutButton(KeyShortcut.RightMouse);
 
-        ImGui.SeparatorText("General");
+        ImGui.SeparatorText("全局");
         ShortcutButton(KeyShortcut.ViewZoomIn);
         ShortcutButton(KeyShortcut.ViewZoomOut);
         ImGui.Separator();
@@ -1107,7 +1095,7 @@ static class PreferencesWindow
         // static lingo runtime
         {
             boolRef = prefs.StaticDrizzleLingoRuntime;
-            if (ImGui.Checkbox("Persistent Drizzle runtime", ref boolRef))
+            if (ImGui.Checkbox("保留 Drizzle 运行时", ref boolRef))
             {
                 prefs.StaticDrizzleLingoRuntime = boolRef;
                 if (!boolRef)
@@ -1118,11 +1106,7 @@ static class PreferencesWindow
             ImGui.TextDisabled("(?)");
             ImGui.SetItemTooltip(
                 """
-                This will keep a Drizzle runtime in the background
-                after a render, instead of discarding it and
-                recreating a new one on the next render. This
-                results in more idle RAM usage, but will decrease
-                the time it takes for subsequent renders.
+                渲染完成后，此设置会在后台保留一个 Drizzle 运行进程，而非将其丢弃并在下次渲染时重新创建新进程。这会导致闲置内存（RAM）占用增加，但能缩短后续渲染所需的时间。
                 """);
         }
 

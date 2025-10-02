@@ -1,4 +1,5 @@
 namespace Rained.EditorGui.Editors.CellEditing;
+
 using Raylib_cs;
 using Rained.LevelData;
 using System.Numerics;
@@ -73,7 +74,7 @@ static class StaticSelectionTools
 
             if (tile.HasSecondLayer)
             {
-                dstSelections[layer+1] = new LayerSelection(
+                dstSelections[layer + 1] = new LayerSelection(
                     minX, minY,
                     maxX, maxY
                 );
@@ -91,7 +92,7 @@ static class StaticSelectionTools
                         ref var c = ref level.Layers[l, x + minX, y + minY];
                         if (c.TileRootX == tileHeadPos.X && c.TileRootY == tileHeadPos.Y && c.TileLayer == tileHeadPos.Layer)
                         {
-                            selLayer.mask[y,x] = true;
+                            selLayer.mask[y, x] = true;
                         }
                     }
                 }
@@ -108,12 +109,12 @@ static class StaticSelectionTools
     public static LayerSelection? MagicWand(int mouseX, int mouseY, int layer)
     {
         var level = RainEd.Instance.Level;
-        if (!level.IsInBounds(mouseX, mouseY)) 
+        if (!level.IsInBounds(mouseX, mouseY))
         {
             return null;
         }
 
-        var levelMask = new bool[level.Height,level.Width];
+        var levelMask = new bool[level.Height, level.Width];
 
         bool isSolidGeo(int x, int y, int l)
         {
@@ -136,7 +137,7 @@ static class StaticSelectionTools
             mouseX, mouseY, level.Width, level.Height,
             isSimilar: (int x, int y) =>
             {
-                return isSolidGeo(x, y, layer) == selectGeo && !levelMask[y,x];
+                return isSolidGeo(x, y, layer) == selectGeo && !levelMask[y, x];
                 //return false;
             },
             plot: (int x, int y) =>
@@ -145,14 +146,14 @@ static class StaticSelectionTools
                 if (y < minY) minY = y;
                 if (x > maxX) maxX = x;
                 if (y > maxY) maxY = y;
-                levelMask[y,x] = true;
+                levelMask[y, x] = true;
                 hasValue = true;
             }
         );
 
         if (!success)
         {
-            EditorWindow.ShowNotification("Magic wand selection too large!");
+            EditorWindow.ShowNotification("魔棒选取过大！");
             return null;
         }
 
@@ -163,7 +164,7 @@ static class StaticSelectionTools
 
         var aabbW = maxX - minX + 1;
         var aabbH = maxY - minY + 1;
-        var mask = new bool[aabbH,aabbW];
+        var mask = new bool[aabbH, aabbW];
 
         for (int y = 0; y < aabbH; y++)
         {
@@ -171,7 +172,7 @@ static class StaticSelectionTools
             {
                 var gx = minX + x;
                 var gy = minY + y;
-                mask[y,x] = levelMask[gy,gx];
+                mask[y, x] = levelMask[gy, gx];
             }
         }
 
@@ -223,7 +224,7 @@ class RectDragState : SelectToolState, IApplySelection
             Color.White
         );
     }
-    
+
     public bool ApplySelection(Span<LayerSelection?> dstSelections, ReadOnlySpan<bool> layerMask)
     {
         var minX = mouseMinX;
@@ -233,13 +234,13 @@ class RectDragState : SelectToolState, IApplySelection
 
         var w = maxX - minX + 1;
         var h = maxY - minY + 1;
-        var mask = new bool[h,w];
+        var mask = new bool[h, w];
 
         for (int y = 0; y < h; y++)
         {
             for (int x = 0; x < w; x++)
             {
-                mask[y,x] = true;
+                mask[y, x] = true;
             }
         }
 
@@ -279,7 +280,7 @@ class LassoDragState : SelectToolState, IApplySelection
     {
         controller.ChangeRecorder.PushChange();
     }
-    
+
     public override void Update(int mouseX, int mouseY, ReadOnlySpan<bool> layerMask)
     {
         var newPoint = new Vector2i(mouseX, mouseY);
@@ -354,7 +355,7 @@ class LassoDragState : SelectToolState, IApplySelection
         {
             for (int l = 0; l < Level.LayerCount; l++)
                 dstSelections[l] = null;
-            
+
             return false;
         }
 
@@ -368,7 +369,7 @@ class LassoDragState : SelectToolState, IApplySelection
 
         var w = maxX - minX + 1;
         var h = maxY - minY + 1;
-        var mask = new bool[h,w];
+        var mask = new bool[h, w];
 
         // polygon rasterization:
         // a point is inside a polygon if, given an infinitely long horizontal
@@ -378,19 +379,19 @@ class LassoDragState : SelectToolState, IApplySelection
         // the left side of the polygon's AABB to the right side, and then move along each
         // point along that ray. if so far, that ray intersected with an even number of edges,
         // draw a pixel.
-        
+
         // gather lines
         var lines = new List<(Vector2 a, Vector2 b)>();
         for (int i = 1; i < points.Count; i++)
         {
-            var ptA = (Vector2) points[i-1];
-            var ptB = (Vector2) points[i];
+            var ptA = (Vector2)points[i - 1];
+            var ptB = (Vector2)points[i];
             lines.Add((ptA, ptB));
         }
 
         if (points[^1] != points[0])
-            lines.Add(((Vector2) points[^1], (Vector2) points[0]));
-        
+            lines.Add(((Vector2)points[^1], (Vector2)points[0]));
+
         // this function casts a ray towards the right from (rx, ry)
         // and fills the distances array to the distance from the ray
         // to each intersectin segment. it is also sorted.
@@ -405,7 +406,7 @@ class LassoDragState : SelectToolState, IApplySelection
                 var lineMinY = Math.Min(ptA.Y, ptB.Y);
                 var lineMaxY = Math.Max(ptA.Y, ptB.Y);
                 if (!(gy >= lineMinY && gy <= lineMaxY)) continue;
-                
+
                 float dist;
                 if (ptA.X == ptB.X) // line is completely vertical
                 {
@@ -431,10 +432,10 @@ class LassoDragState : SelectToolState, IApplySelection
         {
             for (int i = 0; i < distances.Count; i += 2)
             {
-                var xEnd = i+1 < distances.Count ? (int)distances[i+1] : w;
+                var xEnd = i + 1 < distances.Count ? (int)distances[i + 1] : w;
                 for (int x = (int)distances[i]; x < xEnd; x++)
                 {
-                    mask[y,x] = true;
+                    mask[y, x] = true;
                 }
             }
         }
@@ -468,7 +469,7 @@ class LassoDragState : SelectToolState, IApplySelection
                 dstSelections[l] = null;
             }
         }
-        
+
         return true;
     }
 }
@@ -601,7 +602,7 @@ class SelectedMoveDragState : SelectToolState
     }
 
     public override void Close()
-    {}
+    { }
 
     public override void Update(int mouseX, int mouseY, ReadOnlySpan<bool> layerMask)
     {

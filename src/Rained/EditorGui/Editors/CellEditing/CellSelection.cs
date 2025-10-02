@@ -158,7 +158,7 @@ class CellSelection
         {
             // selection mode options
             // for tile editor mode, Tile Select button appears.
-            using (var group = ImGuiExt.ButtonGroup.Begin("选择模式", AffectTiles ? 5 : 4, 0))
+            using (var group = ImGuiExt.ButtonGroup.Begin("Selection Mode", AffectTiles ? 5 : 4, 0))
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 0f));
                 for (int i = 0; i < toolInfo.Length; i++)
@@ -216,7 +216,7 @@ class CellSelection
             {
                 MoveSelectionLayer(1, !alt);
             }
-            ImGui.SetItemTooltip(alt ? "Move Selection Backward" : "Move Selected Backward");
+            ImGui.SetItemTooltip(alt ? "选区后移" : "选区后移");
 
             ImGui.SameLine();
 
@@ -224,7 +224,7 @@ class CellSelection
             {
                 MoveSelectionLayer(-1, !alt);
             }
-            ImGui.SetItemTooltip(alt ? "Move Selection Forward" : "Move Selected Forward");
+            ImGui.SetItemTooltip(alt ? "选区前移" : "选区前移");
 
             ImGui.EndDisabled();
 
@@ -237,7 +237,7 @@ class CellSelection
                 {
                     GeometryFillCallback?.Invoke(selections);
                 }
-                ImGui.SetItemTooltip("Geometry Fill");
+                ImGui.SetItemTooltip("几何填充");
 
                 ImGui.EndDisabled();
             }

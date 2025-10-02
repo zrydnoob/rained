@@ -8,9 +8,9 @@ namespace Rained.EditorGui.Windows
 {
     public class AssetManagerWindow
     {
-        private const string WindowName = "Asset Manager";
-        private static bool isWindowOpen = false; 
-        
+        private const string WindowName = "资产管理器";
+        private static bool isWindowOpen = false;
+
         private static bool openPopupCmd = false;
         private static bool openCloseConfirm = false;
 
@@ -27,7 +27,7 @@ namespace Rained.EditorGui.Windows
         }
 
         private static AssetTabEnum selectedAssetTab = AssetTabEnum.Tiles;
-        private readonly static string[] NavTabs = ["Tiles", "Props", "Materials"];
+        private readonly static string[] NavTabs = ["瓦片", "道具", "材料"];
 
         private static TaskCompletionSource<bool>? closePromptTcs = null;
 
@@ -114,10 +114,10 @@ namespace Rained.EditorGui.Windows
                     ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
                     if (ImGui.BeginPopupModal("Unsaved Changes"))
                     {
-                        ImGui.Text("Do you want to apply your changes before proceeding?");
+                        ImGui.Text("在继续操作前，您是否要应用所做的更改？");
                         ImGui.Separator();
 
-                        if (ImGui.Button("Yes", StandardPopupButtons.ButtonSize))
+                        if (ImGui.Button("是", StandardPopupButtons.ButtonSize))
                         {
                             AssetManagerGUI.Manager?.Commit();
                             isWindowOpen = false;
@@ -126,7 +126,7 @@ namespace Rained.EditorGui.Windows
                         }
 
                         ImGui.SameLine();
-                        if (ImGui.Button("No", StandardPopupButtons.ButtonSize))
+                        if (ImGui.Button("否", StandardPopupButtons.ButtonSize))
                         {
                             isWindowOpen = false;
                             ImGui.CloseCurrentPopup();
@@ -134,7 +134,7 @@ namespace Rained.EditorGui.Windows
                         }
 
                         ImGui.SameLine();
-                        if (ImGui.Button("Cancel", StandardPopupButtons.ButtonSize))
+                        if (ImGui.Button("取消", StandardPopupButtons.ButtonSize))
                         {
                             ImGui.CloseCurrentPopup();
                             closePromptTcs?.SetResult(false);
