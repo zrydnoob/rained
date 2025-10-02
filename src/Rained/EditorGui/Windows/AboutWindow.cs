@@ -80,7 +80,7 @@ static class AboutWindow
                 ImGui.Text("此汉化版本是Rained的二次开发，并在汉化基础上进行了改动并添加了新功能。");
                 ImGui.Text("尊重原作者的成果，尊重游戏开发者，以下列举在Rained基础上进行的改动");
                 ImGui.Text("- 添加了Rain World中文本地化。");
-                ImGui.Text("- 添加了特效(Effect)的部分预览缩略图。此部分缩略图是从RWE+ (MIT 协议) 中获取的");
+                ImGui.Text("- 添加了效果(Effect)的部分预览缩略图。此部分缩略图是从RWE+ (MIT 协议) 中获取的");
                 ImGui.Bullet();
                 ImGuiExt.LinkText("RWE+", "https://github.com/timofey260/RWE-Plus");
                 ImGui.Text("- 修改了AutoTile的逻辑来支持鼠标右键清除AutoTile");

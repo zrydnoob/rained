@@ -9,7 +9,7 @@ namespace Rained.EditorGui.Editors;
 
 partial class PropEditor : IEditorMode
 {
-    private readonly string[] PropRenderTimeNames = ["渲染特效前", "渲染特效后"];
+    private readonly string[] PropRenderTimeNames = ["渲染效果前", "渲染效果后"];
     private readonly string[] RopeReleaseModeNames = ["None", "Left", "Right"];
 
     enum SelectionMode
@@ -572,7 +572,7 @@ partial class PropEditor : IEditorMode
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Depth Move", btnSize))
+                if (ImGui.Button("纵深移动", btnSize))
                 {
                     ImGui.OpenPopup("ZTranslate");
                     zTranslateValue = 0;
@@ -623,10 +623,10 @@ partial class PropEditor : IEditorMode
                     ImGui.GetTextLineHeightWithSpacing() * 12f,
                     ImGui.GetContentRegionAvail().X - ImGui.GetTextLineHeightWithSpacing() * 8f
                 ));
-                MultiselectDragInt("Render Order", "RenderOrder", 0.02f);
-                MultiselectSliderInt("Depth Offset", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
-                MultiselectSliderInt("Seed", "Seed", 0, 999);
-                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "Render Time", "RenderTime", PropRenderTimeNames);
+                MultiselectDragInt("渲染顺序", "RenderOrder", 0.02f);
+                MultiselectSliderInt("纵深偏移", "DepthOffset", 0, 29, "%i", ImGuiSliderFlags.AlwaysClamp);
+                MultiselectSliderInt("随机种子", "Seed", 0, 999);
+                MultiselectEnumInput<Prop, PropRenderTime>(selectedProps, "渲染时机", "RenderTime", PropRenderTimeNames);
 
                 // custom depth, if available
                 {
@@ -893,7 +893,7 @@ partial class PropEditor : IEditorMode
                         }
                         else
                         {
-                            ImGui.TextWrapped("如果颜色被激活，建议在特效之后渲染这个道具，因为特效不会影响颜色层。");
+                            ImGui.TextWrapped("如果颜色被激活，建议在效果之后渲染这个道具，因为效果不会影响颜色层。");
                         }
                     }
 
@@ -929,8 +929,8 @@ partial class PropEditor : IEditorMode
         // TODO: grey this out if prop clipboard data is not available
         KeyShortcuts.ImGuiMenuItem(KeyShortcut.Paste, "粘贴");
 
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "复制选定的道具");
-        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "删除选定的道具");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.Duplicate, "复制选中道具");
+        KeyShortcuts.ImGuiMenuItem(KeyShortcut.RemoveObject, "删除选中道具");
         KeyShortcuts.ImGuiMenuItem(KeyShortcut.ToggleVertexMode, "切换顶点编辑");
     }
 

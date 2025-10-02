@@ -678,7 +678,7 @@ static class PreferencesWindow
 
             // camera border view mode
             var camBorderMode = (int)prefs.CameraBorderMode;
-            if (ImGui.Combo("Camera border view mode", ref camBorderMode, "Inner Border\0Outer Border\0Both Borders"))
+            if (ImGui.Combo("相机边界渲染", ref camBorderMode, "Inner Border\0Outer Border\0Both Borders"))
                 prefs.CameraBorderMode = (UserPreferences.CameraBorderModeOption)camBorderMode;
 
             // autotile mouse mode
@@ -1084,10 +1084,10 @@ static class PreferencesWindow
 
     private static void ShowDrizzleTab()
     {
-        static void ConfigCheckbox(string key)
+        static void ConfigCheckbox(string label, string key)
         {
             bool v = activeDrizzleConfig!.GetConfig(key);
-            if (ImGui.Checkbox(key, ref v))
+            if (ImGui.Checkbox(label, ref v))
             {
                 activeDrizzleConfig.TrySetConfig(key, v);
                 activeDrizzleConfig.SavePreferences();
@@ -1100,7 +1100,7 @@ static class PreferencesWindow
         var prefs = RainEd.Instance.Preferences;
 
         ImGui.BeginDisabled(DrizzleManager.StaticRuntime is null);
-        if (ImGui.Button("Discard Drizzle runtime"))
+        if (ImGui.Button("销毁 Drizzle 运行时"))
             DrizzleManager.DisposeStaticRuntime();
         ImGui.EndDisabled();
 
@@ -1135,11 +1135,13 @@ static class PreferencesWindow
 
         ImGui.SeparatorText("渲染");
 
-        ConfigCheckbox("Grime on gradients");
-        ConfigCheckbox("Grime");
-        ConfigCheckbox("Material fixes");
-        ConfigCheckbox("Slime always affects editor decals");
-        ConfigCheckbox("voxelStructRandomDisplace for tiles as props");
+        ImGui.TextWrapped("译注：此部分内容翻译时单词对照无从考证，故保留原文，若翻译出错请及时指出。");
+
+        ConfigCheckbox("污垢渐变 | Grime on gradients", "Grime on gradients");
+        ConfigCheckbox("污垢 | Grime", "Grime");
+        ConfigCheckbox("材质修复 | Material fixes", "Material fixes");
+        ConfigCheckbox("黏液始终影响编辑器贴花 | Slime always affects editor decals", "Slime always affects editor decals");
+        ConfigCheckbox("将瓦片作为道具时启用体素结构随机位移 | voxelStructRandomDisplace for tiles as props", "voxelStructRandomDisplace for tiles as props");
 
         // notice tooltip for voxelStructRandomDisplace for tiles as props
         ImGui.SameLine();
@@ -1147,27 +1149,27 @@ static class PreferencesWindow
         if (ImGui.BeginItemTooltip())
         {
             ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
-            ImGui.TextWrapped("After changing this option, a restart is advised in order to update the props list.");
+            ImGui.TextWrapped("更改此选项后，建议重新启动以更新属性列表。");
             ImGui.PopTextWrapPos();
             ImGui.EndTooltip();
         }
 
-        ConfigCheckbox("notTrashProp fix");
-        ConfigCheckbox("Trash and Small pipes non solid");
-        ConfigCheckbox("Gradients with BackgroundScenes fix");
-        ConfigCheckbox("Invisible material fix");
-        ConfigCheckbox("Tiles as props fixes");
-        ConfigCheckbox("Large trash debug log");
-        ConfigCheckbox("Rough Rock spreads more");
-        ConfigCheckbox("Dark Slime fix");
-        ConfigCheckbox("Sky roots fix");
+        ConfigCheckbox("非垃圾道具修复 | notTrashProp fix", "notTrashProp fix");
+        ConfigCheckbox("垃圾和小管道设为非实体 | Trash and Small pipes non solid", "Trash and Small pipes non solid");
+        ConfigCheckbox("背景场景渐变修复 | Gradients with BackgroundScenes fix", "Gradients with BackgroundScenes fix");
+        ConfigCheckbox("隐形材质修复 | Invisible material fix", "Invisible material fix");
+        ConfigCheckbox("瓦片道具化修复 | Tiles as props fixes", "Tiles as props fixes");
+        ConfigCheckbox("大型垃圾调试日志 | Large trash debug log", "Large trash debug log");
+        ConfigCheckbox("粗糙岩石自然扩散 | Rough Rock spreads more", "Rough Rock spreads more");
+        ConfigCheckbox("暗色黏液修复 | Dark Slime fix", "Dark Slime fix");
+        ConfigCheckbox("天空根系修复 | Sky roots fix", "Sky roots fix");
 
         ImGui.SameLine();
         ImGui.TextDisabled("(?)");
         if (ImGui.BeginItemTooltip())
         {
             ImGui.PushTextWrapPos(ImGui.GetFontSize() * 20.0f);
-            ImGui.TextWrapped("This will set the value of the \"Require In-Bounds\" effect property for any newly created effects or effects from levels made before this option was added. This is an alias for the \"Require in-bounds effects by default\" option in the General page.");
+            ImGui.TextWrapped("此设置将对任何新创建的特效或在此选项添加前制作的关卡中的特效，自动设置 \"Require In-Bounds\"（强制边界内）特效属性的值。这是常规设置页面中 \"默认强制边界内特效\" 选项的快捷方式。");
             ImGui.PopTextWrapPos();
             ImGui.EndTooltip();
         }

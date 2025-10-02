@@ -40,7 +40,6 @@
 
 # rained-generated files
 /config/preferences.json
-/config/imgui.ini
 /logs
 /emsavs
 

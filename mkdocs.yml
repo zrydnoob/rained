@@ -5,6 +5,23 @@ plugins:
     - search
 
 nav:
+  - 主页: index.md
+  - 指南:
+    - 快速指南: brief.md
+    - 安装和更新: install-updates.md
+    - 用户界面: user-interface.md
+    - 关卡编辑:
+      - 概述: overview.md
+      - 环境: env.md
+      - 几何: geo.md
+      - 贴图: tiles.md
+      - 相机: cameras.md
+      - 灯光: light.md
+      - 效果: effects.md
+      - 道具: props.md
+    - 渲染和运行: rendering.md
+    - 延伸阅读: resources.md
+  - 开发: developing.md
     - 主页: index.md
     - 指南:
           - 快速指南: brief.md

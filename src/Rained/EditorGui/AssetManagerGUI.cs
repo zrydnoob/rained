@@ -1476,7 +1476,7 @@ static class AssetManagerGUI
         ImGui.Separator();
 
         ImGui.AlignTextToFramePadding();
-        ImGui.Text("Data Path");
+        ImGui.Text("Data 路径");
         ImGui.SameLine();
 
         var oldPath = RainEd.Instance.AssetDataPath;

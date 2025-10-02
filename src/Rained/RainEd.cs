@@ -266,6 +266,7 @@ sealed class RainEd
             // init autotile catalog
             Autotiles = new AutotileCatalog();
 
+
             initPhase = "effects";
             Log.Information("Initializing effects database...");
             EffectsDatabase = new EffectsDatabase();

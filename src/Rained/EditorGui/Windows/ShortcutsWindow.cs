@@ -7,7 +7,7 @@ static partial class ShortcutsWindow
 {
     public static bool IsWindowOpen = false;
 
-    private readonly static string[] NavTabs = new string[] { "常规", "环境编辑", "几何编辑", "图块贴图编辑", "相机编辑", "灯光编辑", "特效编辑", "道具编辑" };
+    private readonly static string[] NavTabs = new string[] { "常规", "环境编辑", "几何编辑", "图块贴图编辑", "相机编辑", "灯光编辑", "效果编辑", "道具编辑" };
 
     private readonly static (string, string)[][] TabData = new (string, string)[][]
     {
@@ -26,7 +26,7 @@ static partial class ShortcutsWindow
             ("3", "编辑图块贴图"),
             ("4", "编辑相机"),
             ("5", "编辑灯光"),
-            ("6", "编辑特效"),
+            ("6", "编辑效果"),
             ("7", "编辑道具"),
             ("[SelectEditor]", "调出编辑模式切换轮盘"),
         ],
@@ -108,9 +108,9 @@ static partial class ShortcutsWindow
 
         // Effects
         [
-            ("鼠标左键", "绘制特效"),
-            ("Shift+鼠标左键", "强力绘制特效"),
-            ("鼠标右键", "擦除特效"),
+            ("鼠标左键", "绘制效果"),
+            ("Shift+鼠标左键", "强力绘制效果"),
+            ("鼠标右键", "擦除效果"),
             ("Shift+鼠标滚轮", "更改笔刷大小"),
             ("[DecreaseBrushSize]/[IncreaseBrushSize]", "更改笔刷大小"),
             ("<Ctrl>+Mouse Wheel", "更改笔刷力度"),

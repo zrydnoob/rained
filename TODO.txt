@@ -2,7 +2,7 @@
 - 完善汉化
 
 额外功能：
-- 特效预览缺失补全
+- 效果预览缺失补全
 
 DRIZZLE UPDATE:
 - port effects
