@@ -87,17 +87,17 @@ class StandardPathAutotile : Autotile, ITileSelectionState
     public override void ConfigGui()
     {
         ImGui.PushItemWidth(ImGui.GetTextLineHeight() * 10f);
-        
+
         TileButton(ref TileTable.LeftDown, "左-下", TileType.Turn);
         TileButton(ref TileTable.LeftUp, "左-上", TileType.Turn);
         TileButton(ref TileTable.RightDown, "右-下", TileType.Turn);
         TileButton(ref TileTable.RightUp, "右-上", TileType.Turn);
         TileButton(ref TileTable.Vertical, "垂直", TileType.Vertical);
         TileButton(ref TileTable.Horizontal, "水平", TileType.Horizontal);
-        
+
         if (ImGui.Checkbox("允许自动连接", ref TileTable.AllowJunctions))
             CheckTiles();
-        
+
         if (ImGui.Checkbox("放置顶盖", ref TileTable.PlaceCaps))
             CheckTiles();
 
@@ -147,16 +147,16 @@ class StandardPathAutotile : Autotile, ITileSelectionState
         ImGui.SeparatorText("Options");
         if (ImGui.Button("删除"))
         {
-            ImGui.OpenPopup("删除?");
+            ImGui.OpenPopup("Delete?");
         }
         ImGui.SameLine();
 
         // show deletion confirmation prompt
         ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
-        if (ImGuiExt.BeginPopupModal("删除?", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
+        if (ImGuiExt.BeginPopupModal("Delete?", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
         {
             ImGui.TextUnformatted($"你确定你想要删除 '{Name}'?");
-            
+
             ImGui.Separator();
             if (StandardPopupButtons.Show(PopupButtonList.YesNo, out int btn))
             {
@@ -179,7 +179,7 @@ class StandardPathAutotile : Autotile, ITileSelectionState
 
         RainEd.Instance.Autotiles.RenderRenamePopup();
     }
-    
+
     private void TileButton(ref string tile, string label, TileType tileType)
     {
         bool invalid = IsInvalid(tile, tileType);
@@ -208,12 +208,12 @@ class StandardPathAutotile : Autotile, ITileSelectionState
         ImGui.Text(label);
 
         //ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
-        
+
         if (ImGui.BeginPopup("PopupTileSelector"))
         {
             //ImGui.TextUnformatted("Select Tile");
             //ImGui.Separator();
-            
+
             SelectedTile = null;
             catalogWidget.WidgetSize = new Vector2(
                 ImGui.GetTextLineHeight() * 32f,
@@ -243,7 +243,7 @@ class StandardPathAutotile : Autotile, ITileSelectionState
     public override void TilePath(int layer, PathSegment[] pathSegments, bool force, bool geometry)
     {
         var modifier = TilePlacementMode.Normal;
-        if (geometry)   modifier = TilePlacementMode.Geometry;
+        if (geometry) modifier = TilePlacementMode.Geometry;
         else if (force) modifier = TilePlacementMode.Force;
 
         StandardTilePath(TileTable, layer, pathSegments, modifier);
@@ -283,7 +283,7 @@ class StandardPathAutotile : Autotile, ITileSelectionState
             header = $"[{Name}]";
             location = lines.IndexOf(header);
         }
-    
+
         // not found, append lines
         if (location == -1)
         {
@@ -300,13 +300,13 @@ class StandardPathAutotile : Autotile, ITileSelectionState
             lines.Add("vertical=" + TileTable.Vertical);
             lines.Add("horizontal=" + TileTable.Horizontal);
             lines.Add("allowJunctions=" + (TileTable.AllowJunctions ? "true" : "false"));
-            lines.Add("tr=" + TileTable.TRight); 
+            lines.Add("tr=" + TileTable.TRight);
             lines.Add("tu=" + TileTable.TUp);
             lines.Add("tl=" + TileTable.TLeft);
             lines.Add("td=" + TileTable.TDown);
-            lines.Add("x="  + TileTable.XJunct);
+            lines.Add("x=" + TileTable.XJunct);
             lines.Add("placeCaps=" + (TileTable.PlaceCaps ? "true" : "false"));
-            lines.Add("capRight=" + TileTable.TRight); 
+            lines.Add("capRight=" + TileTable.TRight);
             lines.Add("capUp=" + TileTable.TUp);
             lines.Add("capLeft=" + TileTable.TLeft);
             lines.Add("capDown=" + TileTable.TDown);
@@ -319,23 +319,23 @@ class StandardPathAutotile : Autotile, ITileSelectionState
 
             //lines[location+1]  = "thickness=" + PathThickness.ToString(CultureInfo.InvariantCulture);
             //lines[location+2]  = "length=" + SegmentLength.ToString(CultureInfo.InvariantCulture);
-            lines[location+1]  = "ld=" + TileTable.LeftDown;
-            lines[location+2]  = "lu=" + TileTable.LeftUp;
-            lines[location+3]  = "rd=" + TileTable.RightDown;
-            lines[location+4]  = "ru=" + TileTable.RightUp;
-            lines[location+5]  = "vertical=" + TileTable.Vertical;
-            lines[location+6]  = "horizontal=" + TileTable.Horizontal;
-            lines[location+7]  = "allowJunctions=" + (TileTable.AllowJunctions ? "true" : "false");
-            lines[location+8] = "tr=" + TileTable.TRight;  
-            lines[location+9] = "tu=" + TileTable.TUp;
-            lines[location+10] = "tl=" + TileTable.TLeft;
-            lines[location+11] = "td=" + TileTable.TDown;
-            lines[location+12] = "x="  + TileTable.XJunct;
-            lines[location+13] = "placeCaps=" + (TileTable.PlaceCaps ? "true" : "false");
-            lines[location+14] = "capRight=" + TileTable.CapRight;
-            lines[location+15] = "capUp=" + TileTable.CapUp;
-            lines[location+16] = "capLeft=" + TileTable.CapLeft;
-            lines[location+17] = "capDown=" + TileTable.CapDown;
+            lines[location + 1] = "ld=" + TileTable.LeftDown;
+            lines[location + 2] = "lu=" + TileTable.LeftUp;
+            lines[location + 3] = "rd=" + TileTable.RightDown;
+            lines[location + 4] = "ru=" + TileTable.RightUp;
+            lines[location + 5] = "vertical=" + TileTable.Vertical;
+            lines[location + 6] = "horizontal=" + TileTable.Horizontal;
+            lines[location + 7] = "allowJunctions=" + (TileTable.AllowJunctions ? "true" : "false");
+            lines[location + 8] = "tr=" + TileTable.TRight;
+            lines[location + 9] = "tu=" + TileTable.TUp;
+            lines[location + 10] = "tl=" + TileTable.TLeft;
+            lines[location + 11] = "td=" + TileTable.TDown;
+            lines[location + 12] = "x=" + TileTable.XJunct;
+            lines[location + 13] = "placeCaps=" + (TileTable.PlaceCaps ? "true" : "false");
+            lines[location + 14] = "capRight=" + TileTable.CapRight;
+            lines[location + 15] = "capUp=" + TileTable.CapUp;
+            lines[location + 16] = "capLeft=" + TileTable.CapLeft;
+            lines[location + 17] = "capDown=" + TileTable.CapDown;
         }
     }
 
@@ -353,7 +353,7 @@ class StandardPathAutotile : Autotile, ITileSelectionState
             header = $"[{Name}]";
             location = lines.IndexOf(header);
         }
-    
+
         // delete if found
         if (location >= 0)
         {
@@ -362,9 +362,9 @@ class StandardPathAutotile : Autotile, ITileSelectionState
             lines.RemoveRange(location, 18);
 
             // remove newline before autotile definition
-            if (location > 0 && string.IsNullOrWhiteSpace(lines[location-1]))
+            if (location > 0 && string.IsNullOrWhiteSpace(lines[location - 1]))
             {
-                lines.RemoveAt(location-1);
+                lines.RemoveAt(location - 1);
             }
         }
     }
@@ -383,7 +383,7 @@ class StandardPathAutotile : Autotile, ITileSelectionState
             header = $"[{Name}]";
             location = lines.IndexOf(header);
         }
-    
+
         // delete if found
         if (location >= 0)
         {

@@ -1,4 +1,5 @@
 namespace Rained.EditorGui.Editors;
+
 using Rained.Autotiles;
 using ImGuiNET;
 using System.Numerics;
@@ -6,12 +7,12 @@ using System.Numerics;
 class AutotileEditMode : TileEditorMode
 {
     public override string TabName => "自动图块";
-    
+
     private Autotile? selectedAutotile = null;
     private IAutotileInputBuilder? activePathBuilder = null;
 
     public AutotileEditMode(TileEditor editor) : base(editor)
-    {}
+    { }
 
     public override void Unfocus()
     {
@@ -22,7 +23,7 @@ class AutotileEditMode : TileEditorMode
     public override void Process()
     {
         base.Process();
-        
+
         var forcePlace = editor.PlacementFlags.HasFlag(TilePlacementFlags.Force);
         var modifyGeometry = editor.PlacementFlags.HasFlag(TilePlacementFlags.Geometry);
         var window = RainEd.Instance.LevelView;
@@ -41,7 +42,8 @@ class AutotileEditMode : TileEditorMode
                     selectedAutotile.CanActivate
                 )
                 {
-                    activePathBuilder = selectedAutotile.Type switch {
+                    activePathBuilder = selectedAutotile.Type switch
+                    {
                         AutotileType.Path => new AutotilePathBuilder(selectedAutotile),
                         AutotileType.Rect => new AutotileRectBuilder(selectedAutotile, new Vector2i(window.MouseCx, window.MouseCy)),
                         _ => null
@@ -78,7 +80,7 @@ class AutotileEditMode : TileEditorMode
 
                 if (activePathBuilder.Autotile.AutoHistory)
                     RainEd.Instance.LevelView.CellChangeRecorder.TryPushChange();
-                
+
                 activePathBuilder = null;
 
             }
@@ -103,7 +105,7 @@ class AutotileEditMode : TileEditorMode
         if (ImGui.Button("创建自动图块", new Vector2(boxWidth, 0f)))
         {
             RainEd.Instance.Autotiles.OpenCreatePopup();
-            ImGui.OpenPopup("创建自动图块");
+            ImGui.OpenPopup("Rename Autotile");
             ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
         }
 
@@ -133,7 +135,7 @@ class AutotileEditMode : TileEditorMode
 
                 ImGui.PopID();
             }
-            
+
             ImGui.EndListBox();
         }
         ImGui.EndGroup();
@@ -141,35 +143,35 @@ class AutotileEditMode : TileEditorMode
         // selected autotile options
         ImGui.SameLine();
         ImGui.BeginGroup();
-            if (selectedAutotile is not null)
+        if (selectedAutotile is not null)
+        {
+            var autotile = selectedAutotile;
+
+            ImGui.SeparatorText(autotile.Name);
+            if (autotile.Type == Autotiles.AutotileType.Path)
             {
-                var autotile = selectedAutotile;
+                ImGui.Text("Path Autotile");
+            }
+            else if (autotile.Type == Autotiles.AutotileType.Rect)
+            {
+                ImGui.Text("Rectangle Autotile");
+            }
 
-                ImGui.SeparatorText(autotile.Name);
-                if (autotile.Type == Autotiles.AutotileType.Path)
-                {
-                    ImGui.Text("Path Autotile");
-                }
-                else if (autotile.Type == Autotiles.AutotileType.Rect)
-                {
-                    ImGui.Text("Rectangle Autotile");
-                }
+            ImGui.Separator();
 
-                ImGui.Separator();
-
-                if (!autotile.IsReady)
-                {
-                    ImGui.TextWrapped("There was a problem loading this autotile.");
-                }
-                else
-                {
-                    autotile.ConfigGui();
-                }
+            if (!autotile.IsReady)
+            {
+                ImGui.TextWrapped("There was a problem loading this autotile.");
             }
             else
             {
-                ImGui.TextDisabled("(no autotile selected)");
+                autotile.ConfigGui();
             }
+        }
+        else
+        {
+            ImGui.TextDisabled("(no autotile selected)");
+        }
         ImGui.EndGroup();
     }
 }
