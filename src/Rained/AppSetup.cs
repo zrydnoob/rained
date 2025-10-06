@@ -19,7 +19,8 @@ class AppSetup
     // 2 = extracting
     private int downloadStage = 0;
     private float downloadProgress = 0f;
-
+    private int downloadSourceIndex = 0;
+    private MirrorManager mirrorManager = new MirrorManager();
     private string? callbackRes = null;
     private List<string> missingDirs = [];
     private float callbackWait = 1f;
@@ -129,18 +130,22 @@ class AppSetup
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("下载数据文件（Github）"))
+        if (ImGui.Button("下载数据文件"))
         {
             setupState = SetupState.Downloading;
-            downloadTask = DownloadData("https://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip");
+            downloadTask = DownloadData(mirrorManager.GetSelectedUrl());
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("下载数据文件（llkk.cc加速）"))
+        var comboItems = mirrorManager.MirrorComboItems();
+        var selectedIndex = mirrorManager.SelectedIndex;
+        if (ImGui.Combo("下载源", ref selectedIndex, comboItems))
         {
-            setupState = SetupState.Downloading;
-            downloadTask = DownloadData("https://gh.llkk.cc/https://github.com/SlimeCubed/Drizzle.Data/archive/refs/heads/community.zip");
+            mirrorManager.SelectedIndex = selectedIndex;
         }
+
+        ImGui.SameLine();
+
 
         // show missing dirs popup
         if (missingDirs.Count > 0)
@@ -149,7 +154,7 @@ class AppSetup
             ImGuiExt.CenterNextWindow(ImGuiCond.Appearing);
             if (ImGuiExt.BeginPopupModal("Error", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings))
             {
-                ImGui.Text("The given data folder is missing the following subdirectories:");
+                ImGui.Text("给定的 Data 文件夹缺失以下子目录：");
                 foreach (var dir in missingDirs)
                 {
                     ImGui.BulletText(dir);
